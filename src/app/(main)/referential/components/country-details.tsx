@@ -4,7 +4,7 @@ import Link from 'next/link';
 import {
     ArrowLeftIcon,
     ArrowTopRightOnSquareIcon,
-    ArrowUturnLeftIcon,
+    ArrowUturnLeftIcon, CalendarDaysIcon,
     ClockIcon,
     GlobeEuropeAfricaIcon,
     HashtagIcon,
@@ -111,6 +111,20 @@ export default function CountryDetails({countryDataParam, onSave, onDelete}: {
         newCountryData.modified = true;
         setCountryData(newCountryData);
     };
+
+    const isLikelyDate = (date: string): boolean => {
+        return countryData.likelyDates.includes(date);
+    }
+
+    const toggleLikelyDate = (date: string): void => {
+        const newCountryData: Country = {
+            ...countryData,
+        };
+        isLikelyDate(date)
+            ? newCountryData.likelyDates.splice(newCountryData.likelyDates.indexOf(date), 1)
+            : newCountryData.likelyDates.push(date);
+        setCountryData(newCountryData);
+    }
 
     useEffect(() => {
         if (watchLinks.current) {
@@ -318,6 +332,66 @@ export default function CountryDetails({countryDataParam, onSave, onDelete}: {
                             />
                         </div>
                     </div>
+
+                    <h2 className="text-lg flex items-center my-2">
+                        <CalendarDaysIcon className="w-6 me-1"/>Likely dates
+                    </h2>
+
+                    <div className="flex flex-col gap-2 py-3 md:px-3">
+                        {/*<div className="grid grid-flow-col grid-cols-4 grid-rows-3 gap-x-2 gap-y-1">*/}
+                        <div className="grid grid-flow-col grid-cols-4 grid-rows-[30px_minmax(0,_1fr)_minmax(0,_1fr)] gap-x-3 gap-y-2">
+                            {
+                                [
+                                    {month: 'September', id: '09'},
+                                    {month: 'October', id: '10'}
+                                ].map(({month, id}) => (
+                                    <>
+                                        <div>{month}</div>
+
+                                        <CountryCalendarWindow
+                                            id={`${id}A`}
+                                            selected={isLikelyDate(`${id}A`)}
+                                            onToggle={toggleLikelyDate.bind(null, `${id}A`)}
+                                        />
+
+                                        <CountryCalendarWindow
+                                            id={`${id}B`}
+                                            selected={isLikelyDate(`${id}B`)}
+                                            onToggle={toggleLikelyDate.bind(null, `${id}B`)}
+                                        />
+                                    </>
+                                ))}
+
+                            {/*<div>September</div>*/}
+
+                            {/*<CountryCalendarWindow*/}
+                            {/*    id="09A"*/}
+                            {/*    selected={isLikelyDate("09A")}*/}
+                            {/*    onToggle={toggleLikelyDate.bind(null, "09A")}*/}
+                            {/*/>*/}
+
+                            {/*<CountryCalendarWindow*/}
+                            {/*    id="09B"*/}
+                            {/*    selected={countryData.likelyDates.includes("09B")}*/}
+                            {/*    onToggle={toggleLikelyDate.bind(null, "09B")}*/}
+                            {/*/>*/}
+
+                            {/*<div>October</div>*/}
+
+                            {/*<CountryCalendarWindow*/}
+                            {/*    id="10A"*/}
+                            {/*    selected={countryData.likelyDates.includes("10A")}*/}
+                            {/*    onToggle={toggleLikelyDate.bind(null, "10A")}*/}
+                            {/*/>*/}
+
+                            {/*<CountryCalendarWindow*/}
+                            {/*    id="10B"*/}
+                            {/*    selected={countryData.likelyDates.includes("10B")}*/}
+                            {/*    onToggle={toggleLikelyDate.bind(null, "10B")}*/}
+                            {/*/>*/}
+
+                        </div>
+                    </div>
                 </div>
 
                 <div className={clsx('w-full lg:w-[50%] p-2',
@@ -380,5 +454,20 @@ function CountryTextInput({name, value, placeholder, disabled, callback}: {
                placeholder={placeholder}
                onChange={callback}
         />
-    )
+    );
+}
+
+function CountryCalendarWindow({id, selected, onToggle}: { id: string, selected: boolean, onToggle: () => void }) {
+    return (
+        <button
+            onClick={onToggle}
+            className={clsx('rounded-lg h-12',
+                {
+                    'bg-foreground/10': !selected,
+                    'bg-sky-500': selected
+                }
+            )}>
+
+        </button>
+    );
 }
