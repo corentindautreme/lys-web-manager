@@ -1,4 +1,4 @@
-import { WatchLink } from '@/app/types/events/event';
+import { WatchLink } from '@/app/types/watch-link';
 
 export interface LysCountry {
     id: number;

@@ -153,8 +153,8 @@ export default function WatchLinkCard({id, watchLinkParam, changeCallback, edita
                                 {
                                     'border-1 bg-foreground/10 border-foreground/10': watchLink.comment == 'Recommended link' && !editable,
                                     'cursor-not-allowed': !editable,
-                                    'border-1 bg-sky-300 border-sky-300 dark:bg-sky-700 dark:border-sky-700': watchLink.comment == 'Recommended link' && editable,
-                                    'border-1 border-foreground/30': watchLink.comment != 'Recommended link',
+                                    'border-1 bg-sky-500 border-sky-500 text-background': watchLink.comment == 'Recommended link' && editable,
+                                    'border-1 border-foreground/30 text-foreground': watchLink.comment != 'Recommended link',
                                     'cursor-pointer': editable
                                 })}
                         >
@@ -269,8 +269,9 @@ function WatchLinkFeature({name, displayName, icon, value, disabled, callback}: 
                 {
                     'border-1 bg-foreground/10 border-foreground/10': value == 1 && disabled,
                     'cursor-not-allowed': disabled,
-                    'border-1 bg-sky-300 border-sky-300 dark:bg-sky-700 dark:border-sky-700': value == 1 && !disabled,
+                    'border-1 bg-sky-500 border-sky-500 text-background': value == 1 && !disabled,
                     'border-1 border-foreground/30': value == 0,
+                    'text-foreground': value == 0 && !disabled,
                     'cursor-pointer': !disabled
                 }
             )}>

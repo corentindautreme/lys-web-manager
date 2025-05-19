@@ -20,7 +20,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { useSearchParams } from 'next/navigation';
 import { getQueryParamString } from '@/app/utils/event-utils';
-import WatchLinkCard from '@/app/components/events/event/watch-link-card';
+import WatchLinkCard from '@/app/components/watch-link-card';
 import { createSwapy } from 'swapy';
 import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import { clsx } from 'clsx';

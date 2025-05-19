@@ -2,12 +2,7 @@
 
 import { Event } from '@/app/types/events/event'
 import { pulishEventChanges } from '@/app/services/events-service';
-
-export type EventSubmissionResponse = {
-    success: boolean;
-    error: string;
-    message: string;
-}
+import { EventSubmissionResponse } from '@/app/types/event-submission-response';
 
 export async function submitEvents(events: Event[]): Promise<EventSubmissionResponse> {
     const updatedEvents = events.filter(e => !e.deleted && (e.created || (e.modified && !e.rescheduled)));
@@ -28,7 +23,7 @@ export async function submitEvents(events: Event[]): Promise<EventSubmissionResp
             return {
                 success: false,
                 error: "UnknownError",
-                message: new Error(JSON.stringify(error))
+                message: JSON.stringify(error)
             };
         }
     }

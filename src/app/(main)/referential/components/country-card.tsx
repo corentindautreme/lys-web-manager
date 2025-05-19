@@ -4,6 +4,8 @@ import { BackwardIcon, LinkIcon } from '@heroicons/react/24/outline';
 import { Country } from '@/app/types/country';
 
 export default function CountryCard({countryData, active}: { countryData: Country, active: boolean | undefined }) {
+    const liveLinkCount = countryData.watchLinks.filter(l => l.live == 1).length;
+    const replayableLinkCount = countryData.watchLinks.filter(l => l.replayable == 1).length;
     return (
         <div
             className={clsx(
@@ -32,14 +34,15 @@ export default function CountryCard({countryData, active}: { countryData: Countr
                 <div className="flex-col">
                     <div className="text-xl/5 font-bold my-1">{countryData.country}</div>
                     <div className={clsx('text-base/4', {'text-foreground/70': !active, 'text-white': !!active})}>{countryData.eventName}</div>
-                    {/*{countryData.watchLinks && (*/}
-                    {/*    <div className="mt-2 flex">*/}
-                    {/*        <Label icon={LinkIcon} style="normal" active={!!active}*/}
-                    {/*               content={`${countryData.watchLinks.length} link(s)`}/>*/}
-                    {/*        <Label icon={BackwardIcon} style="normal" active={!!active}*/}
-                    {/*               content={`${countryData.watchLinks.length} VOD link(s)`}/>*/}
-                    {/*    </div>*/}
-                    {/*)}*/}
+                    {countryData.watchLinks && (
+                        <div className="mt-2 flex">
+                            <Label icon={LinkIcon} style={liveLinkCount == 0 ? 'error' : 'normal'} active={!!active}
+                                   content={`${liveLinkCount} link(s)`}/>
+                            <Label icon={BackwardIcon} style={replayableLinkCount == 0 ? 'error' : 'normal'}
+                                   active={!!active}
+                                   content={`${replayableLinkCount} VOD link(s)`}/>
+                        </div>
+                    )}
                 </div>
                 <div className="grow"></div>
                 {countryData.modified && !countryData.deleted && (
@@ -63,9 +66,9 @@ function Label({icon, content, style, active}: {
         <div className={clsx(
             'flex items-center w-fit me-1 px-1.5 py-0.5 rounded-xs text-xs',
             {
-                'bg-red-500': style === 'error',
-                'bg-gray-400/30 dark:bg-gray-700/50': style === 'normal',
-                // 'bg-sky-300 dark:bg-sky-700': style === 'normal' && active
+                'bg-red-400 dark:bg-red-600': style === 'error' && !active,
+                'bg-gray-400/30 dark:bg-gray-700/50': style === 'normal' && !active,
+                'border-1 border-white': active
             }
         )}>
             <Icon className="w-3.5 me-1"/> {content}

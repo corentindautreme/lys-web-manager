@@ -8,11 +8,12 @@ import { redirect, useSearchParams } from 'next/navigation';
 import { getQueryParamString } from '@/app/utils/event-utils';
 import { ExclamationCircleIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 import { useEvents } from '@/app/(main)/events/utils';
-import { EventSubmissionResponse, submitEvents } from '@/app/(main)/events/actions';
+import { submitEvents } from '@/app/(main)/events/actions';
 import { KeyedMutator } from 'swr';
 import { useEffect, useState } from 'react';
 import EventListSkeleton from '@/app/(main)/events/components/event-list-skeleton';
 import ErrorScreen from '@/app/components/error-screen';
+import { EventSubmissionResponse } from '@/app/types/event-submission-response';
 
 async function submitModifiedEvents(
     events: Event[],
@@ -71,7 +72,7 @@ function UnsavedEventsBanner({count, events, callback}: {
                 </form>
             </div>}
         </div>
-)
+    );
 }
 
 function insertHeader(event: Event, previous: Event | undefined) {

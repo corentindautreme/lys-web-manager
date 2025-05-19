@@ -1,4 +1,5 @@
 import { Metadata } from 'next';
+import EditCountry from '@/app/(main)/referential/components/edit-country';
 
 export const metadata: Metadata = {
     title: 'Referential'
@@ -11,6 +12,5 @@ export default async function Page(props:
 ) {
     const params = await props.params;
     const id = params.id;
-    return (`Editing country ${id}`);
-    // return (<EditCountry countryId={id}/>);
+    return (<EditCountry countryId={id}/>);
 }
