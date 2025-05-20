@@ -60,7 +60,7 @@ export function EventCard({event, active}: { event: Event, active: boolean | und
                                    content={`${liveLinkCount} link(s)`}/>
                             <Label icon={BackwardIcon} style={replayableLinkCount == 0 ? 'error' : 'normal'}
                                    active={!!active}
-                                   content={`${replayableLinkCount} VOD link(s)`}/>
+                                   content={`${replayableLinkCount} VOD`}/>
                         </div>
                     )}
                 </div>

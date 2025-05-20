@@ -2,6 +2,7 @@
 
 import { Event } from '@/app/types/events/event'
 import useSWR from 'swr';
+import { fetcher } from '@/app/utils/fetching-utils';
 
 export function useEvents(): {
     events: Event[],
@@ -12,19 +13,6 @@ export function useEvents(): {
         cause: {response: string, status: number};
     }
 } {
-    const fetcher = (url: string) => fetch(url).then(async res => {
-        if (res.ok) {
-            return res.json();
-        }
-        const json = await res.json();
-        const error = new Error(json.message);
-        error.name = json.error;
-        error.cause = {
-            response: json,
-            status: res.status
-        };
-        throw error;
-    });
     const {
         data,
         mutate,

@@ -2,6 +2,7 @@
 
 import { Country } from '@/app/types/country'
 import useSWR from 'swr';
+import { fetcher } from '@/app/utils/fetching-utils';
 
 export function useCountries(): {
     countryData: Country[],
@@ -12,18 +13,6 @@ export function useCountries(): {
         cause: {response: string, status: number};
     }
 } {
-    const fetcher = (url: string) => fetch(url).then(async res => {
-        if (res.ok) {
-            return res.json();
-        }
-        const error = new Error('Could not fetch country data');
-        error.message = 'Could not fetch country data';
-        error.cause = {
-            response: await res.json(),
-            status: res.status
-        };
-        throw error;
-    });
     const {
         data,
         mutate,

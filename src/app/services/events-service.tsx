@@ -257,7 +257,7 @@ function toLysEvent(event: Event): LysEvent {
     return lysEvent;
 }
 
-export async function pulishEventChanges(updatedEvents: Event[], rescheduledEvents: Event[], deletedEvents: Event[]) {
+export async function publishEventChanges(updatedEvents: Event[], rescheduledEvents: Event[], deletedEvents: Event[]) {
     const client = new DynamoDBClient({
         region: 'eu-west-3',
     });
@@ -327,7 +327,7 @@ export async function pulishEventChanges(updatedEvents: Event[], rescheduledEven
             // submit the batch and save the processing response
             responses.push(await client.send(new BatchWriteItemCommand({
                 RequestItems: {
-                    lys_events: batch
+                    lys_eventsZ: batch
                 }
             })) as LysBatchWriteItemOutput);
         }

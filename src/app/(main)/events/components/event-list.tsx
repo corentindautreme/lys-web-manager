@@ -10,7 +10,7 @@ import { ExclamationCircleIcon, ExclamationTriangleIcon } from '@heroicons/react
 import { useEvents } from '@/app/(main)/events/utils';
 import { submitEvents } from '@/app/(main)/events/actions';
 import { KeyedMutator } from 'swr';
-import { useEffect, useState } from 'react';
+import { JSX, useEffect, useState } from 'react';
 import EventListSkeleton from '@/app/(main)/events/components/event-list-skeleton';
 import ErrorScreen from '@/app/components/error-screen';
 import { DataSubmissionResponse } from '@/app/types/data-submission-response';
@@ -42,9 +42,9 @@ function UnsavedEventsBanner({count, events, callback}: {
     events: Event[],
     callback: KeyedMutator<Event[]>
 }) {
-    const [error, setError] = useState('');
+    const [error, setError] = useState<JSX.Element>();
     const onError = (errorName: string, message: string) => {
-        setError(`${errorName} occurred with message: ${message}`);
+        setError(<div className=""><span className="font-bold">{errorName}</span> has occurred with message: {message}</div>);
     }
     const submit = submitModifiedEvents.bind(null, events, callback, onError);
     return (
@@ -64,7 +64,7 @@ function UnsavedEventsBanner({count, events, callback}: {
             </div>
             {!!error && <div className="flex flex-col mt-2 pt-2 border-t-1 border-background">
                     <span className="flex flex-row content-center">
-                        <ExclamationTriangleIcon className="shrink-0 w-5 me-1"/>
+                        <ExclamationTriangleIcon className="shrink-0 w-5 me-1.5"/>
                         {error}
                     </span>
                 <form className="text-right" action={() => setError('')}>
