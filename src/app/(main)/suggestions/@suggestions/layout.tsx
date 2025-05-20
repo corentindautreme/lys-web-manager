@@ -7,9 +7,11 @@ import CountryListSkeleton from '@/app/(main)/referential/components/country-lis
 
 export default function Layout({children}: { children: React.ReactNode }) {
     const layoutSegment = useSelectedLayoutSegment();
+    console.log(layoutSegment);
 
     return (
-        <div className={clsx("h-full md:block", {"hidden": layoutSegment === 'edit' || layoutSegment === 'new'})}>
+        <div className={clsx("h-full md:block", {"hidden": layoutSegment === 'process'})}>
+            {/* TODO replace with appropriate skeleton */}
             <Suspense fallback={<CountryListSkeleton/>}>
                 {children}
             </Suspense>

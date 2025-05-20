@@ -6,6 +6,7 @@ import {usePathname} from 'next/navigation';
 import {clsx} from 'clsx';
 import { useEvents } from '@/app/(main)/events/utils';
 import { useCountries } from '@/app/(main)/referential/utils';
+import { useSuggestions } from '@/app/(main)/suggestions/utils';
 
 // Map of links to display in the side navigation.
 // Depending on the size of the application, this would be stored in a database.
@@ -46,9 +47,10 @@ export default function NavLinks() {
     const significantPath = pathName.substring(0, pathName.slice(1).indexOf('/') + 1);
     const {events, error: eventsError} = useEvents();
     const {countryData, error: countryDataError} = useCountries();
+    const {suggestions, error: suggestionsError} = useSuggestions();
     const hasBadge = {
         'Home': false,
-        'Suggestions': false, // TODO
+        'Suggestions': !suggestionsError && suggestions?.length > 0,
         'Events': !eventsError && events?.some(e => e.modified || e.deleted),
         'Referential': !countryDataError && countryData?.some(e => e.modified || e.deleted)
     }
