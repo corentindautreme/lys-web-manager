@@ -3,7 +3,7 @@ import { clsx } from 'clsx';
 import { ReactElement } from 'react';
 import { LinkIcon, BackwardIcon } from '@heroicons/react/24/outline';
 
-export function EventCard({event, active}: { event: Event, active: boolean | undefined }) {
+export function EventCard({event, active, shorten}: { event: Event, active: boolean | undefined, shorten?: boolean }) {
     const date = new Date(event.dateTimeCet);
     const liveLinkCount = event.watchLinks.filter(l => l.live == 1).length;
     const replayableLinkCount = event.watchLinks.filter(l => l.replayable == 1).length;
@@ -57,10 +57,10 @@ export function EventCard({event, active}: { event: Event, active: boolean | und
                     {event.watchLinks && (
                         <div className="mt-2 flex">
                             <Label icon={LinkIcon} style={liveLinkCount == 0 ? 'error' : 'normal'} active={!!active}
-                                   content={`${liveLinkCount} link(s)`}/>
+                                   shorten={!!shorten} content={`${liveLinkCount} ${!shorten ? "link(s)" : ""}`}/>
                             <Label icon={BackwardIcon} style={replayableLinkCount == 0 ? 'error' : 'normal'}
                                    active={!!active}
-                                   content={`${replayableLinkCount} VOD`}/>
+                                   shorten={!!shorten} content={`${replayableLinkCount} ${!shorten ? "VOD" : ""}`}/>
                         </div>
                     )}
                 </div>
@@ -86,18 +86,19 @@ export function EventCardLite({event}: { event: Event }) {
     )
 }
 
-function Label({icon, content, style, active}: {
+function Label({icon, content, style, active, shorten}: {
     icon: ReactElement,
     content: string,
     style: 'normal' | 'error',
-    active: boolean
+    active: boolean,
+    shorten: boolean,
 }) {
     const Icon = icon;
     return (
         <div className={clsx(
             'flex items-center w-fit me-1 px-1.5 py-0.5 rounded-xs text-xs',
             {
-                'bg-red-400 dark:bg-red-600': style === 'error' && !active,
+                'bg-red-300 dark:bg-red-800': style === 'error' && !active,
                 'bg-gray-400/30 dark:bg-gray-700/50': style === 'normal' && !active,
                 'border-1 border-white': active
             }
