@@ -1,6 +1,15 @@
 import { NextResponse } from 'next/server';
-import { getCountries } from '@/app/services/countries-service';
+import { fetchCountries } from '@/app/services/countries-service';
 
-export function GET(req: Request) {
-    return NextResponse.json(getCountries());
+export async function GET(req: Request) {
+    // TODO better error management
+    try {
+        return NextResponse.json(await fetchCountries());
+    } catch (e) {
+        // if (e instanceof Error) {
+        //
+        // } else {
+            return NextResponse.json({error: 'Internal Server Error'}, {status: 500});
+        // }
+    }
 }

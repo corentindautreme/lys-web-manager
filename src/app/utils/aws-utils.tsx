@@ -1,0 +1,1 @@
+export const DYNAMODB_BATCH_SIZE = 25; // hard limit defined by AWS for BatchWriteItem requests

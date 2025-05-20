@@ -13,14 +13,14 @@ import { KeyedMutator } from 'swr';
 import { useEffect, useState } from 'react';
 import EventListSkeleton from '@/app/(main)/events/components/event-list-skeleton';
 import ErrorScreen from '@/app/components/error-screen';
-import { EventSubmissionResponse } from '@/app/types/event-submission-response';
+import { DataSubmissionResponse } from '@/app/types/data-submission-response';
 
 async function submitModifiedEvents(
     events: Event[],
     onSuccess: KeyedMutator<Event[]>,
     onError: (errorName: string, message: string) => void
 ) {
-    const response: EventSubmissionResponse = await submitEvents(events);
+    const response: DataSubmissionResponse = await submitEvents(events);
     if (response.success) {
         const updatedEvents = events
             .filter(e => !e.deleted)
@@ -105,9 +105,9 @@ export default function EventList({currentEventId}: { currentEventId?: number | 
         <>
             {!!error ? (
                 <ErrorScreen
-                    title={'Error'}
+                    title={error.name}
                     message={`${error.message} (status: ${error.cause.status})`}
-                    details={error.cause.response}
+                    // details={JSON.stringify(error.cause.response)}
                 />
             ) : (!isLoading && !!events ? (
                     <>
@@ -135,6 +135,11 @@ export default function EventList({currentEventId}: { currentEventId?: number | 
                                         )
                                     }
                                 )}
+                                <div className="flex md:hidden py-3 items-center">
+                                    <div className="w-full border-t-1 border-foreground/50"></div>
+                                    <div className="shrink-0 px-2 text-foreground/50">That's it!</div>
+                                    <div className="w-full border-t-1 border-foreground/50"></div>
+                                </div>
                             </div>
                         </div>
                     </>

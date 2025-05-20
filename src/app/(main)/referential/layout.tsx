@@ -35,7 +35,7 @@ export default function Layout({children, countries}: { children: React.ReactNod
                 <div className={clsx(
                     'w-full flex-col md:flex md:flex-grow md:pl-8 md:overflow-y-auto',
                     {
-                        'flex p-3 md:py-0': layoutSegment === 'edit' || layoutSegment === 'new',
+                        'flex p-1 md:p-3 md:py-0': layoutSegment === 'edit' || layoutSegment === 'new',
                         'hidden': layoutSegment == null
                     }
                 )}>
@@ -43,7 +43,9 @@ export default function Layout({children, countries}: { children: React.ReactNod
                 </div>
             </div>
 
-            <NewCountryButton/>
+            {/* Hide the "New" button on mobile on the edit and new screen, but always display it on desktop */}
+            {layoutSegment === "(empty)" && <div className="md:hidden"><NewCountryButton/></div>}
+            <div className="hidden md:block"><NewCountryButton/></div>
         </main>
     );
 }

@@ -10,7 +10,7 @@ import {
     HashtagIcon,
     ListBulletIcon,
     MapIcon,
-    PlusCircleIcon,
+    PlusCircleIcon, SignalIcon,
     SwatchIcon,
     TagIcon,
     TrashIcon,
@@ -123,7 +123,7 @@ export default function CountryDetails({countryDataParam, onSave, onDelete}: {
         isLikelyDate(date)
             ? newCountryData.likelyDates.splice(newCountryData.likelyDates.indexOf(date), 1)
             : newCountryData.likelyDates.push(date);
-        setCountryData(newCountryData);
+        onCountryDataModified(newCountryData);
     }
 
     useEffect(() => {
@@ -266,8 +266,70 @@ export default function CountryDetails({countryDataParam, onSave, onDelete}: {
                                 disabled={!!countryData.deleted}
                             />
                         </div>
+                    </div>
 
-                        <div className="flex items-center mt-2">
+                    <h2 className="text-lg flex items-center my-2">
+                        <CalendarDaysIcon className="w-6 me-1"/>Likely dates
+                    </h2>
+
+                    <div className="flex flex-col gap-2 py-3 md:px-3">
+                        {
+                            [
+                                [
+                                    {month: 'September', monthShort: 'Sep', id: '09'},
+                                    {month: 'October', monthShort: 'Oct', id: '10'},
+                                    {month: 'November', monthShort: 'Nov', id: '11'},
+                                    {month: 'December', monthShort: 'Dec', id: '12'}
+                                ],
+                                [
+                                    {month: 'January', monthShort: 'Jan', id: '01'},
+                                    {month: 'February', monthShort: 'Feb', id: '02'},
+                                    {month: 'March', monthShort: 'Mar', id: '03'}
+                                ]
+                            ].map(
+                                (monthList) => {
+                                    return (
+                                        <div
+                                            className="grid grid-flow-col grid-cols-4 grid-rows-[30px_minmax(0,_1fr)_minmax(0,_1fr)] gap-2 md:gap-x-3 md:gap-y-2">
+                                            {monthList.map(({month, monthShort, id}) => (
+                                                <>
+                                                    <div className="hidden md:block">{month}</div>
+                                                    <div className="block md:hidden">{monthShort}</div>
+
+                                                    <CountryCalendarWindow
+                                                        id={`${id}A`}
+                                                        selected={isLikelyDate(`${id}A`)}
+                                                        onToggle={toggleLikelyDate.bind(null, `${id}A`)}
+                                                        disabled={countryData.deleted || false}
+                                                    />
+
+                                                    {month != 'March' && (<CountryCalendarWindow
+                                                        id={`${id}B`}
+                                                        selected={isLikelyDate(`${id}B`)}
+                                                        onToggle={toggleLikelyDate.bind(null, `${id}B`)}
+                                                        disabled={countryData.deleted || false}
+                                                    />)}
+                                                </>
+                                            ))}
+                                        </div>
+                                    )
+                                }
+                            )
+                        }
+                    </div>
+                </div>
+
+                <div className={clsx('w-full lg:w-[50%] p-2',
+                    {
+                        'line-through text-foreground/50': countryData.deleted
+                    }
+                )}>
+                    <h2 className="text-lg flex items-center mb-2">
+                        <TrophyIcon className="w-6 me-1"/>Stages
+                    </h2>
+
+                    <div className="py-3 md:px-3 flex flex-col">
+                        <div className="flex items-center">
                             <TrophyIcon className="w-5 me-2"/>
                             <CountryTextInput
                                 name="stages"
@@ -277,8 +339,14 @@ export default function CountryDetails({countryDataParam, onSave, onDelete}: {
                                 disabled={!!countryData.deleted}
                             />
                         </div>
+                    </div>
 
-                        <div className="flex items-center mt-2">
+                    <h2 className="text-lg flex items-center my-2">
+                        <SignalIcon className="w-6 me-1"/>Broadcast
+                    </h2>
+
+                    <div className="py-3 md:px-3 flex flex-col">
+                        <div className="flex items-center">
                             <TvIcon className="w-5 me-2"/>
                             <CountryTextInput
                                 name="defaultChannel"
@@ -334,76 +402,10 @@ export default function CountryDetails({countryDataParam, onSave, onDelete}: {
                     </div>
 
                     <h2 className="text-lg flex items-center my-2">
-                        <CalendarDaysIcon className="w-6 me-1"/>Likely dates
-                    </h2>
-
-                    <div className="flex flex-col gap-2 py-3 md:px-3">
-                        {/*<div className="grid grid-flow-col grid-cols-4 grid-rows-3 gap-x-2 gap-y-1">*/}
-                        <div className="grid grid-flow-col grid-cols-4 grid-rows-[30px_minmax(0,_1fr)_minmax(0,_1fr)] gap-x-3 gap-y-2">
-                            {
-                                [
-                                    {month: 'September', id: '09'},
-                                    {month: 'October', id: '10'}
-                                ].map(({month, id}) => (
-                                    <>
-                                        <div>{month}</div>
-
-                                        <CountryCalendarWindow
-                                            id={`${id}A`}
-                                            selected={isLikelyDate(`${id}A`)}
-                                            onToggle={toggleLikelyDate.bind(null, `${id}A`)}
-                                        />
-
-                                        <CountryCalendarWindow
-                                            id={`${id}B`}
-                                            selected={isLikelyDate(`${id}B`)}
-                                            onToggle={toggleLikelyDate.bind(null, `${id}B`)}
-                                        />
-                                    </>
-                                ))}
-
-                            {/*<div>September</div>*/}
-
-                            {/*<CountryCalendarWindow*/}
-                            {/*    id="09A"*/}
-                            {/*    selected={isLikelyDate("09A")}*/}
-                            {/*    onToggle={toggleLikelyDate.bind(null, "09A")}*/}
-                            {/*/>*/}
-
-                            {/*<CountryCalendarWindow*/}
-                            {/*    id="09B"*/}
-                            {/*    selected={countryData.likelyDates.includes("09B")}*/}
-                            {/*    onToggle={toggleLikelyDate.bind(null, "09B")}*/}
-                            {/*/>*/}
-
-                            {/*<div>October</div>*/}
-
-                            {/*<CountryCalendarWindow*/}
-                            {/*    id="10A"*/}
-                            {/*    selected={countryData.likelyDates.includes("10A")}*/}
-                            {/*    onToggle={toggleLikelyDate.bind(null, "10A")}*/}
-                            {/*/>*/}
-
-                            {/*<CountryCalendarWindow*/}
-                            {/*    id="10B"*/}
-                            {/*    selected={countryData.likelyDates.includes("10B")}*/}
-                            {/*    onToggle={toggleLikelyDate.bind(null, "10B")}*/}
-                            {/*/>*/}
-
-                        </div>
-                    </div>
-                </div>
-
-                <div className={clsx('w-full lg:w-[50%] p-2',
-                    {
-                        'line-through text-foreground/50': countryData.deleted
-                    }
-                )}>
-                    <h2 className="text-lg flex items-center">
                         <TvIcon className="w-6 me-1"/>Watch links ({countryData.watchLinks.length})
                     </h2>
 
-                    <div className="pt-3 md:px-3 flex flex-col space-y-3">
+                    <div className="py-3 md:px-3 flex flex-col space-y-3">
                         <div ref={watchLinks} id="watch-links" className="space-y-3">
                             {countryData.watchLinks.map((watchLink: WatchLink, index: number) => (
                                 <WatchLinkCard
@@ -457,9 +459,14 @@ function CountryTextInput({name, value, placeholder, disabled, callback}: {
     );
 }
 
-function CountryCalendarWindow({id, selected, onToggle}: { id: string, selected: boolean, onToggle: () => void }) {
+function CountryCalendarWindow({selected, onToggle, disabled}: {
+    selected: boolean,
+    onToggle: () => void,
+    disabled: boolean
+}) {
     return (
         <button
+            disabled={disabled}
             onClick={onToggle}
             className={clsx('rounded-lg h-12',
                 {

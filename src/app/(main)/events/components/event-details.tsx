@@ -1,13 +1,13 @@
 'use client';
 
-import { Event, WatchLink } from '@/app/types/events/event'
+import { Event } from '@/app/types/events/event'
 import Link from 'next/link';
 import {
     ArrowLeftIcon,
-    ArrowRightIcon,
+    ArrowRightIcon, ArrowTopRightOnSquareIcon,
     ArrowUturnLeftIcon,
     ClockIcon,
-    DocumentDuplicateIcon,
+    DocumentDuplicateIcon, ExclamationTriangleIcon,
     EyeIcon,
     GlobeEuropeAfricaIcon,
     ListBulletIcon,
@@ -16,7 +16,8 @@ import {
     TagIcon,
     TrashIcon,
     TrophyIcon,
-    TvIcon
+    TvIcon,
+    XMarkIcon
 } from '@heroicons/react/24/outline';
 import { useSearchParams } from 'next/navigation';
 import { getQueryParamString } from '@/app/utils/event-utils';
@@ -24,6 +25,9 @@ import WatchLinkCard from '@/app/components/watch-link-card';
 import { createSwapy } from 'swapy';
 import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import { clsx } from 'clsx';
+import { useCountries } from '@/app/(main)/referential/utils';
+import { Country } from '@/app/types/country';
+import { WatchLink } from '@/app/types/watch-link';
 
 type EventKey = ('country' | 'name' | 'stage' | 'dateTimeCet' | 'endDateTimeCet');
 
@@ -49,12 +53,22 @@ export default function EventDetails({eventParam, onSave, onDelete}: {
     onSave: (event: Event) => Promise<never>,
     onDelete?: ((event: Event) => Promise<never>)
 }) {
-    const swapy = useRef(null)
-    const watchLinks = useRef(null)
+    const isNewEvent = !onDelete && !eventParam.name;
+    const [templateSelected, setTemplateSelected] = useState(false);
+    const swapy = useRef(null);
+    const watchLinks = useRef(null);
     const searchParams = useSearchParams();
     const queryString = getQueryParamString(searchParams);
     const initialDateTime = eventParam.dateTimeCet;
     const [event, setEvent] = useState(eventParam);
+    const {countryData, isLoading: countryDataLoading, error: countryDataError} = useCountries();
+    const [currentCountryData, setCurrentCountryData] = useState<Country | null>(null);
+
+    useEffect(() => {
+        if (!!eventParam.country) {
+            setCurrentCountryData(countryData.filter(c => c.country == eventParam.country)[0]);
+        }
+    }, [countryData]);
 
     const saveEvent = async () => {
         await onSave(event);
@@ -115,6 +129,25 @@ export default function EventDetails({eventParam, onSave, onDelete}: {
         setEvent(newEvent);
     };
 
+    const onSelectTemplate = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        setTemplateSelected(true);
+        const data = countryData.filter((c: Country) => c.countryCode == e.target.value)[0];
+        const newEvent: Event = {
+            ...eventParam,
+            country: data.country,
+            name: data.eventName,
+            watchLinks: [...data.watchLinks]
+        };
+        onEventModified(newEvent);
+        setCurrentCountryData(data);
+    }
+
+    const clearEvent = () => {
+        onEventModified({...eventParam});
+        setTemplateSelected(false);
+        setCurrentCountryData(null);
+    }
+
     useEffect(() => {
         if (watchLinks.current) {
             swapy.current = createSwapy(watchLinks.current, {
@@ -132,7 +165,7 @@ export default function EventDetails({eventParam, onSave, onDelete}: {
             // Destroy the swapy instance on component destroy
             swapy.current?.destroy()
         }
-    }, []);
+    }, [event.watchLinks]);
 
     return (
         <div className="bg-background px-1 py-3 md:p-3 rounded-xl dark:bg-neutral-900">
@@ -149,24 +182,27 @@ export default function EventDetails({eventParam, onSave, onDelete}: {
                     <button className="px-2">
                         <EyeIcon className="w-6"/>
                     </button>
-                    {event.deleted ? <DocumentDuplicateIcon className="w-6 text-foreground/50 cursor-not-allowed"/> : (
-                        <Link
-                            href={`/events/new?fromId=${event.id}`}
-                            className={clsx('flex items-center px-2',
-                                {
-                                    'hidden': !onDelete
-                                }
-                            )}
-                        >
-                            <DocumentDuplicateIcon className="w-6"/>
-                        </Link>
-                    )}
+                    {event.deleted
+                        ? <DocumentDuplicateIcon className="w-6 text-foreground/50 cursor-not-allowed"/>
+                        : (
+                            <Link
+                                href={`/events/new?fromId=${event.id}`}
+                                className={clsx('flex items-center px-2',
+                                    {
+                                        'hidden': !onDelete
+                                    }
+                                )}
+                            >
+                                <DocumentDuplicateIcon className="w-6"/>
+                            </Link>
+                        )
+                    }
                     <form action={async () => await toggleDelete()}>
-                        <button type="submit" className={clsx('px-2 pe-4', {
-                            'hidden': !onDelete
-                        })}>
-                            {!event.deleted ? (<TrashIcon className="w-6"/>) : (
-                                <ArrowUturnLeftIcon className="w-6"/>)}
+                        <button type="submit" className={clsx('px-2 pe-4', {'hidden': isNewEvent})}>
+                            {!event.deleted
+                                ? (<TrashIcon className="w-6"/>)
+                                : (<ArrowUturnLeftIcon className="w-6"/>)
+                            }
                         </button>
                     </form>
                     <form action={async () => await saveEvent()}>
@@ -224,6 +260,36 @@ export default function EventDetails({eventParam, onSave, onDelete}: {
                 )}>
                     <h2 className="text-lg flex items-center mb-2">
                         <ListBulletIcon className="w-6 me-1"/>Details
+                        <div className="grow"></div>
+
+                        {/* Template selection (new events only) */}
+                        {isNewEvent
+                            && !countryDataLoading && !countryDataError && (
+                                <>
+                                    {!templateSelected && (
+                                        <>
+                                            <GlobeEuropeAfricaIcon className="w-5"/>
+                                            <select
+                                                className="px-1 py-2 rounded-lg ms-2 text-sm text-center bg-foreground/10 dark:bg-zinc-800"
+                                                onChange={onSelectTemplate}
+                                            >
+                                                <option value="" disabled selected>...</option>
+                                                {
+                                                    countryData.map((c: Country) => (<option>{c.countryCode}</option>))
+                                                }
+                                            </select>
+                                        </>
+                                    )}
+                                    {templateSelected && (
+                                        <button onClick={clearEvent}
+                                                className="flex flex-col rounded-xl items-center p-2 bg-foreground/10">
+                                            <XMarkIcon className="w-5"/>
+                                            <div className="block text-sm">Clear event</div>
+                                        </button>
+                                    )}
+                                </>
+                            )
+                        }
                     </h2>
 
                     <div className="py-3 md:px-3">
@@ -263,6 +329,26 @@ export default function EventDetails({eventParam, onSave, onDelete}: {
 
                     <h2 className="text-lg flex items-center my-2">
                         <ClockIcon className="w-6 me-1"/>Time
+                        <div className="grow"></div>
+                        {!!currentCountryData && !!currentCountryData.scheduleLink && (
+                            <>
+                                <a
+                                    href={currentCountryData.scheduleLink}
+                                    target="_blank"
+                                    className={clsx('flex ms-1 px-2 rounded-md text-sm bg-sky-500 text-background')}
+                                >
+                                    <ArrowTopRightOnSquareIcon className="w-5 me-1"/>
+                                    <span className="block py-1.5">Schedule</span>
+                                </a>
+                                {currentCountryData.scheduleDeviceTime == 1 && (
+                                    <div
+                                        className="flex items-center ms-1 px-1 py-0.5 rounded-md border-1 border-foreground">
+                                        <ExclamationTriangleIcon className="w-4 me-0.5"/>
+                                        <span className="block text-xs">CET</span>
+                                    </div>
+                                )}
+                            </>
+                        )}
                     </h2>
 
                     <div className="py-3 md:px-3">
@@ -334,12 +420,22 @@ export default function EventDetails({eventParam, onSave, onDelete}: {
     );
 }
 
-function EventTextInput({name, value, placeholder, disabled, callback}: {
+function EventTextInput({
+                            name, value, placeholder, disabled, callback
+                        }: {
     name: string,
-    value: string,
-    placeholder: string,
-    disabled: boolean,
-    callback: (e: ChangeEvent<HTMLInputElement>) => void
+    value
+        :
+        string,
+    placeholder
+        :
+        string,
+    disabled
+        :
+        boolean,
+    callback
+        :
+        (e: ChangeEvent<HTMLInputElement>) => void
 }) {
     return (
         <input className="p-1 grow bg-foreground/10 rounded-lg"

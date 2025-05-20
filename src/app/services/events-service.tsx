@@ -1,15 +1,9 @@
 import { Event, LysEvent } from '@/app/types/events/event'
 import { EventFilterQuery } from '@/app/types/events/event-filter-query';
-import {
-    BatchWriteItemCommand,
-    BatchWriteItemOutput,
-    DynamoDBClient,
-    ScanCommand,
-    WriteRequest,
-} from '@aws-sdk/client-dynamodb';
+import { BatchWriteItemCommand, DynamoDBClient, ScanCommand, WriteRequest, } from '@aws-sdk/client-dynamodb';
 import { marshall, unmarshall } from '@aws-sdk/util-dynamodb';
-
-const DYNAMODB_BATCH_SIZE = 25; // hard limit defined by AWS for BatchWriteItem requests
+import { LysBatchWriteItemOutput } from '@/app/types/aws/lys-batch-write-item-output';
+import { DYNAMODB_BATCH_SIZE } from '@/app/utils/aws-utils';
 
 function getEventPredicateFromFilterQuery(query: EventFilterQuery): (event: LysEvent) => boolean {
     // get current datetime as yyyy-MM-ddTHH:mm:SS string
@@ -253,6 +247,7 @@ export async function fetchEvents(): Promise<Event[]> {
                 .sort((e1: Event, e2: Event) => e1.dateTimeCet.localeCompare(e2.dateTimeCet))
             : [];
     } catch (error) {
+        console.log(error);
         throw error;
     }
 }
@@ -313,9 +308,7 @@ export async function pulishEventChanges(updatedEvents: Event[], rescheduledEven
             });
         });
 
-    const responses: Omit<BatchWriteItemOutput, 'UnprocessedItems'> & {
-        UnprocessedItems: Record<'lys_events', WriteRequest[]>;
-    }[] = [];
+    const responses: LysBatchWriteItemOutput[] = [];
 
     try {
         while (requests.length > 0
@@ -329,16 +322,14 @@ export async function pulishEventChanges(updatedEvents: Event[], rescheduledEven
             // fill the remaining slots of the batch with pending requests
             batch.push(...requests.splice(0, DYNAMODB_BATCH_SIZE - batch.length));
 
-            console.log(JSON.stringify(batch));
+            console.log(`Submitting following event batch to AWS: ${JSON.stringify(batch)}`);
 
             // submit the batch and save the processing response
             responses.push(await client.send(new BatchWriteItemCommand({
                 RequestItems: {
                     lys_events: batch
                 }
-            })) as Omit<BatchWriteItemOutput, 'UnprocessedItems'> & {
-                UnprocessedItems: Record<'lys_events', WriteRequest[]>;
-            });
+            })) as LysBatchWriteItemOutput);
         }
     } catch (e) {
         if (e instanceof Error) {

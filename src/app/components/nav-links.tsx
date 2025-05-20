@@ -5,6 +5,7 @@ import Link from 'next/link';
 import {usePathname} from 'next/navigation';
 import {clsx} from 'clsx';
 import { useEvents } from '@/app/(main)/events/utils';
+import { useCountries } from '@/app/(main)/referential/utils';
 
 // Map of links to display in the side navigation.
 // Depending on the size of the application, this would be stored in a database.
@@ -43,12 +44,13 @@ export default function NavLinks() {
     const pathName = usePathname();
     // extract the "main" path for subpaths like /events/edit/{id}, etc.
     const significantPath = pathName.substring(0, pathName.slice(1).indexOf('/') + 1);
-    const {events} = useEvents();
+    const {events, error: eventsError} = useEvents();
+    const {countryData, error: countryDataError} = useCountries();
     const hasBadge = {
         'Home': false,
         'Suggestions': false, // TODO
-        'Events': events?.some(e => e.modified || e.deleted),
-        'Referential': false
+        'Events': !eventsError && events?.some(e => e.modified || e.deleted),
+        'Referential': !countryDataError && countryData?.some(e => e.modified || e.deleted)
     }
     return (
         <>
@@ -68,7 +70,6 @@ export default function NavLinks() {
                     >
                         <LinkIcon className="w-6"/>
                         {hasBadge[link.name] && <IconBadge/>}
-                        {/*<p className="hidden md:block">{link.name}</p>*/}
                     </Link>
                 );
             })}

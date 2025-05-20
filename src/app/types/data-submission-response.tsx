@@ -1,4 +1,4 @@
-export type EventSubmissionResponse = {
+export type DataSubmissionResponse = {
     success: boolean;
     error?: string;
     message?: string;

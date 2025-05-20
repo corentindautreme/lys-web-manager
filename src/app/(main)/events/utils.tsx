@@ -8,17 +8,19 @@ export function useEvents(): {
     mutate: (events: Event[]) => Promise<void>,
     isLoading: boolean,
     isValidating: boolean,
-    error: any
+    error: Error & {
+        cause: {response: string, status: number};
+    }
 } {
-    const fetcher = (url: string) => fetch(url).then(res => {
+    const fetcher = (url: string) => fetch(url).then(async res => {
         if (res.ok) {
             return res.json();
         }
-        const error = new Error('Could not fetch events');
-        error.message = 'Could not fetch events';
+        const json = await res.json();
+        const error = new Error(json.message);
+        error.name = json.error;
         error.cause = {
-            // TODO res.text() or res.json() don't work
-            response: res.text(),
+            response: json,
             status: res.status
         };
         throw error;

@@ -8,15 +8,29 @@ export function useCountries(): {
     mutate: (countryData: Country[]) => Promise<void>,
     isLoading: boolean,
     isValidating: boolean,
-    error: any
+    error: Error & {
+        cause: {response: string, status: number};
+    }
 } {
+    const fetcher = (url: string) => fetch(url).then(async res => {
+        if (res.ok) {
+            return res.json();
+        }
+        const error = new Error('Could not fetch country data');
+        error.message = 'Could not fetch country data';
+        error.cause = {
+            response: await res.json(),
+            status: res.status
+        };
+        throw error;
+    });
     const {
         data,
         mutate,
         isLoading,
         isValidating,
         error
-    } = useSWR('/api/countries', url => fetch(url).then(res => res.json()), {
+    } = useSWR('/api/countries', fetcher, {
         // the below ensures the data is never revalidated - in other words, that SWR's cache is never *automatically*
         // refreshed with updated data from the source
         // that way, we can keep our updates (aka, mutations) local, until we decide to revalidate it later (which can

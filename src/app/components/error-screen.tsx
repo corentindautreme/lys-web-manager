@@ -6,7 +6,7 @@ export default function ErrorScreen({title, message, details}: {title: string, m
             <ExclamationTriangleIcon className="w-12"/>
             <h1 className="text-2xl font-bold">{title}</h1>
             <p className="text-center">{message}</p>
-            <p className="text-center">{JSON.stringify(details)}</p>
+            <p className="text-center">{details}</p>
         </div>
     )
 }

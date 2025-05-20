@@ -9,13 +9,14 @@ import { submitCountryData } from '@/app/(main)/referential/actions';
 import { KeyedMutator } from 'swr';
 import { useEffect, useState } from 'react';
 import CountryCard from '@/app/(main)/referential/components/country-card';
-import { EventSubmissionResponse } from '@/app/types/event-submission-response';
+import { DataSubmissionResponse } from '@/app/types/data-submission-response';
 import { clsx } from 'clsx';
+import CountryListSkeleton from '@/app/(main)/referential/components/country-list-skeleton';
 
 async function submitModifiedCountryData(countryData: Country[],
                                          onSuccess: KeyedMutator<Country[]>,
                                          onError: (errorName: string, message: string) => void) {
-    const response: EventSubmissionResponse = await submitCountryData(countryData);
+    const response: DataSubmissionResponse = await submitCountryData(countryData);
     if (response.success) {
         // reflect the changes pushed to backend: remove deleted countries and reset edition trackers to false
         const updatedCountryData = countryData
@@ -113,9 +114,8 @@ export default function CountryList({currentCountryId}: { currentCountryId?: num
                         </div>
                     </div>
                 </>
-            ) : ('Loading...')
+            ) : <CountryListSkeleton/>
             }
         </>
-    )
-        ;
+    );
 }

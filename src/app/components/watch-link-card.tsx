@@ -9,8 +9,8 @@ import {
     UserCircleIcon
 } from '@heroicons/react/24/outline';
 import { clsx } from 'clsx';
-import { WatchLink } from '@/app/types/events/event';
 import { ChangeEvent, ForwardRefExoticComponent, RefAttributes, SVGProps, useState } from 'react';
+import { WatchLink } from '@/app/types/watch-link';
 
 type FeatureKey = ('live' | 'replayable' | 'castable' | 'geoblocked' | 'accountRequired');
 type WatchLinkKey = ('link' | 'comment' | 'channel');
@@ -95,6 +95,7 @@ export default function WatchLinkCard({id, watchLinkParam, changeCallback, edita
                     <div className="flex flex-[20%] justify-end">
                         {!unfolded && (
                             <>
+                                {watchLink.comment == 'Recommended link' && <div className="bg-sky-500 p-0.5 rounded-xl text-background"><StarIcon className="w-4"/></div>}
                                 {watchLink.live == 1 && <SignalIcon className="ml-1 w-5"/>}
                                 {watchLink.replayable == 1 && <BackwardIcon className="ml-1 w-5"/>}
                                 {watchLink.geoblocked == 1 && <NoSymbolIcon className="ml-1 w-5"/>}
@@ -142,7 +143,7 @@ export default function WatchLinkCard({id, watchLinkParam, changeCallback, edita
                         <WatchLinkCardInput
                             type={'text'}
                             name={'comment'}
-                            value={watchLink.comment}
+                            value={watchLink.comment || ''}
                             disabled={!editable}
                             callback={onWatchLinkDataChange}
                         />

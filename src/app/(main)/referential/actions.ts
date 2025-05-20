@@ -1,13 +1,14 @@
 'use server';
 
 import { Country } from '@/app/types/country'
-import { EventSubmissionResponse } from '@/app/types/event-submission-response';
+import { DataSubmissionResponse } from '@/app/types/data-submission-response';
+import { pulishCountryChanges } from '@/app/services/countries-service';
 
-export async function submitCountryData(countryData: Country[]): Promise<EventSubmissionResponse> {
+export async function submitCountryData(countryData: Country[]): Promise<DataSubmissionResponse> {
     try {
         const updatedCountryData = countryData.filter(e => e.modified && !e.deleted);
         const deletedCountryData = countryData.filter(e => e.deleted && !e.created);
-        // TODO submit to AWS
+        await pulishCountryChanges(updatedCountryData, deletedCountryData);
         console.log(`Updated ${updatedCountryData.length} and deleted ${deletedCountryData.length} countries to AWS`);
         return { success: true };
     } catch (error) {
