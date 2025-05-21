@@ -393,10 +393,10 @@ export default function CountryDetails({countryDataParam, onSave, onDelete}: {
                             <div className="grow"></div>
                             <input
                                 type="checkbox"
-                                className={clsx('relative peer ms-1 appearance-none shrink-0 rounded-lg w-6 h-6 bg-foreground/10 after:content-[\'\'] checked:after:absolute after:top-1 after:start-1 after:rounded-md after:h-4 after:w-4',
+                                className={clsx('relative peer ms-1 appearance-none shrink-0 rounded-lg w-6 h-6 bg-foreground/10 after:content-[\'\'] after:hidden checked:after:inline-block after:w-2.5 after:h-4 after:ms-1.5 after:rotate-[40deg] after:border-b-4 after:border-r-4',
                                     {
-                                        'after:bg-sky-500': !countryData.deleted,
-                                        'after:bg-foreground/30': countryData.deleted
+                                        'checked:bg-sky-500 after:border-white dark:after:border-black': !countryData.deleted,
+                                        'checked:border-foreground/30 after:border-foreground/50': countryData.deleted
                                     }
                                 )}
                                 id="scheduleDeviceTime"

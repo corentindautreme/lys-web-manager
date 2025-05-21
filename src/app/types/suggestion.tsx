@@ -8,8 +8,9 @@ export interface Suggestion {
     sourceLink: string;
 }
 
-interface SuggestionDate {
+export interface SuggestionDate {
     context: string;
     dateTimeCet: string;
     sentence: string;
+    selected?: boolean;
 }

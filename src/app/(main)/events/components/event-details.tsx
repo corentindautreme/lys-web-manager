@@ -183,7 +183,8 @@ export default function EventDetails({eventParam, onSave, onDelete}: {
                         <EyeIcon className="w-6"/>
                     </button>
                     {event.deleted
-                        ? (<div className="flex items-center px-2"><DocumentDuplicateIcon className="w-6 text-foreground/50 cursor-not-allowed"/></div>)
+                        ? (<div className="flex items-center px-2"><DocumentDuplicateIcon
+                            className="w-6 text-foreground/50 cursor-not-allowed"/></div>)
                         : (
                             <Link
                                 href={`/events/new?fromId=${event.id}`}
