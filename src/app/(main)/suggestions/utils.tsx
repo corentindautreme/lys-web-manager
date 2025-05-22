@@ -32,7 +32,7 @@ export function useSuggestions(): {
     return {
         suggestions: data,
         mutate: async (suggestions: Suggestion[]) => {
-            await mutate(suggestions, {revalidate: false});
+            await mutate(suggestions, {revalidate: false, optimisticData: suggestions});
         },
         isLoading,
         isValidating,

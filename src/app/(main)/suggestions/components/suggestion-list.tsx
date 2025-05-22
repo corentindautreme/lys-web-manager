@@ -16,66 +16,61 @@ import ErrorScreen from '@/app/components/error-screen';
 import { DataSubmissionResponse } from '@/app/types/data-submission-response';
 import { useSuggestions } from '@/app/(main)/suggestions/utils';
 import SuggestionCard from '@/app/(main)/suggestions/components/suggestion-card';
+import { Suggestion } from '@/app/types/suggestion';
+import { submitSuggestions } from '@/app/(main)/suggestions/actions';
 
-// async function submitProcessedSuggestions(
-//     events: Event[],
-//     onSuccess: KeyedMutator<Event[]>,
-//     onError: (errorName: string, message: string) => void
-// ) {
-//     const response: DataSubmissionResponse = await submitEvents(events);
-//     if (response.success) {
-//         const updatedEvents = events
-//             .filter(e => !e.deleted)
-//             .map(e => {
-//                 e.modified = false;
-//                 e.created = false;
-//                 e.rescheduled = false;
-//                 return e;
-//             });
-//         await onSuccess(updatedEvents);
-//         redirect('/events');
-//     } else {
-//         onError(response.error, response.message);
-//     }
-// }
-//
-// function UnsavedSuggestionsBanner({count, events, callback}: {
-//     count: number,
-//     events: Event[],
-//     callback: KeyedMutator<Event[]>
-// }) {
-//     const [error, setError] = useState<JSX.Element>();
-//     const onError = (errorName: string, message: string) => {
-//         setError(<div className=""><span className="font-bold">{errorName}</span> has occurred with message: {message}</div>);
-//     }
-//     const submit = submitProcessedSuggestions.bind(null, events, callback, onError);
-//     return (
-//         <div className={clsx('flex flex-col rounded-lg p-3 text-background', {
-//             'bg-sky-500 ': !error,
-//             'bg-red-400 dark:bg-red-600': !!error,
-//         })}>
-//             <div className="flex">
-//                     <span className="flex flex-row content-center">
-//                         <ExclamationCircleIcon className="w-5 me-1"/>
-//                         {count} unsaved event(s)
-//                     </span>
-//                 <div className="grow"></div>
-//                 <form action={submit}>
-//                     <button className="border-1 border-background px-2">Save</button>
-//                 </form>
-//             </div>
-//             {!!error && <div className="flex flex-col mt-2 pt-2 border-t-1 border-background">
-//                     <span className="flex flex-row content-center">
-//                         <ExclamationTriangleIcon className="shrink-0 w-5 me-1.5"/>
-//                         {error}
-//                     </span>
-//                 <form className="text-right" action={() => setError('')}>
-//                     <button type="submit" className="text-sm underline cursor-pointer">Dismiss</button>
-//                 </form>
-//             </div>}
-//         </div>
-//     );
-// }
+async function submitProcessedSuggestions(
+    suggestions: Suggestion[],
+    onSuccess: KeyedMutator<Suggestion[]>,
+    onError: (errorName: string, message: string) => void
+) {
+    const response: DataSubmissionResponse = await submitSuggestions(suggestions);
+    if (response.success) {
+        const updatedSuggestions = suggestions.filter(s => !s.processed);
+        await onSuccess(updatedSuggestions);
+        redirect('/suggestions');
+    } else {
+        onError(response.error, response.message);
+    }
+}
+
+function UnsavedSuggestionsBanner({count, suggestions, callback}: {
+    count: number,
+    suggestions: Suggestion[],
+    callback: KeyedMutator<Suggestion[]>
+}) {
+    const [error, setError] = useState<JSX.Element>();
+    const onError = (errorName: string, message: string) => {
+        setError(<div className=""><span className="font-bold">{errorName}</span> has occurred with message: {message}</div>);
+    }
+    const submit = submitProcessedSuggestions.bind(null, suggestions, callback, onError);
+    return (
+        <div className={clsx('flex flex-col rounded-lg p-3 text-background', {
+            'bg-sky-500 ': !error,
+            'bg-red-400 dark:bg-red-600': !!error,
+        })}>
+            <div className="flex">
+                    <span className="flex flex-row content-center">
+                        <ExclamationCircleIcon className="w-5 me-1"/>
+                        {count} unsubmitted suggestions(s)
+                    </span>
+                <div className="grow"></div>
+                <form action={submit}>
+                    <button className="border-1 border-background px-2">Save</button>
+                </form>
+            </div>
+            {!!error && <div className="flex flex-col mt-2 pt-2 border-t-1 border-background">
+                    <span className="flex flex-row content-center">
+                        <ExclamationTriangleIcon className="shrink-0 w-5 me-1.5"/>
+                        {error}
+                    </span>
+                <form className="text-right" action={() => setError('')}>
+                    <button type="submit" className="text-sm underline cursor-pointer">Dismiss</button>
+                </form>
+            </div>}
+        </div>
+    );
+}
 
 export default function SuggestionList({currentSuggestionId}: { currentSuggestionId?: number | undefined }
 ) {
@@ -98,8 +93,8 @@ export default function SuggestionList({currentSuggestionId}: { currentSuggestio
             ) : (!isLoading && !!suggestions ? (
                     <>
                         <div className="h-full flex flex-col">
-                            {/*{modifiedCount > 0 &&*/}
-                            {/*    <UnsavedSuggestionsBanner count={modifiedCount} events={suggestions} callback={mutate}/>}*/}
+                            {modifiedCount > 0 &&
+                                <UnsavedSuggestionsBanner count={modifiedCount} events={suggestions} callback={mutate}/>}
 
                             <div className="flex mt-2 overflow-y-auto flex-col">
                                 {suggestions?.map(suggestion => {
