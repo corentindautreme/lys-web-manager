@@ -1,7 +1,11 @@
 import { clsx } from 'clsx';
 import { Suggestion } from '@/app/types/suggestion';
+import { CheckCircleIcon, XCircleIcon } from '@heroicons/react/16/solid';
 
 export default function SuggestionCard({suggestion, active}: { suggestion: Suggestion, active: boolean | undefined }) {
+    const displayedDates = suggestion.processed && suggestion.accepted
+        ? suggestion.dateTimesCet.filter(d => d.selected)
+        : suggestion.dateTimesCet;
     return (
         <div
             className={clsx(
@@ -16,18 +20,19 @@ export default function SuggestionCard({suggestion, active}: { suggestion: Sugge
                 backgroundBlendMode: 'screen'
             } : {}}
         >
-            <div className={clsx('flex grow',
-                {
-                    'opacity-55 dark:opacity-30': suggestion.processed
-                }
-            )}>
+            <div className="flex grow">
                 <div className={clsx('h-fill border-e-3 me-3',
                     {
                         'border-neutral-500': suggestion.processed && !active,
                         'border-sky-500': !suggestion.processed && !active
                     }
                 )}></div>
-                <div className="flex-col">
+                <div className={clsx('flex-col',
+                    {
+                        'opacity-55 dark:opacity-30': suggestion.processed && !active,
+                        'line-through': suggestion.processed && !suggestion.accepted
+                    })}
+                >
                     <div className="text-xl/5 font-bold my-1">{suggestion.country}</div>
                     <div className={clsx('text-base/4', {
                         'text-foreground/70': !active,
@@ -36,31 +41,51 @@ export default function SuggestionCard({suggestion, active}: { suggestion: Sugge
 
                     <div className="mt-2 flex flex-wrap">
                         {
-                            suggestion.dateTimesCet.slice(0, 4).map((suggestedDate) => {
+                            displayedDates.slice(0, 4).map((suggestedDate) => {
                                 const date = new Date(suggestedDate.dateTimeCet);
                                 const formattedDate = date.toLocaleString('en-US', {month: 'short', day: 'numeric'});
-                                return (<Label style="normal" active={!!active} content={formattedDate}/>);
+                                return (
+                                    <Label
+                                        style="normal"
+                                        active={!!active}
+                                        selected={suggestedDate.selected}
+                                        content={formattedDate}
+                                    />
+                                );
                             })
                         }
-                        {suggestion.dateTimesCet.length > 4 && (<Label style="accent" active={!!active} content={`+ ${suggestion.dateTimesCet.length - 4}`}/>)}
+                        {displayedDates.length > 4 && (
+                            <Label
+                                style="accent"
+                                active={!!active}
+                                content={`+ ${displayedDates.length - 4}`}
+                            />
+                        )}
                     </div>
                 </div>
                 <div className="grow"></div>
-                {/* TODO accepted/discarded indicator (checkmark/x icon?) */}
-                {/*{suggestion.modified && !suggestion.deleted && (*/}
-                {/*    <div className="flex items-center">*/}
-                {/*        <div className="rounded-xl w-2.5 h-2.5 bg-sky-500"></div>*/}
-                {/*    </div>*/}
-                {/*)}*/}
+                {suggestion.processed && (
+                    <div className="flex flex-col justify-center items-center">
+                        {suggestion.accepted
+                            ? <CheckCircleIcon className={clsx('w-5',
+                                {
+                                    'text-green-400 dark:text-green-700': !active
+                                }
+                            )}/>
+                            : <XCircleIcon className={clsx('w-5 text-red-400 dark:text-red-700')}/>
+                        }
+                    </div>
+                )}
             </div>
         </div>
     );
 }
 
-function Label({content, style, active}: {
+function Label({content, style, active, selected}: {
     content: string,
     style: string,
-    active: boolean
+    active: boolean,
+    selected?: boolean
 }) {
     return (
         <div className={clsx(

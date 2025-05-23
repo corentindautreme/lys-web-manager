@@ -66,7 +66,7 @@ function Label({icon, content, style, active}: {
         <div className={clsx(
             'flex items-center w-fit me-1 px-1.5 py-0.5 rounded-xs text-xs',
             {
-                'bg-red-400 dark:bg-red-600': style === 'error' && !active,
+                'bg-red-300 dark:bg-red-800': style === 'error' && !active,
                 'bg-gray-400/30 dark:bg-gray-700/50': style === 'normal' && !active,
                 'border-1 border-white': active
             }

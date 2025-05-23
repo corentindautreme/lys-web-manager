@@ -1,8 +1,9 @@
 import { BatchWriteItemCommand, DynamoDBClient, ScanCommand, WriteRequest, } from '@aws-sdk/client-dynamodb';
 import { marshall, unmarshall } from '@aws-sdk/util-dynamodb';
+import { Event, LysEvent } from '@/app/types/events/event';
 import { LysBatchWriteItemOutput } from '@/app/types/aws/lys-batch-write-item-output';
 import { DYNAMODB_BATCH_SIZE } from '@/app/utils/aws-utils';
-import { Suggestion } from '@/app/types/suggestion';
+import { LysSuggestion, Suggestion } from '@/app/types/suggestion';
 
 export function getSuggestions(): Suggestion[] {
     return [
@@ -138,6 +139,11 @@ export async function fetchSuggestions(): Promise<Suggestion[]> {
     }
 }
 
+function toLysSuggestion(suggestion: Suggestion): LysSuggestion {
+    const {events: _, ...lysSuggestion} = suggestion;
+    return lysSuggestion;
+}
+
 export async function publishProcessedSuggestions(suggestions: Suggestion[]) {
     const client = new DynamoDBClient({
         region: 'eu-west-3',
@@ -146,7 +152,7 @@ export async function publishProcessedSuggestions(suggestions: Suggestion[]) {
     const requests: WriteRequest[] = suggestions.map((suggestion) => {
         return {
             PutRequest: {
-                Item: marshall(suggestion)
+                Item: marshall(toLysSuggestion(suggestion))
             }
         }
     });

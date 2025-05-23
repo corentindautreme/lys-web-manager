@@ -20,40 +20,39 @@ export default function ProcessSuggestion({suggestionId}: { suggestionId: number
             const suggestion = {...suggestions.filter((s: Suggestion) => s.id == suggestionId)[0]};
             const currentCountryData = countryData.filter(c => c.country == suggestion.country)[0];
             setCurrentCountryData(currentCountryData);
-            initSuggestion(suggestion, currentCountryData); // TODO yeah do this server side lol (post AWS fetch?)
+            if (!suggestion.processed) {
+                initSuggestion(suggestion, currentCountryData);
+            }
             setSuggestion(suggestion);
         }
     }, [suggestions, countryData]);
 
-    const updateSuggestionCache = async (suggestion: Suggestion) => {
-        console.log(suggestion); // TODO why isn't the checked date reflected here?
+    const updateCache = async (suggestion: Suggestion) => {
         const newSuggestions = [...suggestions].filter((s: Suggestion) => s.id != suggestionId);
-        newSuggestions.push({...suggestion, dateTimesCet: suggestion.dateTimesCet});
+        newSuggestions.push(suggestion);
         newSuggestions.sort((s1, s2) => s2.id - s1.id);
         await mutate(newSuggestions);
-        console.log(JSON.stringify(newSuggestions, null, 2));
-        console.log(JSON.stringify(suggestions, null, 2)); // TODO why are these only updated when opening another suggestion?
     }
 
     const onSubmit = async (suggestion: Suggestion) => {
-        await updateSuggestionCache(suggestion);
+        await updateCache(suggestion);
         redirect('/suggestions');
     }
 
     const initSuggestion = (suggestion: Suggestion, countryData: Country): void => {
-        // suggestion.accepted = false;
-        // suggestion.processed = false;
-        // suggestion.dateTimesCet.forEach((d, index) => {
-        //     for (const likelyDate of countryData.likelyDates) {
-        //         if (likelyDate.substring(0, 2) == d.dateTimeCet.substring(5, 7)) {
-        //             const suggestedDateDay = d.dateTimeCet.substring(8, 10);
-        //             d.selected = likelyDate.endsWith('A') ? suggestedDateDay <= "15" : suggestedDateDay > "15";
-        //             break;
-        //         } else {
-        //             d.selected = false;
-        //         }
-        //     }
-        // });
+        suggestion.accepted = false;
+        suggestion.events = [];
+        suggestion.dateTimesCet.forEach((d, index) => {
+            for (const likelyDate of countryData.likelyDates) {
+                if (likelyDate.substring(0, 2) == d.dateTimeCet.substring(5, 7)) {
+                    const suggestedDateDay = d.dateTimeCet.substring(8, 10);
+                    d.selected = likelyDate.endsWith('A') ? suggestedDateDay <= "15" : suggestedDateDay > "15";
+                    break;
+                } else {
+                    d.selected = false;
+                }
+            }
+        });
     }
 
     return (

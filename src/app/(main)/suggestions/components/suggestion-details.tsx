@@ -1,11 +1,12 @@
 'use client';
 
-import { Suggestion, SuggestionDate } from '@/app/types/suggestion';
+import { GeneratedEvent, Suggestion, SuggestionDate } from '@/app/types/suggestion';
 import { Country } from '@/app/types/country';
 import { ChangeEvent, useEffect, useState } from 'react';
 import Link from 'next/link';
 import {
     ArrowLeftIcon,
+    ArrowUturnLeftIcon,
     CheckIcon,
     ChevronDownIcon,
     ChevronUpDownIcon,
@@ -20,39 +21,29 @@ import {
 } from '@heroicons/react/24/outline';
 import { clsx } from 'clsx';
 import { EventCard } from '@/app/components/events/event/event-cards';
-import { Event } from '@/app/types/events/event';
-
-type GeneratedEvent = Event & {
-    key: string;
-}
+import { insertHeader } from '@/app/(main)/events/components/event-list';
+import { SuggestedDateSkeleton } from '@/app/(main)/suggestions/components/suggested-date-skeleton';
 
 export default function SuggestionDetails({suggestionParam, countryData, onSubmit}: {
     suggestionParam: Suggestion,
     countryData: Country,
     onSubmit: (suggestion: Suggestion) => Promise<never>
 }) {
-    const canSubmit = !suggestionParam.processed;
     const [suggestion, setSuggestion] = useState(suggestionParam);
     const [events, setEvents] = useState<GeneratedEvent[]>([]);
     const [unfoldedAll, unfoldAll] = useState(false);
 
     useEffect(() => {
-        suggestionParam.dateTimesCet
-            .forEach((d, index) => {
-                if (d.selected) {
-                    generateEvent(d, `${suggestionParam.id}-${index}`);
-                }
-            });
+        generateEvents(suggestionParam.dateTimesCet);
     }, []);
 
     const acceptSuggestion = async () => {
         const newSuggestion: Suggestion = {
             ...suggestion,
             processed: true,
-            accepted: true
+            accepted: true,
+            events: events
         };
-        // TODO selected dates are lost here
-        setSuggestion(newSuggestion);
         await onSubmit(newSuggestion);
     }
 
@@ -62,47 +53,17 @@ export default function SuggestionDetails({suggestionParam, countryData, onSubmi
             processed: true,
             accepted: false
         };
-        setSuggestion(newSuggestion);
+        newSuggestion.dateTimesCet.forEach(d => d.selected = false);
         await onSubmit(newSuggestion);
     }
 
-    const accept = async () => {
-        if (!suggestion.processed || !suggestion.accepted) {
-            // if the suggestion hasn't been processed yet or has been rejected, switch it to approved
-            setSuggestion({
-                ...suggestion,
-                processed: true,
-                accepted: true
-            });
-        } else {
-            // otherwise, the suggestion was already approved => act as a toggle off
-            setSuggestion({
-                ...suggestion,
-                processed: false,
-                accepted: false
-            });
-        }
-    }
-
-    const discard = async () => {
-        if (!suggestion.processed || suggestion.accepted) {
-            // if the suggestion hasn't been processed yet or has been accepted, switch it to rejected
-            setSuggestion({
-                ...suggestion,
-                processed: true,
-                accepted: false
-            });
-        } else {
-            // otherwise, the suggestion was already rejected => act as a toggle off
-            setSuggestion({
-                ...suggestion,
-                processed: false
-            });
-        }
-    }
-
-    const submit = async () => {
-        await onSubmit(suggestion);
+    const reprocessSuggestion = async () => {
+        const newSuggestion = {
+            ...suggestion,
+            processed: false,
+            accepted: false,
+        };
+        setSuggestion(newSuggestion);
     }
 
     const setStages = (events: GeneratedEvent[]) => {
@@ -143,7 +104,6 @@ export default function SuggestionDetails({suggestionParam, countryData, onSubmi
     }
 
     const generateEvent = (suggestedDate: SuggestionDate, key: string) => {
-        // TODO save events on the Suggestion (split in 2 types (Lys/(local)), like the rest?)
         const newEvents: GeneratedEvent[] = [...events, {
             id: -1,
             key: key,
@@ -154,6 +114,28 @@ export default function SuggestionDetails({suggestionParam, countryData, onSubmi
             stage: '',
             watchLinks: [...countryData.watchLinks]
         }].sort((e1, e2) => e1.dateTimeCet.localeCompare(e2.dateTimeCet));
+        // regenerate stages
+        setStages(newEvents);
+        setEvents(newEvents);
+    }
+
+    const generateEvents = (suggestedDates: SuggestionDate[]) => {
+        const newEvents: GeneratedEvent[] = [];
+        suggestedDates.forEach((d, index) => {
+            if (d.selected) {
+                newEvents.push({
+                    id: -1,
+                    key: `${suggestionParam.id}-${index}`,
+                    country: countryData.country,
+                    name: countryData.eventName,
+                    dateTimeCet: d.dateTimeCet,
+                    endDateTimeCet: d.dateTimeCet.replace('T00', 'T02'),
+                    stage: '',
+                    watchLinks: [...countryData.watchLinks]
+                });
+            }
+        });
+        newEvents.sort((e1, e2) => e1.dateTimeCet.localeCompare(e2.dateTimeCet));
         // regenerate stages
         setStages(newEvents);
         setEvents(newEvents);
@@ -176,7 +158,6 @@ export default function SuggestionDetails({suggestionParam, countryData, onSubmi
         } else {
             removeEvent(key);
         }
-        console.log(newSuggestion);
         setSuggestion(newSuggestion);
     }
 
@@ -185,14 +166,13 @@ export default function SuggestionDetails({suggestionParam, countryData, onSubmi
             <div className="block md:hidden">
                 <SuggestionActionButtons
                     suggestion={suggestion}
-                    // accept={accept}
-                    // discard={discard}
                     accept={acceptSuggestion}
                     discard={discardSuggestion}
+                    reprocess={reprocessSuggestion}
                 />
             </div>
             <div className="bg-background px-1 py-3 md:p-3 rounded-xl dark:bg-neutral-900">
-                <div className="flex px-1 flex-row justify-between space-x-2">
+                <div className="flex items-center justify-between px-1 space-x-2">
                     <Link
                         href={`/suggestions`}
                         className="flex flex-row items-center"
@@ -200,25 +180,12 @@ export default function SuggestionDetails({suggestionParam, countryData, onSubmi
                         <ArrowLeftIcon className="w-6"/>
                         <span className="hidden md:block md:ml-1">Back</span>
                     </Link>
-                    <div className="hidden w-auto grow"></div>
-                    <SuggestionActionButtons suggestion={suggestion} accept={acceptSuggestion} discard={discardSuggestion}/>
-                    <form action={async () => await submit()}>
-                        <button
-                            type="submit"
-                            className={clsx('w-full px-2 rounded-md ',
-                                {
-                                    'bg-sky-500 text-background': canSubmit && suggestion.processed,
-                                    'bg-none border-1 border-foreground/50 text-foreground/50 cursor-not-allowed': !canSubmit || !suggestion.processed,
-                                }
-                            )}
-                            disabled={!canSubmit || !suggestion.processed}
-                        >
-                            <div className="flex items-center justify-center">
-                                <CheckIcon className="w-5 me-0.5"/>
-                                <span className="block py-1 md:text-base">Submit</span>
-                            </div>
-                        </button>
-                    </form>
+                    <SuggestionActionButtons
+                        suggestion={suggestion}
+                        accept={acceptSuggestion}
+                        discard={discardSuggestion}
+                        reprocess={reprocessSuggestion}
+                    />
                 </div>
 
                 <div className={clsx('flex flex-col items-center justify-center w-full mt-4',
@@ -246,15 +213,11 @@ export default function SuggestionDetails({suggestionParam, countryData, onSubmi
                                     )}
                                 </span>
                     </div>
-                    {/*<SuggestionActionButtons*/}
-                    {/*    suggestion={suggestion}*/}
-                    {/*    accept={accept}*/}
-                    {/*    discard={discard}*/}
-                    {/*/>*/}
                 </div>
 
+                {/* TODO 2xl = suggested dates as a grid? */}
                 <div className="block lg:flex lg:mt-4">
-                    <div className={clsx('w-full lg:w-[50%] p-2',
+                    <div className={clsx('w-full lg:w-[50%] xl:grow p-2',
                         {
                             'text-foreground/50': suggestion.processed
                         }
@@ -287,7 +250,7 @@ export default function SuggestionDetails({suggestionParam, countryData, onSubmi
                             </button>
                         </h2>
 
-                        <div className="md:px-3 mt-3 flex flex-col gap-2">
+                        <div className="2xl:grid flex flex-col md:px-3 mt-3 grid-flow-row grid-cols-2 gap-2">
                             {suggestion.dateTimesCet.map((suggestedDate, index) => {
                                     return (
                                         <SuggestedDate
@@ -303,11 +266,14 @@ export default function SuggestionDetails({suggestionParam, countryData, onSubmi
                                     )
                                 }
                             )}
+                            {suggestion.dateTimesCet.length % 2 == 1 && (
+                                <div className="hidden 2xl:block rounded-xl w-full h-full border-1 border-dashed border-foreground/30"></div>
+                            )}
                         </div>
 
                     </div>
 
-                    <div className={clsx('w-full lg:w-[50%] p-2',
+                    <div className={clsx('w-full lg:w-[50%] xl:w-fit p-2',
                         {
                             'text-foreground/50': suggestion.processed
                         }
@@ -317,16 +283,21 @@ export default function SuggestionDetails({suggestionParam, countryData, onSubmi
                         </h2>
 
                         {events.length == 0 ? (
-                            <div className="flex flex-col items-center text-foreground/50 py-18">
+                            <div className="flex flex-col w-full xl:w-[340px] items-center text-foreground/50 py-18">
                                 <CubeTransparentIcon className="w-18"/>
                                 <span>No date selected</span>
                             </div>
                         ) : (
                             <div className="mt-4">
-                                <div className="bg-gray-100 dark:bg-background p-5 md:px-18 rounded-2xl">
-                                    {events.map((event, index) => (
-                                        <EventCard event={event} active={false} shorten={true}/>
-                                    ))}
+                                <div className="bg-gray-100 dark:bg-background p-5 m-auto rounded-2xl">
+                                    <div className="w-full xl:w-[300px]">
+                                        {events.map((event, index) => (
+                                            <>
+                                                {insertHeader(event, index > 0 ? events[index - 1] : undefined)}
+                                                <EventCard event={event} active={false} shorten={true}/>
+                                            </>
+                                        ))}
+                                    </div>
                                 </div>
                             </div>
                         )}
@@ -334,43 +305,61 @@ export default function SuggestionDetails({suggestionParam, countryData, onSubmi
                 </div>
 
             </div>
+
+            <div className="md:hidden h-14"></div>
         </>
     );
 }
 
-function SuggestionActionButtons({suggestion, accept, discard}: {
+function SuggestionActionButtons({suggestion, accept, discard, reprocess}: {
     suggestion: Suggestion,
     accept: () => Promise<void>,
-    discard: () => Promise<void>
+    discard: () => Promise<void>,
+    reprocess: () => Promise<void>
 }) {
+    const canAccept = suggestion.dateTimesCet.some(d => d.selected);
     return (
         <div
-            className="absolute md:relative md:bottom-0 bottom-18 start-0 w-full flex items-center justify-center px-2 md:px-0 md:mt-2">
-            <form className="grow md:grow-0" action={async () => await discard()}>
-                <button className={clsx('w-full px-2 rounded-md',
-                    {
-                        'bg-sky-500 text-background': suggestion.processed && !suggestion.accepted,
-                        'bg-foreground/10': !suggestion.processed || suggestion.accepted
-                    })}>
-                    <div className="flex items-center justify-center">
-                        <XMarkIcon className="w-5 me-0.5"/>
-                        <span className="block py-2 md:py-1 text-lg md:text-base">Discard</span>
-                    </div>
-                </button>
-            </form>
-            <div className="w-2 md:w-1 shrink-0"></div>
-            <form className="grow md:grow-0" action={async () => await accept()}>
-                <button className={clsx('w-full px-2 rounded-md',
-                    {
-                        'bg-sky-500 text-background': suggestion.processed && suggestion.accepted,
-                        'bg-foreground/10': !suggestion.processed || !suggestion.accepted
-                    })}>
-                    <div className="flex items-center justify-center">
-                        <CheckIcon className="w-5 me-0.5"/>
-                        <span className="block py-2 md:py-1 text-lg md:text-base">Accept</span>
-                    </div>
-                </button>
-            </form>
+            className="absolute md:relative md:bottom-0 bottom-14 start-0 w-full md:w-fit flex ps-2 pe-1 pt-2 bg-background dark:bg-neutral-900 border-t-1 md:border-0 border-foreground/10 md:p-0 z-50">
+            {suggestion.processed ? (
+                <form className="grow md:grow-0" action={async () => await reprocess()}>
+                    <button
+                        className="w-full px-2 rounded-md  bg-gray-200 dark:bg-neutral-800">
+                        <div className="flex items-center justify-center">
+                            <ArrowUturnLeftIcon className="w-5 me-1"/>
+                            <span className="block py-2 md:py-1 md:text-base">Reprocess</span>
+                        </div>
+                    </button>
+                </form>
+            ) : (
+                <>
+                    <form className="grow md:grow-0" action={async () => await discard()}>
+                        <button className="w-full px-2 rounded-md bg-gray-200 dark:bg-neutral-800">
+                            <div className="flex items-center justify-center">
+                                <XMarkIcon className="w-5 me-0.5"/>
+                                <span className="block py-2 md:py-1 md:text-base">Discard</span>
+                            </div>
+                        </button>
+                    </form>
+                    <div className="w-2 md:w-1 shrink-0"></div>
+                    <form className="grow md:grow-0" action={async () => await accept()}>
+                        <button
+                            disabled={!canAccept}
+                            className={clsx('w-full px-2 rounded-md',
+                                {
+                                    'bg-sky-500 text-background': !suggestion.processed && canAccept,
+                                    'text-foreground/50 cursor-not-allowed': !canAccept
+                                })}
+                        >
+                            <div className="flex items-center justify-center">
+                                <CheckIcon className="w-5 me-0.5"/>
+                                <span className="block py-2 md:py-1 md:text-base">Accept</span>
+                            </div>
+                        </button>
+                    </form>
+                </>
+            )}
+
             <div className="w-2 md:w-1 shrink-0"></div>
         </div>
     );
@@ -412,7 +401,7 @@ function SuggestedDate({suggestedDate, dateKey, index, callback, forceUnfold, se
 
     return (
         <div
-            className={clsx('flex items-center p-3 md:px-5 rounded-xl bg-foreground/10',
+            className={clsx('flex items-center h-fit p-3 md:px-5 rounded-xl bg-foreground/10',
                 {
                     'text-white': suggestedDate.selected
                 }
@@ -457,10 +446,10 @@ function SuggestedDate({suggestedDate, dateKey, index, callback, forceUnfold, se
             </div>
             <input
                 type="checkbox"
-                className={clsx('relative peer ms-1 appearance-none shrink-0 rounded-lg w-6 h-6 bg-foreground/10 after:content-[\'\'] after:hidden checked:after:inline-block after:w-2.5 after:h-4 after:ms-1.5 after:rotate-[40deg] after:border-b-4 after:border-r-4',
+                className={clsx('relative peer ms-1 appearance-none shrink-0 rounded-lg w-6 h-6 after:content-[\'\'] after:hidden checked:after:inline-block after:w-2.5 after:h-4 after:ms-1.5 after:rotate-[40deg] after:border-b-4 after:border-r-4',
                     {
-                        'checked:bg-transparent checked:border-1 border-white after:border-white': !disabled,
-                        'checked:border-foreground/30 after:border-foreground/50': disabled
+                        'bg-foreground/10 checked:bg-transparent checked:border-1 border-white after:border-white': !disabled,
+                        'bg-black/10': disabled
                     }
                 )}
                 id="scheduleDeviceTime"
