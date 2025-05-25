@@ -1,19 +1,25 @@
 'use client';
 
-import {HomeIcon, CalendarDaysIcon, GlobeEuropeAfricaIcon, SparklesIcon} from '@heroicons/react/24/outline';
+import {
+    CalendarDaysIcon,
+    CommandLineIcon,
+    GlobeEuropeAfricaIcon,
+    HomeIcon,
+    SparklesIcon
+} from '@heroicons/react/24/outline';
 import Link from 'next/link';
-import {usePathname} from 'next/navigation';
-import {clsx} from 'clsx';
+import { usePathname } from 'next/navigation';
+import { clsx } from 'clsx';
 import { useEvents } from '@/app/(main)/events/utils';
 import { useCountries } from '@/app/(main)/referential/utils';
 import { useSuggestions } from '@/app/(main)/suggestions/utils';
 import { JSX } from 'react';
 
-type LinkName = 'Home' | 'Suggestions' | 'Events' | 'Referential';
+type LinkName = 'Home' | 'Suggestions' | 'Events' | 'Referential' | 'Logs';
 
 // Map of links to display in the side navigation.
 // Depending on the size of the application, this would be stored in a database.
-const links: {name: LinkName, href: string, icon: JSX.Element}[] = [
+const links: { name: LinkName, href: string, icon: JSX.Element }[] = [
     {
         name: 'Home',
         href: '/',
@@ -33,12 +39,19 @@ const links: {name: LinkName, href: string, icon: JSX.Element}[] = [
         name: 'Referential',
         href: '/referential',
         icon: <GlobeEuropeAfricaIcon className="w-6"/>
+    },
+    {
+        name: 'Logs',
+        href: '/logs',
+        icon: <CommandLineIcon className="w-6"/>
     }
 ];
 
 function IconBadge() {
     return (
-        <div className="absolute flex items-center justify-center top-[8px] rounded-xl w-[10px] h-[10px] bg-white dark:bg-neutral-900" style={{right: "calc(50% - 5px - 10px)"}}>
+        <div
+            className="absolute flex items-center justify-center top-[8px] rounded-xl w-[10px] h-[10px] bg-white dark:bg-neutral-900"
+            style={{right: 'calc(50% - 5px - 10px)'}}>
             <div className="rounded-xl w-[7px] h-[7px] bg-sky-500"></div>
         </div>
     );
@@ -51,11 +64,12 @@ export default function NavLinks() {
     const {events, error: eventsError} = useEvents();
     const {countryData, error: countryDataError} = useCountries();
     const {suggestions, error: suggestionsError} = useSuggestions();
-    const hasBadge = {
+    const hasBadge: { [name: string]: boolean } = {
         'Home': false,
         'Suggestions': !suggestionsError && suggestions?.length > 0,
         'Events': !eventsError && events?.some(e => e.modified || e.deleted),
-        'Referential': !countryDataError && countryData?.some(e => e.modified || e.deleted)
+        'Referential': !countryDataError && countryData?.some(e => e.modified || e.deleted),
+        'Status': false
     }
     return (
         <>

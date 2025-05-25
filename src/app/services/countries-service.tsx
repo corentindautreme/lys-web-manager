@@ -7,7 +7,7 @@ import { DYNAMODB_BATCH_SIZE } from '@/app/utils/aws-utils';
 export async function fetchCountries(): Promise<Country[]> {
     try {
         const client = new DynamoDBClient({
-            region: 'eu-west-3',
+            region: 'eu-west-3'
         });
         const {Items: countries} = await client.send(new ScanCommand({
             TableName: 'lys_ref_country'
@@ -33,7 +33,7 @@ function toLysCountry(country: Country): LysCountry {
 
 export async function pulishCountryChanges(updatedCountries: Country[], deletedCountries: Country[]) {
     const client = new DynamoDBClient({
-        region: 'eu-west-3',
+        region: 'eu-west-3'
     });
 
     const requests: WriteRequest[] = [];
