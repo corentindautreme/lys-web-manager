@@ -1,6 +1,6 @@
 'use client';
 
-import {HomeIcon, CalendarDaysIcon, GlobeEuropeAfricaIcon, SparklesIcon} from '@heroicons/react/24/outline';
+import { HomeIcon, CalendarDaysIcon, GlobeEuropeAfricaIcon, SparklesIcon, BoltIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import {usePathname} from 'next/navigation';
 import {clsx} from 'clsx';
@@ -33,6 +33,11 @@ const links: {name: LinkName, href: string, icon: JSX.Element}[] = [
         name: 'Referential',
         href: '/referential',
         icon: <GlobeEuropeAfricaIcon className="w-6"/>
+    },
+    {
+        name: 'Status',
+        href: '/status',
+        icon: <BoltIcon className="w-6"/>
     }
 ];
 
