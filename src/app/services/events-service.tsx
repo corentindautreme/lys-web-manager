@@ -327,7 +327,7 @@ export async function publishEventChanges(updatedEvents: Event[], rescheduledEve
             // submit the batch and save the processing response
             responses.push(await client.send(new BatchWriteItemCommand({
                 RequestItems: {
-                    lys_eventsZ: batch
+                    lys_events: batch
                 }
             })) as LysBatchWriteItemOutput);
         }

@@ -1,0 +1,198 @@
+import { BatchWriteItemCommand, DynamoDBClient, ScanCommand, WriteRequest, } from '@aws-sdk/client-dynamodb';
+import { marshall, unmarshall } from '@aws-sdk/util-dynamodb';
+import { Event, LysEvent } from '@/app/types/events/event';
+import { LysBatchWriteItemOutput } from '@/app/types/aws/lys-batch-write-item-output';
+import { DYNAMODB_BATCH_SIZE } from '@/app/utils/aws-utils';
+import { LysSuggestion, Suggestion } from '@/app/types/suggestion';
+
+export function getSuggestions(): Suggestion[] {
+    return [
+        {
+            "id": 1257,
+            "accepted": false,
+            "country": "Finland",
+            "dateTimesCet": [
+                {
+                    "context": "on February 28",
+                    "dateTimeCet": "2026-02-28T00:00:00",
+                    "sentence": "Yle, the Finnish national broadcaster, has confirmed that Uuden Musiikin Kilpailu 2026 will take place on February 28"
+                }
+            ],
+            "name": "Uuden Musiikin Kilpailu",
+            "processed": false,
+            "sourceLink": "https://eurovoix.com/2025/05/16/finland-uuden-musiikin-kilpailu-2026-february-28/"
+        },
+        {
+            "id": 1256,
+            "accepted": false,
+            "country": "United Kingdom",
+            "dateTimesCet": [
+                {
+                    "context": "on the 7th of March",
+                    "dateTimeCet": "2026-03-07T00:00:00",
+                    "sentence": "The entry was internally selected by the BBC and formally revealed on the 7th of March"
+                }
+            ],
+            "name": "Eurovision: You Decide",
+            "processed": false,
+            "sourceLink": "https://eurovoix.com/2025/05/15/united-kingdom-sophie-ellis-bextor-replaces-ncuti-gatwa-as-spokesperson-for-eurovision-2025/"
+        },
+        {
+            "id": 1255,
+            "accepted": false,
+            "country": "Australia",
+            "dateTimesCet": [
+                {
+                    "context": "6th September",
+                    "dateTimeCet": "2025-09-06T00:00:00",
+                    "sentence": "6th September - London, UK"
+                },
+                {
+                    "context": "7th September",
+                    "dateTimeCet": "2025-09-07T00:00:00",
+                    "sentence": "7th September - Brussels, Belgium"
+                },
+                {
+                    "context": "8th September",
+                    "dateTimeCet": "2025-09-08T00:00:00",
+                    "sentence": "8th September - Utrecht, The Netherlands"
+                },
+                {
+                    "context": "10th September",
+                    "dateTimeCet": "2025-09-10T00:00:00",
+                    "sentence": "10th September - Copenhagen, Denmark"
+                },
+                {
+                    "context": "11th September",
+                    "dateTimeCet": "2025-09-11T00:00:00",
+                    "sentence": "11th September - Hamburg, Germany"
+                },
+                {
+                    "context": "13th September",
+                    "dateTimeCet": "2025-09-13T00:00:00",
+                    "sentence": "13th September - Cologne, Germany"
+                },
+                {
+                    "context": "14th September",
+                    "dateTimeCet": "2025-09-14T00:00:00",
+                    "sentence": "14th September - Berlin, Germany"
+                },
+                {
+                    "context": "16th September",
+                    "dateTimeCet": "2025-09-16T00:00:00",
+                    "sentence": "16th September - Warsaw, Poland"
+                },
+                {
+                    "context": "18th September",
+                    "dateTimeCet": "2025-09-18T00:00:00",
+                    "sentence": "18th September - Prague, Czechia"
+                },
+                {
+                    "context": "19th September",
+                    "dateTimeCet": "2025-09-19T00:00:00",
+                    "sentence": "19th September - Budapest, Hungary"
+                },
+                {
+                    "context": "20th September",
+                    "dateTimeCet": "2025-09-20T00:00:00",
+                    "sentence": "20th September - Vienna, Austria"
+                },
+                {
+                    "context": "21st September",
+                    "dateTimeCet": "2025-09-21T00:00:00",
+                    "sentence": "21st September - Munich, Germany"
+                },
+                {
+                    "context": "23rd September",
+                    "dateTimeCet": "2025-09-23T00:00:00",
+                    "sentence": "23rd September - Paris, France"
+                },
+                {
+                    "context": "September",
+                    "dateTimeCet": "2025-09-30T00:00:00",
+                    "sentence": "Across September this year, Australia's Go-Jo will perform in ten different countries as he embarks on his European tour named after his Eurovision entry"
+                }
+            ],
+            "name": "Australia Decides",
+            "processed": false,
+            "sourceLink": "https://eurovoix.com/2025/04/22/australia-go-jo-european-tour/"
+        }
+    ];
+}
+
+export async function fetchSuggestions(): Promise<Suggestion[]> {
+    try {
+        const client = new DynamoDBClient({
+            region: 'eu-west-3',
+        });
+        const {Items: suggestions} = await client.send(new ScanCommand({
+            TableName: 'lys_suggested_events'
+        }));
+        return suggestions
+            ? suggestions
+                .map(suggestion => unmarshall(suggestion) as Suggestion)
+                .filter(suggestion => !suggestion.processed)
+                .sort((s1: Suggestion, s2: Suggestion) => s2.id - s1.id)
+            : [];
+    } catch (error) {
+        console.log(error);
+        throw error;
+    }
+}
+
+function toLysSuggestion(suggestion: Suggestion): LysSuggestion {
+    const {events: _, ...lysSuggestion} = suggestion;
+    return lysSuggestion;
+}
+
+export async function publishProcessedSuggestions(suggestions: Suggestion[]) {
+    const client = new DynamoDBClient({
+        region: 'eu-west-3',
+    });
+
+    const requests: WriteRequest[] = suggestions.map((suggestion) => {
+        return {
+            PutRequest: {
+                Item: marshall(toLysSuggestion(suggestion))
+            }
+        }
+    });
+
+    const responses: LysBatchWriteItemOutput[] = [];
+
+    try {
+        while (requests.length > 0
+            || (responses.length > 0 && responses[responses.length - 1].UnprocessedItems.lys_suggested_events?.length > 0)
+            ) {
+            const batch: WriteRequest[] = [];
+            // re-submit unprocessed items (if any)
+            if (responses.length > 0 && responses[responses.length - 1].UnprocessedItems.lys_suggested_events?.length > 0) {
+                batch.push(...responses[responses.length - 1].UnprocessedItems.lys_suggested_events);
+            }
+            // fill the remaining slots of the batch with pending requests
+            batch.push(...requests.splice(0, DYNAMODB_BATCH_SIZE - batch.length));
+
+            console.log(`Submitting following suggestion batch to AWS: ${JSON.stringify(batch)}`);
+
+            // submit the batch and save the processing response
+            responses.push(await client.send(new BatchWriteItemCommand({
+                RequestItems: {
+                    lys_suggested_events: batch
+                }
+            })) as LysBatchWriteItemOutput);
+        }
+    } catch (e) {
+        if (e instanceof Error) {
+            console.log(`An error occurred when batch submitting suggestions: ${e.name} - ${e.message}`);
+            console.log(e);
+            throw e;
+        } else {
+            console.log(`Something weird happened: ${e}`);
+            const error = new Error(JSON.stringify(e));
+            error.name = 'Unexpected Error';
+            throw error;
+        }
+    }
+
+    return responses;
+}

@@ -4,7 +4,7 @@ import { Event } from '@/app/types/events/event'
 import Link from 'next/link';
 import {
     ArrowLeftIcon,
-    ArrowRightIcon, ArrowTopRightOnSquareIcon,
+    ArrowRightIcon, ArrowTopRightOnSquareIcon, ArrowUpOnSquareIcon,
     ArrowUturnLeftIcon,
     ClockIcon,
     DocumentDuplicateIcon, ExclamationTriangleIcon,
@@ -183,7 +183,8 @@ export default function EventDetails({eventParam, onSave, onDelete}: {
                         <EyeIcon className="w-6"/>
                     </button>
                     {event.deleted
-                        ? <DocumentDuplicateIcon className="w-6 text-foreground/50 cursor-not-allowed"/>
+                        ? (<div className="flex items-center px-2"><DocumentDuplicateIcon
+                            className="w-6 text-foreground/50 cursor-not-allowed"/></div>)
                         : (
                             <Link
                                 href={`/events/new?fromId=${event.id}`}
@@ -198,10 +199,10 @@ export default function EventDetails({eventParam, onSave, onDelete}: {
                         )
                     }
                     <form action={async () => await toggleDelete()}>
-                        <button type="submit" className={clsx('px-2 pe-4', {'hidden': isNewEvent})}>
+                        <button type="submit" className={clsx('px-2 me-2', {'hidden': isNewEvent})}>
                             {!event.deleted
-                                ? (<TrashIcon className="w-6"/>)
-                                : (<ArrowUturnLeftIcon className="w-6"/>)
+                                ? (<div className="flex items-center py-1"><TrashIcon className="w-6"/></div>)
+                                : (<div className="flex items-center py-1"><ArrowUturnLeftIcon className="w-6"/></div>)
                             }
                         </button>
                     </form>
@@ -215,7 +216,10 @@ export default function EventDetails({eventParam, onSave, onDelete}: {
                                 }
                             )}
                         >
-                            Save
+                            <div className="flex items-center">
+                                <ArrowUpOnSquareIcon className="w-5 me-0.5"/>
+                                <span className="block py-1">Save</span>
+                            </div>
                         </button>
                     </form>
                 </div>

@@ -75,7 +75,7 @@ function UnsavedEventsBanner({count, events, callback}: {
     );
 }
 
-function insertHeader(event: Event, previous: Event | undefined) {
+export function insertHeader(event: Event, previous: Event | undefined) {
     const month = new Date(event.dateTimeCet).toLocaleString('en-GB', {month: 'long'});
     const previousMonth = previous && new Date(previous.dateTimeCet).toLocaleString('en-GB', {month: 'long'});
     return previousMonth == month ? '' : (

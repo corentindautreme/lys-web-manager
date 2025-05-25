@@ -1,0 +1,39 @@
+'use server';
+
+import { DataSubmissionResponse } from '@/app/types/data-submission-response';
+import { GeneratedEvent, Suggestion } from '@/app/types/suggestion';
+import { publishProcessedSuggestions } from '@/app/services/suggestions-service';
+import { publishEventChanges } from '@/app/services/events-service';
+import { Event } from '@/app/types/events/event';
+
+export async function submitSuggestions(suggestions: Suggestion[]): Promise<DataSubmissionResponse> {
+    const processedSuggestions = suggestions.filter(s => s.processed);
+    try {
+        const events = processedSuggestions
+            .filter(s => s.accepted)
+            .map(s => s.events || [])
+            .flat()
+            .map((e: GeneratedEvent): Event => {
+                const {key: _, ...event} = e;
+                return event;
+            });
+        await publishProcessedSuggestions(processedSuggestions);
+        await publishEventChanges(events, [], []);
+        console.log(`Updated ${processedSuggestions.length} suggestions and saved ${events.length} events to AWS`);
+        return {success: true};
+    } catch (error) {
+        if (error instanceof Error) {
+            return {
+                success: false,
+                error: error.name,
+                message: error.message
+            };
+        } else {
+            return {
+                success: false,
+                error: 'UnknownError',
+                message: JSON.stringify(error)
+            };
+        }
+    }
+}

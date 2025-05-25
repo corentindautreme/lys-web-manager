@@ -57,7 +57,7 @@ export default function WatchLinkCard({id, watchLinkParam, changeCallback, edita
     }
 
     const toggleRecommendedLinkComment = () => {
-        watchLink.comment = watchLink.comment == "Recommended link" ? "" : "Recommended link";
+        watchLink.comment = watchLink.comment == 'Recommended link' ? '' : 'Recommended link';
         onWatchLinkSet();
     }
 
@@ -95,7 +95,14 @@ export default function WatchLinkCard({id, watchLinkParam, changeCallback, edita
                     <div className="flex flex-[20%] justify-end">
                         {!unfolded && (
                             <>
-                                {watchLink.comment == 'Recommended link' && <div className="bg-sky-500 p-0.5 rounded-xl text-background"><StarIcon className="w-4"/></div>}
+                                {watchLink.comment == 'Recommended link' &&
+                                    <div className={clsx('p-0.5 rounded-xl text-background',
+                                        {
+                                            'bg-sky-500': editable,
+                                            'bg-foreground/30': !editable
+                                        }
+                                    )}><StarIcon className="w-4"/></div>
+                                }
                                 {watchLink.live == 1 && <SignalIcon className="ml-1 w-5"/>}
                                 {watchLink.replayable == 1 && <BackwardIcon className="ml-1 w-5"/>}
                                 {watchLink.geoblocked == 1 && <NoSymbolIcon className="ml-1 w-5"/>}
@@ -155,7 +162,7 @@ export default function WatchLinkCard({id, watchLinkParam, changeCallback, edita
                                     'border-1 bg-foreground/10 border-foreground/10': watchLink.comment == 'Recommended link' && !editable,
                                     'cursor-not-allowed': !editable,
                                     'border-1 bg-sky-500 border-sky-500 text-background': watchLink.comment == 'Recommended link' && editable,
-                                    'border-1 border-foreground/30 text-foreground': watchLink.comment != 'Recommended link',
+                                    'border-1 border-foreground/30': watchLink.comment != 'Recommended link',
                                     'cursor-pointer': editable
                                 })}
                         >

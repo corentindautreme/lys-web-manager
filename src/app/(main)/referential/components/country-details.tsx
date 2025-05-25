@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import {
     ArrowLeftIcon,
-    ArrowTopRightOnSquareIcon,
+    ArrowTopRightOnSquareIcon, ArrowUpOnSquareIcon,
     ArrowUturnLeftIcon, CalendarDaysIcon,
     ClockIcon,
     GlobeEuropeAfricaIcon,
@@ -158,11 +158,13 @@ export default function CountryDetails({countryDataParam, onSave, onDelete}: {
                 <div className="hidden w-auto grow"></div>
                 <div className="flex">
                     <form action={async () => await toggleDelete()}>
-                        <button type="submit" className={clsx('px-2 pe-4', {
+                        <button type="submit" className={clsx('px-2 me-2', {
                             'hidden': !onDelete
                         })}>
-                            {!countryData.deleted ? (<TrashIcon className="w-6"/>) : (
-                                <ArrowUturnLeftIcon className="w-6"/>)}
+                            {!countryData.deleted
+                                ? (<div className="flex items-center py-1"><TrashIcon className="w-6"/></div>)
+                                : (<div className="flex items-center py-1"><ArrowUturnLeftIcon className="w-6"/></div>)
+                            }
                         </button>
                     </form>
                     <form action={async () => await saveCountryData()}>
@@ -175,7 +177,10 @@ export default function CountryDetails({countryDataParam, onSave, onDelete}: {
                                 }
                             )}
                         >
-                            Save
+                            <div className="flex items-center">
+                                <ArrowUpOnSquareIcon className="w-5 me-0.5"/>
+                                <span className="block py-1">Save</span>
+                            </div>
                         </button>
                     </form>
                 </div>
@@ -388,10 +393,12 @@ export default function CountryDetails({countryDataParam, onSave, onDelete}: {
                             <div className="grow"></div>
                             <input
                                 type="checkbox"
-                                className="relative peer ms-1 appearance-none shrink-0 rounded-lg w-6 h-6 bg-foreground/10 after:content-['']
-                                        checked:after:absolute
-                                        after:bg-sky-500 after:top-1 after:start-1 after:rounded-md after:h-4
-                                        after:w-4"
+                                className={clsx('relative peer ms-1 appearance-none shrink-0 rounded-lg w-6 h-6 bg-foreground/10 after:content-[\'\'] after:hidden checked:after:inline-block after:w-2.5 after:h-4 after:ms-1.5 after:rotate-[40deg] after:border-b-4 after:border-r-4',
+                                    {
+                                        'checked:bg-sky-500 after:border-white dark:after:border-black': !countryData.deleted,
+                                        'checked:border-foreground/30 after:border-foreground/50': countryData.deleted
+                                    }
+                                )}
                                 id="scheduleDeviceTime"
                                 name="scheduleDeviceTime"
                                 checked={countryData.scheduleDeviceTime == 1}
@@ -471,7 +478,8 @@ function CountryCalendarWindow({selected, onToggle, disabled}: {
             className={clsx('rounded-lg h-12',
                 {
                     'bg-foreground/10': !selected,
-                    'bg-sky-500': selected
+                    'bg-sky-500': selected && !disabled,
+                    'bg-foreground/30': selected && disabled
                 }
             )}>
 
