@@ -9,7 +9,6 @@ import { getQueryParamString } from '@/app/utils/event-utils';
 import { ExclamationCircleIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 import { useEvents } from '@/app/(main)/events/utils';
 import { submitEvents } from '@/app/(main)/events/actions';
-import { KeyedMutator } from 'swr';
 import { JSX, useEffect, useState } from 'react';
 import EventListSkeleton from '@/app/(main)/events/components/event-list-skeleton';
 import ErrorScreen from '@/app/components/error-screen';
@@ -17,7 +16,7 @@ import { DataSubmissionResponse } from '@/app/types/data-submission-response';
 
 async function submitModifiedEvents(
     events: Event[],
-    onSuccess: KeyedMutator<Event[]>,
+    onSuccess: (events: Event[]) => void,
     onError: (errorName: string, message: string) => void
 ) {
     const response: DataSubmissionResponse = await submitEvents(events);
@@ -33,18 +32,20 @@ async function submitModifiedEvents(
         await onSuccess(updatedEvents);
         redirect('/events');
     } else {
-        onError(response.error, response.message);
+        onError(response.error || '', response.message || '');
     }
 }
 
 function UnsavedEventsBanner({count, events, callback}: {
     count: number,
     events: Event[],
-    callback: KeyedMutator<Event[]>
+    callback: (events: Event[]) => void
 }) {
     const [error, setError] = useState<JSX.Element>();
+    let hasError = false;
     const onError = (errorName: string, message: string) => {
         setError(<div className=""><span className="font-bold">{errorName}</span> has occurred with message: {message}</div>);
+        hasError = true;
     }
     const submit = submitModifiedEvents.bind(null, events, callback, onError);
     return (
@@ -62,12 +63,14 @@ function UnsavedEventsBanner({count, events, callback}: {
                     <button className="border-1 border-background px-2">Save</button>
                 </form>
             </div>
-            {!!error && <div className="flex flex-col mt-2 pt-2 border-t-1 border-background">
+            {hasError && <div className="flex flex-col mt-2 pt-2 border-t-1 border-background">
                     <span className="flex flex-row content-center">
                         <ExclamationTriangleIcon className="shrink-0 w-5 me-1.5"/>
                         {error}
                     </span>
-                <form className="text-right" action={() => setError('')}>
+                <form className="text-right" action={() => {
+                    hasError = false;
+                }}>
                     <button type="submit" className="text-sm underline cursor-pointer">Dismiss</button>
                 </form>
             </div>}
@@ -137,7 +140,7 @@ export default function EventList({currentEventId}: { currentEventId?: number | 
                                 )}
                                 <div className="flex md:hidden py-3 items-center">
                                     <div className="w-full border-t-1 border-foreground/50"></div>
-                                    <div className="shrink-0 px-2 text-foreground/50">That's it!</div>
+                                    <div className="shrink-0 px-2 text-foreground/50">That&apos;s it!</div>
                                     <div className="w-full border-t-1 border-foreground/50"></div>
                                 </div>
                             </div>

@@ -24,6 +24,7 @@ export async function fetchCountries(): Promise<Country[]> {
 }
 
 function toLysCountry(country: Country): LysCountry {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const {modified: _, created: __, ...lysCountry} = country;
     return lysCountry;
 }

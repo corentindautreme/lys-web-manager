@@ -6,7 +6,6 @@ import { redirect } from 'next/navigation';
 import { ExclamationCircleIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 import { useCountries } from '@/app/(main)/referential/utils';
 import { submitCountryData } from '@/app/(main)/referential/actions';
-import { KeyedMutator } from 'swr';
 import { useEffect, useState } from 'react';
 import CountryCard from '@/app/(main)/referential/components/country-card';
 import { DataSubmissionResponse } from '@/app/types/data-submission-response';
@@ -14,7 +13,7 @@ import { clsx } from 'clsx';
 import CountryListSkeleton from '@/app/(main)/referential/components/country-list-skeleton';
 
 async function submitModifiedCountryData(countryData: Country[],
-                                         onSuccess: KeyedMutator<Country[]>,
+                                         onSuccess: (countryData: Country[]) => void,
                                          onError: (errorName: string, message: string) => void) {
     const response: DataSubmissionResponse = await submitCountryData(countryData);
     if (response.success) {
@@ -29,14 +28,14 @@ async function submitModifiedCountryData(countryData: Country[],
         await onSuccess(updatedCountryData);
         redirect('/referential');
     } else {
-        onError(response.error, response.message);
+        onError(response.error || '', response.message || '');
     }
 }
 
 function UnsavedCountryDataBanner({count, countryData, callback}: {
     count: number,
     countryData: Country[],
-    callback: KeyedMutator<Country[]>
+    callback: (countryData: Country[]) => void
 }) {
     const [error, setError] = useState('');
     const onError = (errorName: string, message: string) => {
@@ -92,7 +91,7 @@ export default function CountryList({currentCountryId}: { currentCountryId?: num
                         }
 
                         <div className="flex mt-2 overflow-y-auto flex-col">
-                            {countryData?.map((countryData, idx) => {
+                            {countryData?.map(countryData => {
                                     return (
                                         <div key={countryData.id}>
                                             <Link href={`/referential/edit/${countryData.id}#${countryData.id}`}>

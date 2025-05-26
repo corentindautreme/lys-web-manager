@@ -4,6 +4,7 @@ import { useSelectedLayoutSegment } from 'next/navigation';
 import { clsx } from 'clsx';
 import Breadcrumbs from '@/app/components/breadcrumbs';
 import NewEventButton from '@/app/(main)/events/components/new-event-button';
+import { Suspense } from 'react';
 
 export default function Layout({children, events}: { children: React.ReactNode, events: React.ReactNode }) {
     const layoutSegment = useSelectedLayoutSegment();
@@ -40,12 +41,14 @@ export default function Layout({children, events}: { children: React.ReactNode, 
                         'hidden': layoutSegment == null
                     }
                 )}>
-                    {children}
+                    <Suspense>
+                        {children}
+                    </Suspense>
                 </div>
             </div>
 
             {/* Hide the "New" button on mobile on the edit and new screen, but always display it on desktop */}
-            {layoutSegment === "(empty)" && <div className="md:hidden"><NewEventButton/></div>}
+            {layoutSegment === '(empty)' && <div className="md:hidden"><NewEventButton/></div>}
             <div className="hidden md:block"><NewEventButton/></div>
         </main>
     );

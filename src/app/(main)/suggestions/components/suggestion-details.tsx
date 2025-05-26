@@ -2,7 +2,7 @@
 
 import { GeneratedEvent, Suggestion, SuggestionDate } from '@/app/types/suggestion';
 import { Country } from '@/app/types/country';
-import { ChangeEvent, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import {
     ArrowLeftIcon,
@@ -34,6 +34,44 @@ export default function SuggestionDetails({suggestionParam, countryData, onSubmi
     const [suggestion, setSuggestion] = useState(suggestionParam);
     const [events, setEvents] = useState<GeneratedEvent[]>([]);
     const [unfoldedAll, unfoldAll] = useState(false);
+
+    const generateEvent = (suggestedDate: SuggestionDate, key: string) => {
+        const newEvents: GeneratedEvent[] = [...events, {
+            id: -1,
+            key: key,
+            country: countryData.country,
+            name: countryData.eventName,
+            dateTimeCet: suggestedDate.dateTimeCet,
+            endDateTimeCet: suggestedDate.dateTimeCet.replace('T00', 'T02'),
+            stage: '',
+            watchLinks: [...countryData.watchLinks]
+        }].sort((e1, e2) => e1.dateTimeCet.localeCompare(e2.dateTimeCet));
+        // regenerate stages
+        setStages(newEvents);
+        setEvents(newEvents);
+    }
+
+    const generateEvents = (suggestedDates: SuggestionDate[]) => {
+        const newEvents: GeneratedEvent[] = [];
+        suggestedDates.forEach((d, index) => {
+            if (d.selected) {
+                newEvents.push({
+                    id: -1,
+                    key: `${suggestionParam.id}-${index}`,
+                    country: countryData.country,
+                    name: countryData.eventName,
+                    dateTimeCet: d.dateTimeCet,
+                    endDateTimeCet: d.dateTimeCet.replace('T00', 'T02'),
+                    stage: '',
+                    watchLinks: [...countryData.watchLinks]
+                });
+            }
+        });
+        newEvents.sort((e1, e2) => e1.dateTimeCet.localeCompare(e2.dateTimeCet));
+        // regenerate stages
+        setStages(newEvents);
+        setEvents(newEvents);
+    }
 
     useEffect(() => {
         generateEvents(suggestionParam.dateTimesCet);
@@ -103,44 +141,6 @@ export default function SuggestionDetails({suggestionParam, countryData, onSubmi
             }
             events.forEach((event, index) => event['stage'] = stages[index]);
         }
-    }
-
-    const generateEvent = (suggestedDate: SuggestionDate, key: string) => {
-        const newEvents: GeneratedEvent[] = [...events, {
-            id: -1,
-            key: key,
-            country: countryData.country,
-            name: countryData.eventName,
-            dateTimeCet: suggestedDate.dateTimeCet,
-            endDateTimeCet: suggestedDate.dateTimeCet.replace('T00', 'T02'),
-            stage: '',
-            watchLinks: [...countryData.watchLinks]
-        }].sort((e1, e2) => e1.dateTimeCet.localeCompare(e2.dateTimeCet));
-        // regenerate stages
-        setStages(newEvents);
-        setEvents(newEvents);
-    }
-
-    const generateEvents = (suggestedDates: SuggestionDate[]) => {
-        const newEvents: GeneratedEvent[] = [];
-        suggestedDates.forEach((d, index) => {
-            if (d.selected) {
-                newEvents.push({
-                    id: -1,
-                    key: `${suggestionParam.id}-${index}`,
-                    country: countryData.country,
-                    name: countryData.eventName,
-                    dateTimeCet: d.dateTimeCet,
-                    endDateTimeCet: d.dateTimeCet.replace('T00', 'T02'),
-                    stage: '',
-                    watchLinks: [...countryData.watchLinks]
-                });
-            }
-        });
-        newEvents.sort((e1, e2) => e1.dateTimeCet.localeCompare(e2.dateTimeCet));
-        // regenerate stages
-        setStages(newEvents);
-        setEvents(newEvents);
     }
 
     const removeEvent = (key: string) => {
@@ -397,7 +397,7 @@ function SuggestedDate({suggestedDate, dateKey, index, callback, forceUnfold, se
     index: number,
     callback: (d: SuggestionDate, key: string) => void,
     forceUnfold: boolean,
-    selected: boolean,
+    selected?: boolean,
     disabled: boolean
 }) {
     const [unfolded, unfold] = useState(forceUnfold);
@@ -420,7 +420,7 @@ function SuggestedDate({suggestedDate, dateKey, index, callback, forceUnfold, se
         </>
     );
 
-    const onChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const onChange = () => {
         callback(suggestedDate, dateKey);
     }
 
@@ -481,9 +481,9 @@ function SuggestedDate({suggestedDate, dateKey, index, callback, forceUnfold, se
                         'bg-black/10': disabled
                     }
                 )}
-                id="scheduleDeviceTime"
-                name="scheduleDeviceTime"
-                checked={selected}
+                id={dateKey}
+                name={dateKey}
+                checked={selected || false}
                 onChange={onChange}
                 disabled={disabled}
             />

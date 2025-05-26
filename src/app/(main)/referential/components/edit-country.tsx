@@ -16,7 +16,7 @@ export default function EditCountry({countryId}: { countryId: number }) {
             const countryData = countries.filter((c: Country) => c.id == countryId)[0];
             setCountryData(countryData);
         }
-    }, [countries]);
+    }, [countries, countryId]);
 
     const updateCache = async (countryData: Country) => {
         const newCountries = [...countries].filter((c: Country) => c.id != countryId);

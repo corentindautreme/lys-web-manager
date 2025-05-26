@@ -17,7 +17,7 @@ import {
     TrophyIcon,
     TvIcon
 } from '@heroicons/react/24/outline';
-import { createSwapy } from 'swapy';
+import { createSwapy, Swapy } from 'swapy';
 import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import { clsx } from 'clsx';
 import { Country } from '@/app/types/country';
@@ -48,7 +48,7 @@ export default function CountryDetails({countryDataParam, onSave, onDelete}: {
     onSave: (countryData: Country) => Promise<never>,
     onDelete?: ((countryData: Country) => Promise<never>)
 }) {
-    const swapy = useRef(null)
+    const swapy = useRef<Swapy>(null)
     const watchLinks = useRef(null)
     const [countryData, setCountryData] = useState(countryDataParam);
 
@@ -57,7 +57,9 @@ export default function CountryDetails({countryDataParam, onSave, onDelete}: {
     }
 
     const toggleDelete = async () => {
-        !!onDelete && await onDelete(countryData);
+        if (!!onDelete) {
+            await onDelete(countryData);
+        }
     }
 
     /**
@@ -68,7 +70,7 @@ export default function CountryDetails({countryDataParam, onSave, onDelete}: {
     const onCountryDataModified = (countryData: Country) => {
         countryData.modified = true;
         setCountryData(countryData);
-        swapy.current.update();
+        swapy.current?.update();
     }
 
     const createLink = addLink.bind(null, countryData, onCountryDataModified);
@@ -86,6 +88,7 @@ export default function CountryDetails({countryDataParam, onSave, onDelete}: {
         } else if (e.target.name == 'scheduleDeviceTime') {
             newCountryData.scheduleDeviceTime = e.target.checked ? 1 : 0;
         } else {
+            // @ts-ignore: TS2322
             newCountryData[e.target.name as CountryDataKey] = e.target.value;
         }
         onCountryDataModified(newCountryData);
@@ -120,9 +123,11 @@ export default function CountryDetails({countryDataParam, onSave, onDelete}: {
         const newCountryData: Country = {
             ...countryData,
         };
-        isLikelyDate(date)
-            ? newCountryData.likelyDates.splice(newCountryData.likelyDates.indexOf(date), 1)
-            : newCountryData.likelyDates.push(date);
+        if (isLikelyDate(date)) {
+            newCountryData.likelyDates.splice(newCountryData.likelyDates.indexOf(date), 1)
+        } else {
+            newCountryData.likelyDates.push(date);
+        }
         onCountryDataModified(newCountryData);
     }
 
@@ -143,7 +148,7 @@ export default function CountryDetails({countryDataParam, onSave, onDelete}: {
             // Destroy the swapy instance on component destroy
             swapy.current?.destroy()
         }
-    }, []);
+    }, [countryData.deleted, onWatchLinksReordered]);
 
     return (
         <div className="bg-background px-1 py-3 md:p-3 rounded-xl dark:bg-neutral-900">
@@ -292,9 +297,10 @@ export default function CountryDetails({countryDataParam, onSave, onDelete}: {
                                     {month: 'March', monthShort: 'Mar', id: '03'}
                                 ]
                             ].map(
-                                (monthList) => {
+                                (monthList, index) => {
                                     return (
                                         <div
+                                            key={`months-${index}`}
                                             className="grid grid-flow-col grid-cols-4 grid-rows-[30px_minmax(0,_1fr)_minmax(0,_1fr)] gap-2 md:gap-x-3 md:gap-y-2">
                                             {monthList.map(({month, monthShort, id}) => (
                                                 <>
@@ -416,6 +422,7 @@ export default function CountryDetails({countryDataParam, onSave, onDelete}: {
                         <div ref={watchLinks} id="watch-links" className="space-y-3">
                             {countryData.watchLinks.map((watchLink: WatchLink, index: number) => (
                                 <WatchLinkCard
+                                    key={`link-${index}`}
                                     id={index}
                                     watchLinkParam={watchLink}
                                     changeCallback={onWatchLinkChanged}
@@ -466,13 +473,15 @@ function CountryTextInput({name, value, placeholder, disabled, callback}: {
     );
 }
 
-function CountryCalendarWindow({selected, onToggle, disabled}: {
+function CountryCalendarWindow({id, selected, onToggle, disabled}: {
+    id: string,
     selected: boolean,
     onToggle: () => void,
     disabled: boolean
 }) {
     return (
         <button
+            id={id}
             disabled={disabled}
             onClick={onToggle}
             className={clsx('rounded-lg h-12',

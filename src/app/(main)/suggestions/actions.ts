@@ -14,6 +14,7 @@ export async function submitSuggestions(suggestions: Suggestion[]): Promise<Data
             .map(s => s.events || [])
             .flat()
             .map((e: GeneratedEvent): Event => {
+                // eslint-disable-next-line @typescript-eslint/no-unused-vars
                 const {key: _, ...event} = e;
                 return event;
             });

@@ -10,7 +10,7 @@ import SuggestionDetails from '@/app/(main)/suggestions/components/suggestion-de
 
 export default function ProcessSuggestion({suggestionId}: { suggestionId: number }) {
     const {suggestions, mutate, isLoading: isLoadingSuggestions} = useSuggestions();
-    const {countryData, isLoading: isLoadingCountryData, error: countryDataError} = useCountries();
+    const {countryData, isLoading: isLoadingCountryData} = useCountries();
     const [suggestion, setSuggestion] = useState<Suggestion>();
     const [currentCountryData, setCurrentCountryData] = useState<Country>();
 
@@ -25,7 +25,7 @@ export default function ProcessSuggestion({suggestionId}: { suggestionId: number
             }
             setSuggestion(suggestion);
         }
-    }, [suggestions, countryData]);
+    }, [suggestions, countryData, suggestionId]);
 
     const updateCache = async (suggestion: Suggestion) => {
         const newSuggestions = [...suggestions].filter((s: Suggestion) => s.id != suggestionId);
@@ -35,6 +35,7 @@ export default function ProcessSuggestion({suggestionId}: { suggestionId: number
     }
 
     const onSubmit = async (suggestion: Suggestion) => {
+        console.log(suggestion);
         await updateCache(suggestion);
         redirect('/suggestions');
     }

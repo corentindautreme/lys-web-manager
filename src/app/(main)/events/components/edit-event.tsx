@@ -16,7 +16,7 @@ export default function EditEvent({eventId}: { eventId: number }) {
             const event = events.filter((event: Event) => event.id == eventId)[0];
             setEvent(event);
         }
-    }, [events]);
+    }, [eventId, events]);
 
     const updateCache = async (event: Event) => {
         const newEvents = [...events].filter((event: Event) => event.id != eventId);

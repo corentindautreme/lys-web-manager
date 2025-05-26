@@ -5,7 +5,7 @@ import { marshall, unmarshall } from '@aws-sdk/util-dynamodb';
 import { LysBatchWriteItemOutput } from '@/app/types/aws/lys-batch-write-item-output';
 import { DYNAMODB_BATCH_SIZE } from '@/app/utils/aws-utils';
 
-function getEventPredicateFromFilterQuery(query: EventFilterQuery): (event: LysEvent) => boolean {
+export function getEventPredicateFromFilterQuery(query: EventFilterQuery): (event: LysEvent) => boolean {
     // get current datetime as yyyy-MM-ddTHH:mm:SS string
     const now = new Date().toISOString().slice(0, 19);
     return (event) => {
@@ -253,6 +253,7 @@ export async function fetchEvents(): Promise<Event[]> {
 }
 
 function toLysEvent(event: Event): LysEvent {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const {modified: _, created: __, rescheduled: ___, previousDateTimeCet: ____, ...lysEvent} = event;
     return lysEvent;
 }

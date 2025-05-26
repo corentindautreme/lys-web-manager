@@ -1,9 +1,9 @@
 'use client';
 
-import {ReadonlyURLSearchParams, useParams, usePathname, useSearchParams} from 'next/navigation';
-import {ClockIcon, GlobeEuropeAfricaIcon, TrophyIcon} from '@heroicons/react/24/outline';
-import {clsx} from 'clsx';
-import {EventFilterQuery} from '@/app/types/events/event-filter-query';
+import { ReadonlyURLSearchParams, useParams, usePathname, useSearchParams } from 'next/navigation';
+import { ClockIcon, TrophyIcon } from '@heroicons/react/24/outline';
+import { clsx } from 'clsx';
+import { EventFilterQuery } from '@/app/types/events/event-filter-query';
 import Link from 'next/link';
 
 export default function EventFilters() {
