@@ -168,7 +168,7 @@ export default function EventDetails({eventParam, onSave, onDelete}: {
     }, [event.watchLinks]);
 
     return (
-        <div className="bg-background px-1 py-3 md:p-3 rounded-xl dark:bg-neutral-900">
+        <div className="bg-background dark:bg-neutral-900 px-1 py-3 md:p-3 rounded-xl">
             <div className="flex px-1 flex-row justify-between space-x-2">
                 <Link
                     href={`/events${queryString}`}
