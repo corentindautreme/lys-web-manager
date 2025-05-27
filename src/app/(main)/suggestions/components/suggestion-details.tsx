@@ -114,8 +114,8 @@ export default function SuggestionDetails({suggestionParam, countryData, onSubmi
         } else if (!!countryData) {
             const repeatedStagesCount = countryData.stages.filter(s => s.endsWith('...')).length;
             const referentialStages = (countryData.stages.length < events.length && !countryData.stages.some(s => s.endsWith('...'))) || repeatedStagesCount > 1
-                ? countryData.stages
-                : ['Night...', 'Final'];
+                ? ['Night...', 'Final']
+                : countryData.stages;
 
             const nonRepeatingStages = countryData.stages.filter(s => !s.endsWith('...'));
 
