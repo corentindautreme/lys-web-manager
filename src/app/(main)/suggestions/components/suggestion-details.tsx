@@ -332,7 +332,7 @@ export default function SuggestionDetails({suggestionParam, countryData, onSubmi
 
             </div>
 
-            <div className="md:hidden h-14"></div>
+            <div className="md:hidden h-12"></div>
         </>
     );
 }

@@ -143,8 +143,6 @@ export default function EventList({currentEventId}: { currentEventId?: number | 
                                     <div className="shrink-0 px-2 text-foreground/50">That&apos;s it!</div>
                                     <div className="w-full border-t-1 border-foreground/50"></div>
                                 </div>
-
-                                <div className="md:hidden h-18"></div>
                             </div>
                         </div>
                     </>
