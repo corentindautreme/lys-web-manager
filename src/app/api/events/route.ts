@@ -2,7 +2,7 @@ import { fetchEvents } from '@/app/services/events-service';
 import { NextResponse } from 'next/server';
 import { DynamoDBServiceException } from '@aws-sdk/client-dynamodb';
 
-export async function GET(req: Request) {
+export async function GET() {
     try {
         return NextResponse.json(await fetchEvents());
     } catch (error) {

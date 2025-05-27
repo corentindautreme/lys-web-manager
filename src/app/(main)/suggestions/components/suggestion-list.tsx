@@ -34,7 +34,7 @@ async function submitProcessedSuggestions(
         await onSuccess(suggestions);
         redirect('/suggestions');
     } else {
-        onError(response.error, response.message);
+        onError(response.error || '', response.message || '');
     }
 }
 

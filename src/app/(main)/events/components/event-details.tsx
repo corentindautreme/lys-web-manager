@@ -22,7 +22,7 @@ import {
 import { useSearchParams } from 'next/navigation';
 import { getQueryParamString } from '@/app/utils/event-utils';
 import WatchLinkCard from '@/app/components/watch-link-card';
-import { createSwapy } from 'swapy';
+import { createSwapy, Swapy } from 'swapy';
 import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import { clsx } from 'clsx';
 import { useCountries } from '@/app/(main)/referential/utils';
@@ -55,7 +55,7 @@ export default function EventDetails({eventParam, onSave, onDelete}: {
 }) {
     const isNewEvent = !onDelete && !eventParam.name;
     const [templateSelected, setTemplateSelected] = useState(false);
-    const swapy = useRef(null);
+    const swapy = useRef<Swapy>(null);
     const watchLinks = useRef(null);
     const searchParams = useSearchParams();
     const queryString = getQueryParamString(searchParams);
@@ -68,14 +68,16 @@ export default function EventDetails({eventParam, onSave, onDelete}: {
         if (!!eventParam.country) {
             setCurrentCountryData(countryData.filter(c => c.country == eventParam.country)[0]);
         }
-    }, [countryData]);
+    }, [countryData, eventParam.country]);
 
     const saveEvent = async () => {
         await onSave(event);
     }
 
     const toggleDelete = async () => {
-        !!onDelete && await onDelete(event);
+        if (!!onDelete) {
+            await onDelete(event);
+        }
     }
 
     /**
@@ -86,7 +88,7 @@ export default function EventDetails({eventParam, onSave, onDelete}: {
     const onEventModified = (event: Event) => {
         event.modified = true;
         setEvent(event);
-        swapy.current.update();
+        swapy.current?.update();
     }
 
     const createLink = addLink.bind(null, event, onEventModified);
@@ -108,11 +110,11 @@ export default function EventDetails({eventParam, onSave, onDelete}: {
         onEventModified(newEvent);
     }
 
-    const onWatchLinkChanged = (index: number, watchLink: WatchLink) => {
+    const onWatchLinkChanged = (index: number, watchLink: WatchLink, deleted?: boolean) => {
         const newEvent = {
             ...event,
         };
-        if (watchLink === null) {
+        if (!!deleted) {
             newEvent.watchLinks.splice(index, 1);
         } else {
             newEvent.watchLinks[index] = watchLink;
@@ -165,7 +167,7 @@ export default function EventDetails({eventParam, onSave, onDelete}: {
             // Destroy the swapy instance on component destroy
             swapy.current?.destroy()
         }
-    }, [event.watchLinks]);
+    }, [event.deleted, event.watchLinks]);
 
     return (
         <div className="bg-background dark:bg-neutral-900 px-1 py-3 md:p-3 rounded-xl">
@@ -279,7 +281,7 @@ export default function EventDetails({eventParam, onSave, onDelete}: {
                                             >
                                                 <option value="" disabled selected>...</option>
                                                 {
-                                                    countryData.map((c: Country) => (<option>{c.countryCode}</option>))
+                                                    countryData.map((c: Country) => (<option key={c.countryCode}>{c.countryCode}</option>))
                                                 }
                                             </select>
                                         </>
@@ -394,6 +396,7 @@ export default function EventDetails({eventParam, onSave, onDelete}: {
                         <div ref={watchLinks} id="watch-links" className="space-y-3">
                             {event.watchLinks.map((watchLink, index) => (
                                 <WatchLinkCard
+                                    key={`link-${index}`}
                                     id={index}
                                     watchLinkParam={watchLink}
                                     changeCallback={onWatchLinkChanged}

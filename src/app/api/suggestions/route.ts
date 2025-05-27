@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { DynamoDBServiceException } from '@aws-sdk/client-dynamodb';
 import { fetchSuggestions } from '@/app/services/suggestions-service';
 
-export async function GET(req: Request) {
+export async function GET() {
     try {
         return NextResponse.json(await fetchSuggestions());
     } catch (error) {

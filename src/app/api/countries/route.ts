@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { fetchCountries } from '@/app/services/countries-service';
 import { DynamoDBServiceException } from '@aws-sdk/client-dynamodb';
 
-export async function GET(req: Request) {
+export async function GET() {
     try {
         return NextResponse.json(await fetchCountries());
     } catch (error) {

@@ -8,7 +8,7 @@ export default async function Page(props:
                                    }
 ) {
     const params = await props.params;
-    const searchParams = await props.searchParams;
+    // const searchParams = await props.searchParams;
     const id = params.id;
 
     return (

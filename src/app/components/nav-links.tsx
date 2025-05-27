@@ -7,29 +7,32 @@ import {clsx} from 'clsx';
 import { useEvents } from '@/app/(main)/events/utils';
 import { useCountries } from '@/app/(main)/referential/utils';
 import { useSuggestions } from '@/app/(main)/suggestions/utils';
+import { JSX } from 'react';
+
+type LinkName = 'Home' | 'Suggestions' | 'Events' | 'Referential';
 
 // Map of links to display in the side navigation.
 // Depending on the size of the application, this would be stored in a database.
-const links = [
+const links: {name: LinkName, href: string, icon: JSX.Element}[] = [
     {
         name: 'Home',
         href: '/',
-        icon: HomeIcon
+        icon: <HomeIcon className="w-6"/>
     },
     {
         name: 'Suggestions',
         href: '/suggestions',
-        icon: SparklesIcon,
+        icon: <SparklesIcon className="w-6"/>,
     },
     {
         name: 'Events',
         href: '/events',
-        icon: CalendarDaysIcon,
+        icon: <CalendarDaysIcon className="w-6"/>,
     },
     {
         name: 'Referential',
         href: '/referential',
-        icon: GlobeEuropeAfricaIcon
+        icon: <GlobeEuropeAfricaIcon className="w-6"/>
     }
 ];
 
@@ -57,7 +60,6 @@ export default function NavLinks() {
     return (
         <>
             {links.map((link) => {
-                const LinkIcon = link.icon;
                 return (
                     <Link
                         key={link.name}
@@ -70,7 +72,7 @@ export default function NavLinks() {
                             }
                         )}
                     >
-                        <LinkIcon className="w-6"/>
+                        {link.icon}
                         {hasBadge[link.name] && <IconBadge/>}
                     </Link>
                 );

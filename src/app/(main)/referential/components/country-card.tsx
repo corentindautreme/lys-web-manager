@@ -1,5 +1,4 @@
 import { clsx } from 'clsx';
-import { ReactElement } from 'react';
 import { BackwardIcon, LinkIcon } from '@heroicons/react/24/outline';
 import { Country } from '@/app/types/country';
 
@@ -36,9 +35,9 @@ export default function CountryCard({countryData, active}: { countryData: Countr
                     <div className={clsx('text-base/4', {'text-foreground/70': !active, 'text-white': !!active})}>{countryData.eventName}</div>
                     {countryData.watchLinks && (
                         <div className="mt-2 flex">
-                            <Label icon={LinkIcon} style={liveLinkCount == 0 ? 'error' : 'normal'} active={!!active}
+                            <Label icon='link' style={liveLinkCount == 0 ? 'error' : 'normal'} active={!!active}
                                    content={`${liveLinkCount} link(s)`}/>
-                            <Label icon={BackwardIcon} style={replayableLinkCount == 0 ? 'error' : 'normal'}
+                            <Label icon='vod' style={replayableLinkCount == 0 ? 'error' : 'normal'}
                                    active={!!active}
                                    content={`${replayableLinkCount} VOD link(s)`}/>
                         </div>
@@ -47,7 +46,12 @@ export default function CountryCard({countryData, active}: { countryData: Countr
                 <div className="grow"></div>
                 {countryData.modified && !countryData.deleted && (
                     <div className="flex items-center">
-                        <div className="rounded-xl w-2.5 h-2.5 bg-sky-500"></div>
+                        <div className={clsx('rounded-xl w-2.5 h-2.5',
+                            {
+                                'bg-sky-500': !active,
+                                'bg-white': active
+                            }
+                        )}></div>
                     </div>
                 )}
             </div>
@@ -56,22 +60,21 @@ export default function CountryCard({countryData, active}: { countryData: Countr
 }
 
 function Label({icon, content, style, active}: {
-    icon: ReactElement,
+    icon: 'link' | 'vod',
     content: string,
     style: 'normal' | 'error',
     active: boolean
 }) {
-    const Icon = icon;
     return (
         <div className={clsx(
             'flex items-center w-fit me-1 px-1.5 py-0.5 rounded-xs text-xs',
             {
-                'bg-red-300 dark:bg-red-800': style === 'error' && !active,
+                'bg-red-300 dark:bg-red-900': style === 'error' && !active,
                 'bg-gray-400/30 dark:bg-gray-700/50': style === 'normal' && !active,
                 'border-1 border-white': active
             }
         )}>
-            <Icon className="w-3.5 me-1"/> {content}
+            { icon == 'link' ? <LinkIcon className="w-3.5 me-1"/> : <BackwardIcon className="w-3.5 me-1"/> } {content}
         </div>
     );
 }

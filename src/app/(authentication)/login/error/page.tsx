@@ -5,7 +5,7 @@ import { Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 
 function Error() {
-    let search = useSearchParams();
+    const search = useSearchParams();
     const error = search.get('error')
     return (
         <>

@@ -1,15 +1,19 @@
 import {
     ArrowTopRightOnSquareIcon,
     BackwardIcon,
-    ChatBubbleBottomCenterIcon, ChevronDownIcon, ChevronUpIcon,
+    ChatBubbleBottomCenterIcon,
+    ChevronDownIcon,
+    ChevronUpIcon,
     NoSymbolIcon,
     RssIcon,
-    SignalIcon, StarIcon, TrashIcon,
+    SignalIcon,
+    StarIcon,
+    TrashIcon,
     TvIcon,
     UserCircleIcon
 } from '@heroicons/react/24/outline';
 import { clsx } from 'clsx';
-import { ChangeEvent, ForwardRefExoticComponent, RefAttributes, SVGProps, useState } from 'react';
+import { ChangeEvent, JSX, useState } from 'react';
 import { WatchLink } from '@/app/types/watch-link';
 
 type FeatureKey = ('live' | 'replayable' | 'castable' | 'geoblocked' | 'accountRequired');
@@ -35,7 +39,7 @@ function toggleFeature(watchLink: WatchLink, featureKey: FeatureKey, callback: (
 export default function WatchLinkCard({id, watchLinkParam, changeCallback, editable}: {
     id: number,
     watchLinkParam: WatchLink,
-    changeCallback: (index: number, watchLink: WatchLink | null) => void,
+    changeCallback: (index: number, watchLink: WatchLink, deleted?: boolean) => void,
     editable: boolean
 }) {
     const [unfolded, unfold] = useState(watchLinkParam.link == '');
@@ -61,7 +65,7 @@ export default function WatchLinkCard({id, watchLinkParam, changeCallback, edita
         onWatchLinkSet();
     }
 
-    const deleteWatchLink = changeCallback.bind(null, id, null);
+    const deleteWatchLink = changeCallback.bind(null, id, watchLink, true);
 
     return (
         <div data-swapy-slot={id}>
@@ -185,41 +189,36 @@ export default function WatchLinkCard({id, watchLinkParam, changeCallback, edita
                         <div className="w-5 me-3"></div>
                         <div className="flex flex-wrap gap-2">
                             <WatchLinkFeature
-                                name={'live'}
                                 displayName={'Live'}
-                                icon={SignalIcon}
+                                icon={<SignalIcon className="w-5 md:me-1"/>}
                                 value={watchLink.live}
                                 disabled={!editable}
                                 callback={onFeatureToggle.bind(null, 'live')}
                             />
                             <WatchLinkFeature
-                                name={'replayable'}
                                 displayName={'Replay'}
-                                icon={BackwardIcon}
+                                icon={<BackwardIcon className="w-5 md:me-1"/>}
                                 value={watchLink.replayable}
                                 disabled={!editable}
                                 callback={onFeatureToggle.bind(null, 'replayable')}
                             />
                             <WatchLinkFeature
-                                name={'geoblocked'}
                                 displayName={'Geoblocked'}
-                                icon={NoSymbolIcon}
+                                icon={<NoSymbolIcon className="w-5 md:me-1"/>}
                                 value={watchLink.geoblocked}
                                 disabled={!editable}
                                 callback={onFeatureToggle.bind(null, 'geoblocked')}
                             />
                             <WatchLinkFeature
-                                name={'castable'}
                                 displayName={'Castable'}
-                                icon={RssIcon}
+                                icon={<RssIcon className="w-5 md:me-1"/>}
                                 value={watchLink.castable}
                                 disabled={!editable}
                                 callback={onFeatureToggle.bind(null, 'castable')}
                             />
                             <WatchLinkFeature
-                                name={'accountRequired'}
                                 displayName={'Account required'}
-                                icon={UserCircleIcon}
+                                icon={<UserCircleIcon className="w-5 md:me-1"/>}
                                 value={watchLink.accountRequired}
                                 disabled={!editable}
                                 callback={onFeatureToggle.bind(null, 'accountRequired')}
@@ -257,18 +256,13 @@ function WatchLinkCardInput({type, name, value, disabled, callback}: {
     )
 }
 
-function WatchLinkFeature({name, displayName, icon, value, disabled, callback}: {
-    name: string,
+function WatchLinkFeature({displayName, icon, value, disabled, callback}: {
     displayName: string,
-    icon: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, 'ref'> & {
-        title?: string
-        titleId?: string
-    } & RefAttributes<SVGSVGElement>>
+    icon: JSX.Element,
     value: 0 | 1,
     disabled: boolean,
     callback: () => void
 }) {
-    const Icon = icon;
     return (
         <button
             onClick={callback}
@@ -283,7 +277,7 @@ function WatchLinkFeature({name, displayName, icon, value, disabled, callback}: 
                     'cursor-pointer': !disabled
                 }
             )}>
-            <Icon className="w-5 md:me-1"/>
+            {icon}
             <span className="hidden md:block">{displayName}</span>
         </button>
     )

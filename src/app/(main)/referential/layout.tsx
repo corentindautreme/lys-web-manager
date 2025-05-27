@@ -4,6 +4,7 @@ import { useSelectedLayoutSegment } from 'next/navigation';
 import { clsx } from 'clsx';
 import Breadcrumbs from '@/app/components/breadcrumbs';
 import NewCountryButton from '@/app/(main)/referential/components/new-country-button';
+import { Suspense } from 'react';
 
 export default function Layout({children, countries}: { children: React.ReactNode, countries: React.ReactNode }) {
     const layoutSegment = useSelectedLayoutSegment();
@@ -39,12 +40,14 @@ export default function Layout({children, countries}: { children: React.ReactNod
                         'hidden': layoutSegment == null
                     }
                 )}>
-                    {children}
+                    <Suspense>
+                        {children}
+                    </Suspense>
                 </div>
             </div>
 
             {/* Hide the "New" button on mobile on the edit and new screen, but always display it on desktop */}
-            {layoutSegment === "(empty)" && <div className="md:hidden"><NewCountryButton/></div>}
+            {layoutSegment === '(empty)' && <div className="md:hidden"><NewCountryButton/></div>}
             <div className="hidden md:block"><NewCountryButton/></div>
         </main>
     );

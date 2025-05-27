@@ -41,15 +41,16 @@ export default function SuggestionCard({suggestion, active}: { suggestion: Sugge
 
                     <div className="mt-2 flex flex-wrap">
                         {
-                            displayedDates.slice(0, 4).map((suggestedDate) => {
+                            displayedDates.slice(0, 4).map((suggestedDate, index) => {
                                 const date = new Date(suggestedDate.dateTimeCet);
                                 const formattedDate = date.toLocaleString('en-US', {month: 'short', day: 'numeric'});
                                 return (
                                     <Label
+                                        key={`date-${suggestion.id}-${index}`}
                                         style="normal"
                                         active={!!active}
-                                        selected={suggestedDate.selected}
                                         content={formattedDate}
+                                        discarded={suggestion.processed && !suggestion.accepted}
                                     />
                                 );
                             })
@@ -82,12 +83,11 @@ export default function SuggestionCard({suggestion, active}: { suggestion: Sugge
     );
 }
 
-function Label({content, style, active, discarded, selected}: {
+function Label({content, style, active, discarded}: {
     content: string,
     style: string,
     active: boolean,
-    discarded: boolean,
-    selected?: boolean
+    discarded: boolean
 }) {
     return (
         <div className={clsx(
