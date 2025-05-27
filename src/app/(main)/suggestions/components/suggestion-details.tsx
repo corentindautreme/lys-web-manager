@@ -413,7 +413,8 @@ function SuggestedDate({suggestedDate, dateKey, index, callback, forceUnfold, se
             <span className={clsx(
                 {
                     'bg-white text-black': suggestedDate.selected,
-                    'bg-sky-500 text-background': !suggestedDate.selected,
+                    'bg-sky-500 text-background': !suggestedDate.selected && !disabled,
+                    'bg-foreground/30 text-background': !suggestedDate.selected && disabled,
                 }
             )}>{suggestedDate.context}</span>
             {surroundingSentence[1]}
@@ -456,7 +457,8 @@ function SuggestedDate({suggestedDate, dateKey, index, callback, forceUnfold, se
                 {unfolded && (
                     <div className="p-3">
                         <div className={clsx('border-l-4 p-1 ps-3', {
-                            'border-sky-500': !suggestedDate.selected,
+                            'border-sky-500': !suggestedDate.selected && !disabled,
+                            'border-foreground/30': !suggestedDate.selected && disabled,
                             'border-white': !!suggestedDate.selected
                         })}>
                             <span>{contextualizedSentence}</span>

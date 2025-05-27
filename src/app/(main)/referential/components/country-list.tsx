@@ -110,6 +110,8 @@ export default function CountryList({currentCountryId}: { currentCountryId?: num
                                     )
                                 }
                             )}
+
+                            <div className="md:hidden h-18"></div>
                         </div>
                     </div>
                 </>

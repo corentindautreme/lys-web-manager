@@ -137,6 +137,8 @@ export default function SuggestionList({currentSuggestionId}: { currentSuggestio
                                         )
                                     }
                                 )}
+
+                                <div className="md:hidden h-18"></div>
                             </div>
                         </div>
                     </>
