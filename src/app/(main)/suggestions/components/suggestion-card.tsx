@@ -71,10 +71,14 @@ export default function SuggestionCard({suggestion, active}: { suggestion: Sugge
                         {suggestion.accepted
                             ? <CheckCircleIcon className={clsx('w-5',
                                 {
-                                    'text-green-400 dark:text-green-700': !active
+                                    'text-green-400 dark:text-green-700': !active,
+                                    'text-white': active
                                 }
                             )}/>
-                            : <XCircleIcon className={clsx('w-5 text-red-400 dark:text-red-700')}/>
+                            : <XCircleIcon className={clsx('w-5', {
+                                'text-red-400 dark:text-red-700': !active,
+                                'text-white': active
+                            })}/>
                         }
                     </div>
                 )}
