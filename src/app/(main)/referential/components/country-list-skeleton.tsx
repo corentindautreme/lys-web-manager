@@ -1,4 +1,4 @@
-import { CountryCardSkeleton } from '@/app/(main)/referential/components/country-card-skeletons';
+import { CountryCardSkeleton } from '@/app/(main)/referential/components/country-card-skeleton';
 
 export default function CountryListSkeleton() {
     return (
