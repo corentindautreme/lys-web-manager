@@ -65,7 +65,7 @@ export default function NavLinks() {
                         key={link.name}
                         href={link.href}
                         className={clsx(
-                            'relative flex h-[36px] grow items-center justify-center gap-2 text-sm font-medium md:flex-none hover:text-foreground hover:bg-gray-100 dark:hover:bg-gray-900/50',
+                            'relative flex h-[36px] grow items-center justify-center gap-2 text-sm font-medium md:flex-none hover:text-foreground',
                             {
                                 'text-foreground': pathName == link.href || significantPath == link.href,
                                 'text-gray-400 dark:text-gray-500': pathName != link.href && significantPath != link.href
