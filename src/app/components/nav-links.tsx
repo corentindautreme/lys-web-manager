@@ -9,7 +9,7 @@ import { useCountries } from '@/app/(main)/referential/utils';
 import { useSuggestions } from '@/app/(main)/suggestions/utils';
 import { JSX } from 'react';
 
-type LinkName = 'Home' | 'Suggestions' | 'Events' | 'Referential';
+type LinkName = 'Home' | 'Suggestions' | 'Events' | 'Referential' | 'Status';
 
 // Map of links to display in the side navigation.
 // Depending on the size of the application, this would be stored in a database.
@@ -60,7 +60,8 @@ export default function NavLinks() {
         'Home': false,
         'Suggestions': !suggestionsError && suggestions?.length > 0,
         'Events': !eventsError && events?.some(e => e.modified || e.deleted),
-        'Referential': !countryDataError && countryData?.some(e => e.modified || e.deleted)
+        'Referential': !countryDataError && countryData?.some(e => e.modified || e.deleted),
+        'Status': false
     }
     return (
         <>
