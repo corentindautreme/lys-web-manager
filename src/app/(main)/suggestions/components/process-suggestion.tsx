@@ -35,7 +35,6 @@ export default function ProcessSuggestion({suggestionId}: { suggestionId: number
     }
 
     const onSubmit = async (suggestion: Suggestion) => {
-        console.log(suggestion);
         await updateCache(suggestion);
         redirect('/suggestions');
     }

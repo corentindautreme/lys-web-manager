@@ -4,10 +4,13 @@ import { Event } from '@/app/types/events/event'
 import Link from 'next/link';
 import {
     ArrowLeftIcon,
-    ArrowRightIcon, ArrowTopRightOnSquareIcon, ArrowUpOnSquareIcon,
+    ArrowRightIcon,
+    ArrowTopRightOnSquareIcon,
+    ArrowUpOnSquareIcon,
     ArrowUturnLeftIcon,
     ClockIcon,
-    DocumentDuplicateIcon, ExclamationTriangleIcon,
+    DocumentDuplicateIcon,
+    ExclamationTriangleIcon,
     EyeIcon,
     GlobeEuropeAfricaIcon,
     ListBulletIcon,
@@ -21,32 +24,15 @@ import {
 } from '@heroicons/react/24/outline';
 import { useSearchParams } from 'next/navigation';
 import { getQueryParamString } from '@/app/utils/event-utils';
-import WatchLinkCard from '@/app/components/watch-link-card';
-import { createSwapy, Swapy } from 'swapy';
-import { ChangeEvent, useEffect, useRef, useState } from 'react';
+import { ChangeEvent, useEffect, useState } from 'react';
 import { clsx } from 'clsx';
 import { useCountries } from '@/app/(main)/referential/utils';
 import { Country } from '@/app/types/country';
 import { WatchLink } from '@/app/types/watch-link';
+import WatchLinkList, { SwappedHistory } from '@/app/components/watch-links/watch-link-list';
+import WatchLinkCard from '@/app/components/watch-links/watch-link-card';
 
 type EventKey = ('country' | 'name' | 'stage' | 'dateTimeCet' | 'endDateTimeCet');
-
-function addLink(event: Event, callback: (e: Event) => void) {
-    const newEvent = {
-        ...event,
-    };
-    newEvent.watchLinks.push({
-        link: '',
-        comment: '',
-        channel: '',
-        live: 0,
-        replayable: 0,
-        castable: 0,
-        geoblocked: 0,
-        accountRequired: 0
-    });
-    callback(newEvent);
-}
 
 export default function EventDetails({eventParam, onSave, onDelete}: {
     eventParam: Event,
@@ -55,8 +41,6 @@ export default function EventDetails({eventParam, onSave, onDelete}: {
 }) {
     const isNewEvent = !onDelete && !eventParam.name;
     const [templateSelected, setTemplateSelected] = useState(false);
-    const swapy = useRef<Swapy>(null);
-    const watchLinks = useRef(null);
     const searchParams = useSearchParams();
     const queryString = getQueryParamString(searchParams);
     const initialDateTime = eventParam.dateTimeCet;
@@ -64,9 +48,33 @@ export default function EventDetails({eventParam, onSave, onDelete}: {
     const {countryData, isLoading: countryDataLoading, error: countryDataError} = useCountries();
     const [currentCountryData, setCurrentCountryData] = useState<Country | null>(null);
 
+    const [displayNewLinkForm, setDisplayNewLinkForm] = useState(false);
+    const [newWatchLink, setNewWatchLink] = useState({
+        link: '',
+        comment: '',
+        channel: '',
+        live: 0,
+        replayable: 0,
+        castable: 0,
+        geoblocked: 0,
+        accountRequired: 0
+    } as WatchLink);
+
     useEffect(() => {
         if (!!eventParam.country) {
-            setCurrentCountryData(countryData.filter(c => c.country == eventParam.country)[0]);
+            const currentCountryData = countryData.filter(c => c.country == eventParam.country)[0];
+            setCurrentCountryData(currentCountryData);
+            console.log(currentCountryData);
+            setNewWatchLink({
+                link: '',
+                comment: '',
+                channel: currentCountryData.defaultChannel || '',
+                live: 0,
+                replayable: 0,
+                castable: 0,
+                geoblocked: 0,
+                accountRequired: 0
+            });
         }
     }, [countryData, eventParam.country]);
 
@@ -88,10 +96,7 @@ export default function EventDetails({eventParam, onSave, onDelete}: {
     const onEventModified = (event: Event) => {
         event.modified = true;
         setEvent(event);
-        swapy.current?.update();
     }
-
-    const createLink = addLink.bind(null, event, onEventModified);
 
     /**
      * To be triggered upon modification of an input field of the event (name, stage, start time, etc.)
@@ -122,14 +127,56 @@ export default function EventDetails({eventParam, onSave, onDelete}: {
         onEventModified(newEvent);
     };
 
-    const onWatchLinksReordered = (from: number, to: number) => {
+    const onWatchLinksReordered = (swappedHistory: SwappedHistory) => {
         const newEvent = {
             ...event,
         };
-        [newEvent.watchLinks[from], newEvent.watchLinks[to]] = [newEvent.watchLinks[to], newEvent.watchLinks[from]];
-        newEvent.modified = true;
-        setEvent(newEvent);
+        swappedHistory.forEach(({from, to}: { from: number, to: number }) => {
+            [newEvent.watchLinks[from], newEvent.watchLinks[to]] = [newEvent.watchLinks[to], newEvent.watchLinks[from]];
+        });
+        onEventModified(newEvent);
     };
+
+    const createLink = () => {
+        setDisplayNewLinkForm(true);
+    };
+
+    const onUpdateNewWatchLink = (index: number, watchLink: WatchLink) => {
+        setNewWatchLink({...watchLink});
+    };
+
+    const onSaveNewWatchLink = () => {
+        const newEvent = {
+            ...event,
+            watchLinks: [...event.watchLinks, {...newWatchLink}]
+        };
+        onEventModified(newEvent);
+        setNewWatchLink({
+            link: '',
+            comment: '',
+            channel: currentCountryData?.defaultChannel || '',
+            live: 0,
+            replayable: 0,
+            castable: 0,
+            geoblocked: 0,
+            accountRequired: 0
+        });
+        setDisplayNewLinkForm(false);
+    }
+
+    const onDiscardNewWatchLink = () => {
+        setNewWatchLink({
+            link: '',
+            comment: '',
+            channel: currentCountryData?.defaultChannel || '',
+            live: 0,
+            replayable: 0,
+            castable: 0,
+            geoblocked: 0,
+            accountRequired: 0
+        });
+        setDisplayNewLinkForm(false);
+    }
 
     const onSelectTemplate = (e: React.ChangeEvent<HTMLSelectElement>) => {
         setTemplateSelected(true);
@@ -149,25 +196,6 @@ export default function EventDetails({eventParam, onSave, onDelete}: {
         setTemplateSelected(false);
         setCurrentCountryData(null);
     }
-
-    useEffect(() => {
-        if (watchLinks.current) {
-            swapy.current = createSwapy(watchLinks.current, {
-                dragAxis: 'y',
-                enabled: !event.deleted
-            });
-
-            // Your event listeners
-            swapy.current.onSwap((event: { fromSlot: string, toSlot: string }) => {
-                onWatchLinksReordered(Number(event.fromSlot), Number(event.toSlot));
-            });
-        }
-
-        return () => {
-            // Destroy the swapy instance on component destroy
-            swapy.current?.destroy()
-        }
-    }, [event.deleted, event.watchLinks]);
 
     return (
         <div className="bg-background dark:bg-neutral-900 px-1 py-3 md:p-3 rounded-xl">
@@ -281,7 +309,8 @@ export default function EventDetails({eventParam, onSave, onDelete}: {
                                             >
                                                 <option value="" disabled selected>...</option>
                                                 {
-                                                    countryData.map((c: Country) => (<option key={c.countryCode}>{c.countryCode}</option>))
+                                                    countryData.map((c: Country) => (
+                                                        <option key={c.countryCode}>{c.countryCode}</option>))
                                                 }
                                             </select>
                                         </>
@@ -393,18 +422,14 @@ export default function EventDetails({eventParam, onSave, onDelete}: {
                     </h2>
 
                     <div className="pt-3 md:px-3 flex flex-col space-y-3">
-                        <div ref={watchLinks} id="watch-links" className="space-y-3">
-                            {event.watchLinks.map((watchLink, index) => (
-                                <WatchLinkCard
-                                    key={`link-${index}`}
-                                    id={index}
-                                    watchLinkParam={watchLink}
-                                    changeCallback={onWatchLinkChanged}
-                                    editable={!event.deleted}
-                                />
-                            ))}
-                        </div>
-                        <button
+                        <WatchLinkList
+                            key={`${event.watchLinks.length}-${event.watchLinks.map(l => l.link.substring(l.link.length - 5)).join('-')}`}
+                            watchLinksParam={event.watchLinks}
+                            editable={!event.deleted}
+                            onWatchLinkChanged={onWatchLinkChanged}
+                            onWatchLinksReordered={onWatchLinksReordered}
+                        />
+                        {!displayNewLinkForm && <button
                             disabled={!!event.deleted}
                             onClick={() => {
                                 createLink();
@@ -419,7 +444,16 @@ export default function EventDetails({eventParam, onSave, onDelete}: {
                         >
                             <PlusCircleIcon className="w-8 me-2"/>
                             <p className="">Add link</p>
-                        </button>
+                        </button>}
+                        {displayNewLinkForm && <WatchLinkCard
+                            id={-1}
+                            watchLinkParam={newWatchLink}
+                            changeCallback={onUpdateNewWatchLink}
+                            editable={true}
+                            isNew={true}
+                            saveNew={onSaveNewWatchLink}
+                            discardNew={onDiscardNewWatchLink}
+                        />}
                     </div>
                 </div>
             </div>

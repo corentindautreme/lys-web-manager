@@ -4,7 +4,7 @@ import {
     ChatBubbleBottomCenterIcon,
     ChevronDownIcon,
     ChevronUpIcon,
-    NoSymbolIcon,
+    NoSymbolIcon, PlusCircleIcon,
     RssIcon,
     SignalIcon,
     StarIcon,
@@ -36,11 +36,14 @@ function toggleFeature(watchLink: WatchLink, featureKey: FeatureKey, callback: (
     return newWatchLink;
 }
 
-export default function WatchLinkCard({id, watchLinkParam, changeCallback, editable}: {
+export default function WatchLinkCard({id, watchLinkParam, changeCallback, editable, isNew, saveNew, discardNew}: {
     id: number,
     watchLinkParam: WatchLink,
     changeCallback: (index: number, watchLink: WatchLink, deleted?: boolean) => void,
-    editable: boolean
+    editable: boolean,
+    isNew?: boolean,
+    saveNew?: () => void,
+    discardNew?: () => void
 }) {
     const [unfolded, unfold] = useState(watchLinkParam.link == '');
     const [watchLink, setWatchLink] = useState(watchLinkParam);
@@ -70,7 +73,12 @@ export default function WatchLinkCard({id, watchLinkParam, changeCallback, edita
     return (
         <div data-swapy-slot={id}>
             <div
-                className={clsx('gap-2 p-3 rounded-lg bg-background dark:bg-neutral-900 border-1 border-foreground/20 data-swapy-highlighted:bg-foreground')}
+                className={clsx('gap-2 p-3 rounded-lg bg-background dark:bg-neutral-900',
+                    {
+                        'border-1 border-foreground/20': !isNew,
+                        'border-2 border-foreground/30 border-dashed': isNew
+                    }
+                )}
                 data-swapy-item={id}
             >
                 <div className={clsx('flex flex-row items-center',
@@ -78,23 +86,27 @@ export default function WatchLinkCard({id, watchLinkParam, changeCallback, edita
                         'text-foreground/50': !editable
                     }
                 )}>
-                    <div data-swapy-handle
+                    {!isNew && <div data-swapy-handle
                          className={clsx('shrink-0 min-w-[24px] h-[36px] bg-[radial-gradient(var(--color-neutral-600)_3px,transparent_1px)] [background-size:12px_12px]',
                              {
+                                 'hidden': id == -1,
                                  'cursor-not-allowed': !editable,
                                  'cursor-pointer': editable
                              }
                          )}
-                    ></div>
-                    <button className="flex flex-[50%] ml-2 overflow-hidden text-sm font-bold"
-                            onClick={() => unfold(!unfolded)}>
+                    ></div>}
+                    <button
+                        disabled={isNew}
+                        className="flex flex-[50%] ml-2 overflow-hidden text-sm font-bold"
+                        onClick={() => unfold(!unfolded)}
+                    >
                         <div className="text-nowrap overflow-hidden overflow-ellipsis">
                             {extractShortLink(watchLink.link)}
                         </div>
-                        {unfolded
+                        {isNew ? '' : (unfolded
                             ? (<ChevronUpIcon className="ml-1.5 w-5"/>)
                             : (<ChevronDownIcon className="ml-1.5 w-5"/>)
-                        }
+                        )}
                     </button>
                     <div className="flex flex-[20%] justify-end">
                         {!unfolded && (
@@ -116,7 +128,7 @@ export default function WatchLinkCard({id, watchLinkParam, changeCallback, edita
                         {unfolded && (
                             <>
                                 <div className="grow"></div>
-                                <button
+                                {!isNew && <button
                                     className={clsx({
                                         'cursor-not-allowed': !editable,
                                         'cursor-pointer': editable
@@ -125,6 +137,26 @@ export default function WatchLinkCard({id, watchLinkParam, changeCallback, edita
                                     onClick={deleteWatchLink}
                                 >
                                     <TrashIcon className="w-5"/>
+                                </button>}
+                            </>
+                        )}
+                        {isNew && !!saveNew && !!discardNew && (
+                            <>
+                                <div className="grow"></div>
+                                <button
+                                    className="rounded-md py-0.5 px-2 me-1 bg-foreground/10"
+                                    onClick={discardNew}
+                                >
+                                    Discard
+                                </button>
+                                <button
+                                    className="rounded-md py-1 px-2 bg-sky-500 text-background"
+                                    onClick={saveNew}
+                                >
+                                    <div className="flex items-center">
+                                        <PlusCircleIcon className="w-5 me-0.5"/>
+                                        <span className="block">Add</span>
+                                    </div>
                                 </button>
                             </>
                         )}
