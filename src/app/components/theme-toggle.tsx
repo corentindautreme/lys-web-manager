@@ -24,7 +24,7 @@ export default function ThemeToggle() {
     return (
         <button
             onClick={toggleTheme}
-            className="flex h-[36px] grow items-center justify-center gap-2 text-sm font-medium md:flex-none text-gray-500 hover:text-foreground hover:bg-gray-100 dark:hover:bg-gray-900/50">
+            className="flex h-[36px] grow items-center justify-center gap-2 text-sm font-medium md:flex-none text-gray-500 hover:text-foreground">
             <SunIcon className="w-6"/>
         </button>
     );

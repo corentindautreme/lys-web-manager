@@ -5,7 +5,6 @@ import { clsx } from 'clsx';
 import { redirect } from 'next/navigation';
 import { ExclamationCircleIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 import { JSX, useEffect, useState } from 'react';
-import EventListSkeleton from '@/app/(main)/events/components/event-list-skeleton';
 import ErrorScreen from '@/app/components/error-screen';
 import { DataSubmissionResponse } from '@/app/types/data-submission-response';
 import { useSuggestions } from '@/app/(main)/suggestions/utils';
@@ -14,6 +13,7 @@ import { Suggestion } from '@/app/types/suggestion';
 import { Event } from '@/app/types/events/event';
 import { submitSuggestions } from '@/app/(main)/suggestions/actions';
 import { useEvents } from '@/app/(main)/events/utils';
+import SuggestionListSkeleton from '@/app/(main)/suggestions/components/suggestion-list-skeleton';
 
 async function submitProcessedSuggestions(
     suggestions: Suggestion[],
@@ -140,7 +140,7 @@ export default function SuggestionList({currentSuggestionId}: { currentSuggestio
                             </div>
                         </div>
                     </>
-                ) : (<EventListSkeleton/>)
+                ) : (<SuggestionListSkeleton/>)
             )}
         </>
     );

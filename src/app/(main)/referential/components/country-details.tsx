@@ -3,54 +3,50 @@
 import Link from 'next/link';
 import {
     ArrowLeftIcon,
-    ArrowTopRightOnSquareIcon, ArrowUpOnSquareIcon,
-    ArrowUturnLeftIcon, CalendarDaysIcon,
+    ArrowTopRightOnSquareIcon,
+    ArrowUpOnSquareIcon,
+    ArrowUturnLeftIcon,
+    CalendarDaysIcon,
     ClockIcon,
     GlobeEuropeAfricaIcon,
     HashtagIcon,
     ListBulletIcon,
     MapIcon,
-    PlusCircleIcon, SignalIcon,
+    PlusCircleIcon,
+    SignalIcon,
     SwatchIcon,
     TagIcon,
     TrashIcon,
     TrophyIcon,
     TvIcon
 } from '@heroicons/react/24/outline';
-import { createSwapy, Swapy } from 'swapy';
-import { ChangeEvent, useEffect, useRef, useState } from 'react';
+import { ChangeEvent, useState } from 'react';
 import { clsx } from 'clsx';
 import { Country } from '@/app/types/country';
 import { WatchLink } from '@/app/types/watch-link';
-import WatchLinkCard from '@/app/components/watch-link-card';
+import WatchLinkCard from '@/app/components/watch-links/watch-link-card';
+import WatchLinkList, { SwappedHistory } from '@/app/components/watch-links/watch-link-list';
 
 type CountryDataKey = ('country' | 'countryCode' | 'eventName' | 'altEventNames' | 'stages' | 'defaultChannel' | 'scheduleLink' | 'scheduleDeviceTime');
-
-function addLink(countryData: Country, callback: (c: Country) => void) {
-    const newCountryData = {
-        ...countryData,
-    };
-    newCountryData.watchLinks.push({
-        link: '',
-        comment: '',
-        channel: '',
-        live: 0,
-        replayable: 0,
-        castable: 0,
-        geoblocked: 0,
-        accountRequired: 0
-    });
-    callback(newCountryData);
-}
 
 export default function CountryDetails({countryDataParam, onSave, onDelete}: {
     countryDataParam: Country,
     onSave: (countryData: Country) => Promise<never>,
     onDelete?: ((countryData: Country) => Promise<never>)
 }) {
-    const swapy = useRef<Swapy>(null)
-    const watchLinks = useRef(null)
     const [countryData, setCountryData] = useState(countryDataParam);
+
+    const [displayNewLinkForm, setDisplayNewLinkForm] = useState(false);
+    const [newWatchLink, setNewWatchLink] = useState({
+        link: '',
+        comment: '',
+        channel: countryDataParam.defaultChannel || '',
+        live: 0,
+        replayable: 0,
+        castable: 0,
+        geoblocked: 0,
+        accountRequired: 0
+    } as WatchLink);
 
     const saveCountryData = async () => {
         await onSave(countryData);
@@ -70,10 +66,7 @@ export default function CountryDetails({countryDataParam, onSave, onDelete}: {
     const onCountryDataModified = (countryData: Country) => {
         countryData.modified = true;
         setCountryData(countryData);
-        swapy.current?.update();
     }
-
-    const createLink = addLink.bind(null, countryData, onCountryDataModified);
 
     /**
      * To be triggered upon modification of an input field of the countryData (country name, event name, stages, etc.)
@@ -94,11 +87,11 @@ export default function CountryDetails({countryDataParam, onSave, onDelete}: {
         onCountryDataModified(newCountryData);
     }
 
-    const onWatchLinkChanged = (index: number, watchLink: WatchLink) => {
+    const onWatchLinkChanged = (index: number, watchLink: WatchLink, deleted?: boolean) => {
         const newCountryData = {
             ...countryData,
         };
-        if (watchLink === null) {
+        if (!!deleted) {
             newCountryData.watchLinks.splice(index, 1);
         } else {
             newCountryData.watchLinks[index] = watchLink;
@@ -106,14 +99,57 @@ export default function CountryDetails({countryDataParam, onSave, onDelete}: {
         onCountryDataModified(newCountryData);
     };
 
-    const onWatchLinksReordered = (from: number, to: number) => {
+    const onWatchLinksReordered = (swappedHistory: SwappedHistory) => {
         const newCountryData: Country = {
             ...countryData,
         };
-        [newCountryData.watchLinks[from], newCountryData.watchLinks[to]] = [newCountryData.watchLinks[to], newCountryData.watchLinks[from]];
+        swappedHistory.forEach(({from, to}: { from: number, to: number }) => {
+            [newCountryData.watchLinks[from], newCountryData.watchLinks[to]] = [newCountryData.watchLinks[to], newCountryData.watchLinks[from]];
+        });
         newCountryData.modified = true;
         setCountryData(newCountryData);
     };
+
+    const createLink = () => {
+        setDisplayNewLinkForm(true);
+    };
+
+    const onUpdateNewWatchLink = (index: number, watchLink: WatchLink) => {
+        setNewWatchLink({...watchLink});
+    };
+
+    const onSaveNewWatchLink = () => {
+        const newCountryData: Country = {
+            ...countryData,
+            watchLinks: [...countryData.watchLinks, {...newWatchLink}]
+        };
+        onCountryDataModified(newCountryData);
+        setNewWatchLink({
+            link: '',
+            comment: '',
+            channel: countryData.defaultChannel || '',
+            live: 0,
+            replayable: 0,
+            castable: 0,
+            geoblocked: 0,
+            accountRequired: 0
+        });
+        setDisplayNewLinkForm(false);
+    }
+
+    const onDiscardNewWatchLink = () => {
+        setNewWatchLink({
+            link: '',
+            comment: '',
+            channel: countryData.defaultChannel || '',
+            live: 0,
+            replayable: 0,
+            castable: 0,
+            geoblocked: 0,
+            accountRequired: 0
+        });
+        setDisplayNewLinkForm(false);
+    }
 
     const isLikelyDate = (date: string): boolean => {
         return countryData.likelyDates.includes(date);
@@ -130,25 +166,6 @@ export default function CountryDetails({countryDataParam, onSave, onDelete}: {
         }
         onCountryDataModified(newCountryData);
     }
-
-    useEffect(() => {
-        if (watchLinks.current) {
-            swapy.current = createSwapy(watchLinks.current, {
-                dragAxis: 'y',
-                enabled: !countryData.deleted
-            });
-
-            // Your event listeners
-            swapy.current.onSwap((countryData: { fromSlot: string, toSlot: string }) => {
-                onWatchLinksReordered(Number(countryData.fromSlot), Number(countryData.toSlot));
-            });
-        }
-
-        return () => {
-            // Destroy the swapy instance on component destroy
-            swapy.current?.destroy()
-        }
-    }, [countryData.deleted, onWatchLinksReordered]);
 
     return (
         <div className="bg-background px-1 py-3 md:p-3 rounded-xl dark:bg-neutral-900">
@@ -419,18 +436,14 @@ export default function CountryDetails({countryDataParam, onSave, onDelete}: {
                     </h2>
 
                     <div className="py-3 md:px-3 flex flex-col space-y-3">
-                        <div ref={watchLinks} id="watch-links" className="space-y-3">
-                            {countryData.watchLinks.map((watchLink: WatchLink, index: number) => (
-                                <WatchLinkCard
-                                    key={`link-${index}`}
-                                    id={index}
-                                    watchLinkParam={watchLink}
-                                    changeCallback={onWatchLinkChanged}
-                                    editable={!countryData.deleted}
-                                />
-                            ))}
-                        </div>
-                        <button
+                        <WatchLinkList
+                            key={`${countryData.watchLinks.length}-${countryData.watchLinks.map(l => l.link.substring(l.link.length - 5)).join('-')}`}
+                            watchLinksParam={countryData.watchLinks}
+                            editable={!countryData.deleted}
+                            onWatchLinkChanged={onWatchLinkChanged}
+                            onWatchLinksReordered={onWatchLinksReordered}
+                        />
+                        {!displayNewLinkForm && <button
                             disabled={!!countryData.deleted}
                             onClick={() => {
                                 createLink();
@@ -445,7 +458,16 @@ export default function CountryDetails({countryDataParam, onSave, onDelete}: {
                         >
                             <PlusCircleIcon className="w-8 me-2"/>
                             <p className="">Add link</p>
-                        </button>
+                        </button>}
+                        {displayNewLinkForm && <WatchLinkCard
+                            id={-1}
+                            watchLinkParam={newWatchLink}
+                            changeCallback={onUpdateNewWatchLink}
+                            editable={true}
+                            isNew={true}
+                            saveNew={onSaveNewWatchLink}
+                            discardNew={onDiscardNewWatchLink}
+                        />}
                     </div>
                 </div>
             </div>
