@@ -6,7 +6,6 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import {
     ArrowLeftIcon,
-    ArrowTopRightOnSquareIcon,
     ArrowUturnLeftIcon,
     CheckIcon,
     ChevronDownIcon,
@@ -25,6 +24,7 @@ import { clsx } from 'clsx';
 import { EventCard } from '@/app/components/events/event/event-cards';
 import { insertHeader } from '@/app/(main)/events/components/event-list';
 import { useBreakpoint } from '@/app/utils/display-utils';
+import SourcePreview from '@/app/(main)/suggestions/components/source-preview';
 
 export default function SuggestionDetails({suggestionParam, countryData, onSubmit}: {
     suggestionParam: Suggestion,
@@ -217,7 +217,6 @@ export default function SuggestionDetails({suggestionParam, countryData, onSubmi
                     <h3 className="text-lg text-center text-foreground/50">{suggestion.country}</h3>
                 </div>
 
-                {/* TODO 2xl = suggested dates as a grid? */}
                 <div className="block lg:flex lg:mt-4">
                     <div className={clsx('w-full lg:w-[50%] xl:grow p-2',
                         {
@@ -238,30 +237,14 @@ export default function SuggestionDetails({suggestionParam, countryData, onSubmi
                                        value={suggestion.name}
                                 />
                             </div>
+                        </div>
 
-                            <div className="flex items-center mt-2">
-                                <NewspaperIcon className="shrink-0 w-5 me-2"/>
-                                <input className="p-1 grow bg-foreground/10 text-foreground/50 rounded-lg"
-                                       type="text"
-                                       name="name"
-                                       size={1}
-                                       disabled={true}
-                                       value={suggestion.sourceLink}
-                                />
-                                <a
-                                    href={suggestion.sourceLink}
-                                    target="_blank"
-                                    className={clsx('flex px-2 py-1.5 ms-1 rounded-md text-sm',
-                                        {
-                                            'bg-none border-1 border-foreground/50 text-foreground/50': suggestion.processed,
-                                            'bg-sky-500 text-background': !suggestion.processed
-                                        }
-                                    )}
-                                >
-                                    <ArrowTopRightOnSquareIcon className="w-5 me-1"/>
-                                    <span className="block">Open</span>
-                                </a>
-                            </div>
+                        <h2 className="text-lg flex items-center mb-2">
+                            <NewspaperIcon className="w-6 me-1"/>Source
+                        </h2>
+
+                        <div className="mt-3 md:px-3">
+                            <SourcePreview sourceLink={suggestion.sourceLink}/>
                         </div>
 
                         <h2 className="text-lg flex items-center my-2">
