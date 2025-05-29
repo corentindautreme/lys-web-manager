@@ -2,11 +2,11 @@
 
 import Link from 'next/link';
 import {
-    ArrowLeftIcon,
+    ArrowLeftIcon, ArrowPathRoundedSquareIcon,
     ArrowTopRightOnSquareIcon,
     ArrowUpOnSquareIcon,
     ArrowUturnLeftIcon,
-    CalendarDaysIcon,
+    CalendarDaysIcon, ChevronDownIcon, ChevronUpIcon,
     ClockIcon,
     GlobeEuropeAfricaIcon,
     HashtagIcon,
@@ -35,6 +35,7 @@ export default function CountryDetails({countryDataParam, onSave, onDelete}: {
     onDelete?: ((countryData: Country) => Promise<never>)
 }) {
     const [countryData, setCountryData] = useState(countryDataParam);
+    const [hasRepeatedStage, setHasRepeatedStage] = useState(countryDataParam.stages.some(s => s.endsWith('...')));
 
     const [displayNewLinkForm, setDisplayNewLinkForm] = useState(false);
     const [newWatchLink, setNewWatchLink] = useState({
@@ -84,6 +85,66 @@ export default function CountryDetails({countryDataParam, onSave, onDelete}: {
             // @ts-ignore: TS2322
             newCountryData[e.target.name as CountryDataKey] = e.target.value;
         }
+        onCountryDataModified(newCountryData);
+    }
+
+    const onStageNameUpdate = (index: number, value: string) => {
+        const newCountryData: Country = {
+            ...countryData,
+        };
+        newCountryData.stages[index] = value;
+        onCountryDataModified(newCountryData);
+    }
+
+    const addStage = () => {
+        const newCountryData: Country = {
+            ...countryData,
+        };
+        newCountryData.stages.push('');
+        onCountryDataModified(newCountryData);
+    }
+
+    const removeStage = (index: number) => {
+        if (countryData.stages[index].endsWith('...')) {
+            setHasRepeatedStage(false);
+        }
+        const newCountryData: Country = {
+            ...countryData,
+        };
+        newCountryData.stages.splice(index, 1);
+        onCountryDataModified(newCountryData);
+    }
+
+    const toggleRepeatedStage = (index: number) => {
+        const stage = countryData.stages[index];
+        if (hasRepeatedStage && !stage.endsWith('...')) {
+            return;
+        }
+        const newCountryData: Country = {
+            ...countryData,
+        };
+        if(stage.endsWith('...')) {
+            newCountryData.stages[index] = stage.replace('...', '');
+        } else {
+            newCountryData.stages[index] = stage + '...';
+        }
+        setHasRepeatedStage(newCountryData.stages[index].endsWith('...'));
+        onCountryDataModified(newCountryData);
+    }
+
+    const moveStageUp = (index: number) => {
+        const newCountryData: Country = {
+            ...countryData,
+        };
+        [newCountryData.stages[index], newCountryData.stages[index-1]] = [newCountryData.stages[index-1], newCountryData.stages[index]];
+        onCountryDataModified(newCountryData);
+    }
+
+    const moveStageDown = (index: number) => {
+        const newCountryData: Country = {
+            ...countryData,
+        };
+        [newCountryData.stages[index], newCountryData.stages[index+1]] = [newCountryData.stages[index+1], newCountryData.stages[index]];
         onCountryDataModified(newCountryData);
     }
 
@@ -352,21 +413,137 @@ export default function CountryDetails({countryDataParam, onSave, onDelete}: {
                         'line-through text-foreground/50': countryData.deleted
                     }
                 )}>
+                    {/*<h2 className="text-lg flex items-center mb-2">*/}
+                    {/*    <TrophyIcon className="w-6 me-1"/>Stages*/}
+                    {/*</h2>*/}
+
+                    {/*<div className="py-3 md:px-3 flex flex-col">*/}
+                    {/*    <div className="flex items-center">*/}
+                    {/*        <TrophyIcon className="w-5 me-2"/>*/}
+                    {/*        <CountryTextInput*/}
+                    {/*            name="stages"*/}
+                    {/*            placeholder="Stages (e.g. Heat...,Final)"*/}
+                    {/*            value={countryData.stages.join(',')}*/}
+                    {/*            callback={onCountryDataChange}*/}
+                    {/*            disabled={!!countryData.deleted}*/}
+                    {/*        />*/}
+                    {/*    </div>*/}
+                    {/*</div>*/}
+
                     <h2 className="text-lg flex items-center mb-2">
                         <TrophyIcon className="w-6 me-1"/>Stages
                     </h2>
 
-                    <div className="py-3 md:px-3 flex flex-col">
-                        <div className="flex items-center">
-                            <TrophyIcon className="w-5 me-2"/>
-                            <CountryTextInput
-                                name="stages"
-                                placeholder="Stages (e.g. Heat...,Final)"
-                                value={countryData.stages.join(',')}
-                                callback={onCountryDataChange}
-                                disabled={!!countryData.deleted}
-                            />
-                        </div>
+                    <div className="py-3 px-2 md:px-3 flex flex-col">
+                        {countryData.stages.map((stage, index) =>
+                            <>
+                                <div className={clsx('flex items-center',
+                                    {
+                                        'mb-1': index == 0,
+                                        'my-0.5': index > 0
+                                    })}>
+                                    <button
+                                        className={clsx('me-0.5 p-1',
+                                            {
+                                                'text-foreground/50 cursor-not-allowed': countryData.deleted  || countryData.stages.length == 1,
+                                                'cursor-pointer': !countryData.deleted && countryData.stages.length > 1
+                                            })
+                                        }
+                                        disabled={countryData.deleted || countryData.stages.length == 1}
+                                        onClick={() => removeStage(index)}
+                                    >
+                                        <div className="flex items-center"><TrashIcon className="w-4"/></div>
+                                    </button>
+                                    {index == 0 ? <>
+                                        <div
+                                            className="flex items-center justify-center me-1 w-6 h-6 rounded-xl border-1 border-foreground/50">
+                                            <div className="w-3.5 h-3.5 rounded-xl bg-foreground/50"></div>
+                                        </div>
+                                        <input className="p-1 grow bg-foreground/10 rounded-lg"
+                                               size={1}
+                                               type="text"
+                                               disabled={!!countryData.deleted}
+                                               value={countryData.stages[index].replace('...', '')}
+                                               placeholder="Stage name (e.g. Heat)"
+                                               onChange={(e) => onStageNameUpdate(index, e.target.value)}
+                                        />
+                                    </> : <>
+                                        <div className="flex items-center justify-center me-1 w-6 h-6 rounded-xl">
+                                            <div className="w-4 h-4 rounded-xl bg-foreground/50"></div>
+                                        </div>
+                                        <input className="p-1 grow bg-foreground/10 rounded-lg"
+                                               size={1}
+                                               type="text"
+                                               disabled={!!countryData.deleted}
+                                               value={countryData.stages[index].replace('...', '')}
+                                               placeholder="Stage name (e.g. Heat)"
+                                               onChange={(e) => onStageNameUpdate(index, e.target.value)}
+                                        />
+                                    </>}
+                                    <button
+                                        className={clsx('ms-1 px-1 rounded-xl', {
+                                            'border-1 bg-foreground/10 border-foreground/10': stage.endsWith('...') && countryData.deleted,
+                                            'text-foreground/50 cursor-not-allowed': (hasRepeatedStage && !stage.endsWith('...')) || countryData.deleted,
+                                            'border-1 bg-sky-500 border-sky-500 text-background': stage.endsWith('...') && !countryData.deleted,
+                                            'border-1 border-foreground/30': !stage.endsWith('...'),
+                                            'text-foreground': !stage.endsWith('...') && !countryData.deleted,
+                                            'cursor-pointer': !countryData.deleted && !hasRepeatedStage
+                                        })}
+                                        disabled={(hasRepeatedStage && !stage.endsWith('...')) || countryData.deleted}
+                                        onClick={() => toggleRepeatedStage(index)}
+                                    >
+                                        <div className="flex items-center py-1"><ArrowPathRoundedSquareIcon
+                                            className="w-5"/></div>
+                                    </button>
+                                    <button
+                                        className="ms-1 px-1"
+                                        disabled={index == 0 || countryData.deleted}
+                                        onClick={() => moveStageUp(index)}
+                                    >
+                                        <div className="flex items-center py-1">
+                                            <ChevronUpIcon className={clsx('w-5',
+                                                {
+                                                    'text-foreground/50 cursor-not-allowed': index == 0 || countryData.deleted,
+                                                    'cursor-pointer': index > 0 && !countryData.deleted
+                                                })}/>
+                                        </div>
+                                    </button>
+                                    <button
+                                        className="ms-1 px-1"
+                                        disabled={index == countryData.stages.length - 1 || countryData.deleted}
+                                        onClick={() => moveStageDown(index)}
+                                    >
+                                        <div className="flex items-center py-1">
+                                            <ChevronDownIcon className={clsx('w-5',
+                                                {
+                                                    'text-foreground/50 cursor-not-allowed': index == countryData.stages.length - 1 || countryData.deleted,
+                                                    'cursor-pointer': index < countryData.stages.length - 1 && !countryData.deleted
+                                                })}/>
+                                        </div>
+                                    </button>
+                                </div>
+                                <div>
+                                    <div className="h-5 ml-10 border-l-1 w-0 border-foreground/50"></div>
+                                </div>
+                            </>
+                        )}
+                        <button
+                            className={clsx('ml-7 mt-1 w-fit',
+                                {
+                                    'text-foreground/50 cursor-not-allowed': countryData.deleted,
+                                    'cursor-pointer': !countryData.deleted
+                                }
+                            )}
+                            disabled={countryData.deleted}
+                            onClick={() => addStage()}
+                        >
+                            <div className="flex items-center">
+                                <div className="flex items-center justify-center me-1 w-6 h-6 rounded-xl">
+                                    <PlusCircleIcon className="w-5"/>
+                                </div>
+                                <span className="block">Add</span>
+                            </div>
+                        </button>
                     </div>
 
                     <h2 className="text-lg flex items-center my-2">
