@@ -9,7 +9,7 @@ export default function Layout({children, suggestions}: { children: React.ReactN
 
     return (
         <main className="h-full md:flex md:flex-col">
-            <div className={clsx('flex flex-col w-full mb-2',
+            <div className={clsx('flex flex-col w-full',
                 {
                     'hidden md:block': layoutSegment === 'process',
                     'block': layoutSegment == null

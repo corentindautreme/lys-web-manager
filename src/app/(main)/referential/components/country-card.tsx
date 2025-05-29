@@ -35,9 +35,9 @@ export default function CountryCard({countryData, active}: { countryData: Countr
                     <div className={clsx('text-base/4', {'text-foreground/70': !active, 'text-white': !!active})}>{countryData.eventName}</div>
                     {countryData.watchLinks && (
                         <div className="mt-2 flex">
-                            <Label icon='link' style={liveLinkCount == 0 ? 'error' : 'normal'} active={!!active}
+                            <Label icon='link' style='normal' active={!!active}
                                    content={`${liveLinkCount} link(s)`}/>
-                            <Label icon='vod' style={replayableLinkCount == 0 ? 'error' : 'normal'}
+                            <Label icon='vod' style='normal'
                                    active={!!active}
                                    content={`${replayableLinkCount} VOD link(s)`}/>
                         </div>
