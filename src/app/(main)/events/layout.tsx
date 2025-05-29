@@ -11,7 +11,7 @@ export default function Layout({children, events}: { children: React.ReactNode, 
 
     return (
         <main className="h-full md:flex md:flex-col">
-            <div className={clsx('flex flex-col w-full px-3 md:px-0 mb-2',
+            <div className={clsx('flex flex-col w-full mb-2',
                 {
                     'hidden md:block': layoutSegment === 'edit' || layoutSegment === 'new',
                     'block': layoutSegment == null
@@ -31,7 +31,7 @@ export default function Layout({children, events}: { children: React.ReactNode, 
                 {/*<EventFilters/>*/}
             </div>
             <div className="h-full md:flex md:flex-row md:overflow-y-auto">
-                <div className="w-full px-3 flex-none md:w-[300px] md:px-0">
+                <div className="w-full flex-none md:w-[300px]">
                     {events}
                 </div>
                 <div className={clsx(
