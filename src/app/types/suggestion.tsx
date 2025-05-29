@@ -24,3 +24,14 @@ export type GeneratedEvent = Event & {
 export interface Suggestion extends LysSuggestion {
     events?: GeneratedEvent[];
 }
+
+export interface SourceDetails {
+    title: string;
+    description: string;
+    image: string;
+}
+
+export interface SourceDetailsResponse {
+    data?: SourceDetails;
+    error?: {error: string, message: string};
+}

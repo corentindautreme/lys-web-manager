@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { clsx } from 'clsx';
 import { redirect } from 'next/navigation';
-import { ExclamationCircleIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
+import { CheckIcon, ExclamationCircleIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 import { JSX, useEffect, useState } from 'react';
 import ErrorScreen from '@/app/components/error-screen';
 import { DataSubmissionResponse } from '@/app/types/data-submission-response';
@@ -110,37 +110,49 @@ export default function SuggestionList({currentSuggestionId}: { currentSuggestio
                     title={error.name}
                     message={`${error.message} (status: ${error.cause.status})`}
                 />
-            ) : (!isLoading && !!suggestions ? (
-                    <>
-                        <div className="h-full flex flex-col">
-                            {modifiedCount > 0 &&
-                                <UnsavedSuggestionsBanner count={modifiedCount} suggestions={suggestions} events={events}
-                                                          callback={submittedSuggestionsCallback}/>}
-
-                            <div className="flex mt-2 overflow-y-auto flex-col">
-                                {suggestions?.map(suggestion => {
-                                        return (
-                                            <div key={suggestion.id}>
-                                                <Link href={`/suggestions/process/${suggestion.id}#${suggestion.id}`}>
-                                                    {/*
-                        Stick the ID on a relative div, so that navigating to # "scrolls back up" a litle bit, to
-                        give a visual cue that there's more above in the list
-                        */}
-                                                    <div
-                                                        id={suggestion.id.toString()}
-                                                        className="relative top-[-20px]"
-                                                    />
-                                                    <SuggestionCard suggestion={suggestion}
-                                                                    active={currentSuggestionId == suggestion.id}/>
-                                                </Link>
-                                            </div>
-                                        )
-                                    }
-                                )}
+            ) : (!isLoading && !!suggestions ?
+                    (suggestions.length == 0 ? (
+                            <div className="h-[80dvh] md:h-full flex flex-col items-center justify-center text-foreground/50">
+                                <CheckIcon className="w-18"/>
+                                <h1 className="text-xl">All done!</h1>
+                                <div className="text-center">There are no more suggestions to process. Come back tomorrow!</div>
                             </div>
-                        </div>
-                    </>
-                ) : (<SuggestionListSkeleton/>)
+                        ) : (
+                            <>
+                                <div className="h-full flex flex-col">
+                                    {modifiedCount > 0 &&
+                                        <UnsavedSuggestionsBanner count={modifiedCount} suggestions={suggestions}
+                                                                  events={events}
+                                                                  callback={submittedSuggestionsCallback}/>}
+
+                                    <div className="flex mt-2 overflow-y-auto flex-col">
+                                        {suggestions?.map(suggestion => {
+                                                return (
+                                                    <div key={suggestion.id}>
+                                                        <Link
+                                                            href={`/suggestions/process/${suggestion.id}#${suggestion.id}`}>
+                                                            {/*
+                    Stick the ID on a relative div, so that navigating to # "scrolls back up" a litle bit, to
+                    give a visual cue that there's more above in the list
+                    */}
+                                                            <div
+                                                                id={suggestion.id.toString()}
+                                                                className="relative top-[-20px]"
+                                                            />
+                                                            <SuggestionCard suggestion={suggestion}
+                                                                            active={currentSuggestionId == suggestion.id}/>
+                                                        </Link>
+                                                    </div>
+                                                )
+                                            }
+                                        )}
+                                    </div>
+                                </div>
+                            </>
+                        )
+                    ) : (
+                        <SuggestionListSkeleton/>
+                    )
             )}
         </>
     );
