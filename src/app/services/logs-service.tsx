@@ -48,7 +48,6 @@ export async function fetchLysPublisherLogs(): Promise<{ [publisher: string]: Lo
                 consideredLogs = logs;
             }
             const logsByPublisher: { [publisher: string]: LogEvent[] } = {};
-            // "flatten" a list of {publisher: LogEvent[]} objects into a single {publisher: LogEvent[]} object
             headerIndices
                 // create sub-windows of 2 indices
                 // (the last index of the last window is defaulted to -1 if we've reached the end of the indices array and

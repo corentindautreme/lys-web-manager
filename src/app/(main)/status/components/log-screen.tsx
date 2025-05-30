@@ -1,7 +1,7 @@
 'use client';
 
 import { clsx } from 'clsx';
-import { BellIcon, ChevronRightIcon, ClockIcon, CogIcon } from '@heroicons/react/24/outline';
+import { BellIcon, ChevronRightIcon, ClockIcon, CogIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 import { useState } from 'react';
 import { LogEvent } from '@/app/types/logs';
 import { EXPECTED_PUBLISHERS } from '@/app/services/logs-service';
@@ -16,7 +16,7 @@ export default function LogScreen({logsByPublisher}: { logsByPublisher: { [publi
         }
     ]);
 
-    const getStyle = (publisher: string): "normal" | "error" => {
+    const getStyle = (publisher: string): 'normal' | 'error' => {
         return logsByPublisher[publisher].length == 0 || logsByPublisher[publisher].some(e => e.message.toLowerCase().includes('error')) ? 'error' : 'normal';
     }
 
@@ -33,8 +33,9 @@ export default function LogScreen({logsByPublisher}: { logsByPublisher: { [publi
                 />)}
             </div>
 
+            {/* TODO overflow y doesn't scroll */}
             <div
-                className="relative w-full grow flex flex-col mt-2 p-3 rounded-xl bg-background border-1 border-foreground/10 dark:border-0 font-mono">
+                className="relative w-full grow overflow-y-scroll flex flex-col mt-2 p-3 rounded-xl bg-background border-1 border-foreground/10 dark:border-0 font-mono">
                 <div
                     className="absolute top-0 right-0 py-1 px-2 bg-foreground/10 dark:bg-neutral-900 rounded-bl-xl rounded-tr-xl">
                     <div className="flex items-center">
@@ -54,11 +55,23 @@ export default function LogScreen({logsByPublisher}: { logsByPublisher: { [publi
                 </div>
                 {!!selectedLog
                     ? selectedLog in logsByPublisher && logsByPublisher[selectedLog].length > 0
-                        ? logsByPublisher[selectedLog].map(log => (
-                            <div className="text-sm">
-                                {showTimestamp && <span className="text-foreground/50 me-3">{log.timestamp}</span>}
-                                <span>{log.message}</span>
-                            </div>
+                        ? logsByPublisher[selectedLog].map((log, index) => (
+                            <>
+                                <div className={clsx('text-sm',
+                                    {
+                                        'bg-red-700 dark:bg-red-300 text-background': log.message.toLowerCase().includes('error')
+                                    }
+                                )}>
+                                    {showTimestamp && <span className={clsx('text-foreground/50 me-3',
+                                        {
+                                            'bg-red-700 dark:bg-red-300 text-background!': log.message.toLowerCase().includes('error')
+                                        }
+                                    )}>{log.timestamp}</span>}
+                                    <span>{log.message}</span>
+                                </div>
+                                {index > 0 && log.message.startsWith('START RequestId') &&
+                                    <div className="w-full my-1 border-t-1 border-foreground/30"></div>}
+                            </>
                         )) : ('No log found for this process')
                     : (
                         'Select logs to display'
@@ -83,9 +96,10 @@ function LogSelector({name, displayName, type, style, onClick, active}: {
         <button
             className={clsx('rounded bg-foreground/10 text-sm px-1 py-1.5',
                 {
-                    'bg-foreground/10': !active && style == 'normal',
-                    'bg-sky-500 text-background': active && style == 'normal',
-                    'bg-red-300 dark:bg-red-900': !active && style == 'error'
+                    'bg-foreground/10 opacity-75': !active,
+                    'bg-sky-500 text-background border-1 border-sky-500': active,
+                    'border-1 border-red-700 dark:border-red-300': !active && style == 'error',
+                    'border-1 border-foreground/10': style == 'normal' && !active
                 }
             )}
             onClick={select}
@@ -101,6 +115,13 @@ function LogSelector({name, displayName, type, style, onClick, active}: {
                         </>
                     )
                 )}
+                {style == 'error' && <div
+                    className={clsx('flex items-center justify-center rounded-xl ms-1 p-0.5 ',
+                        {
+                            'bg-red-700 dark:bg-red-300 text-background': !active,
+                            'bg-transparent border-1 border-background': active
+                        }
+                    )}><ExclamationTriangleIcon className="w-4"/></div>}
             </div>
         </button>
     )
