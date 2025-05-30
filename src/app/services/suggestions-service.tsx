@@ -122,7 +122,7 @@ export function getSuggestions(): Suggestion[] {
 export async function fetchSuggestions(): Promise<Suggestion[]> {
     try {
         const client = new DynamoDBClient({
-            region: 'eu-west-3',
+            region: 'eu-west-3'
         });
         const {Items: suggestions} = await client.send(new ScanCommand({
             TableName: 'lys_suggested_events'
@@ -147,7 +147,7 @@ function toLysSuggestion(suggestion: Suggestion): LysSuggestion {
 
 export async function publishProcessedSuggestions(suggestions: Suggestion[]) {
     const client = new DynamoDBClient({
-        region: 'eu-west-3',
+        region: 'eu-west-3'
     });
 
     const requests: WriteRequest[] = suggestions.map((suggestion) => {

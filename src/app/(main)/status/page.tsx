@@ -1,11 +1,14 @@
 import LogCard from '@/app/(main)/status/components/log-card';
 import { BellIcon, CheckIcon, CommandLineIcon } from '@heroicons/react/24/outline';
 import LogScreen from '@/app/(main)/status/components/log-screen';
+import { fetchLysPublisherLogs } from '@/app/services/logs-service';
 
 export default async function Page() {
+    const logsByPublisher = await fetchLysPublisherLogs();
+
     return (
         <div className="h-full flex flex-col bg-background px-1 py-3 md:p-3 rounded-xl dark:bg-neutral-900">
-            <LogScreen/>
+            {logsByPublisher && <LogScreen logsByPublisher={logsByPublisher}/>}
             {/*<div className="grid grid-flow-row grid-cols-1 xl:grid-cols-2 gap-2">*/}
             {/*    <LogCard title="Daily > Bluesky" key="daily-bsky" logs={[*/}
             {/*        'daily|bluesky',*/}

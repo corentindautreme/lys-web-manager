@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@aws-sdk/client-cloudwatch-logs": "^3.817.0",
     "@aws-sdk/client-dynamodb": "^3.808.0",
     "@aws-sdk/util-dynamodb": "^3.808.0",
     "@heroicons/react": "^2.2.0",
@@ -25,10 +26,10 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4.0.0",
+    "@types/jsdom": "^21.1.7",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "@types/jsdom": "^21.1.7",
     "eslint": "^9",
     "eslint-config-next": "15.1.6",
     "postcss": "^8",

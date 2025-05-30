@@ -3,13 +3,10 @@
 import { clsx } from 'clsx';
 import { BellIcon, ChevronRightIcon, ClockIcon, CogIcon } from '@heroicons/react/24/outline';
 import { useState } from 'react';
+import { LogEvent } from '@/app/types/logs';
+import { EXPECTED_PUBLISHERS } from '@/app/services/logs-service';
 
-type LogEvent = {
-    timestamp: string;
-    message: string;
-}
-
-export default function LogScreen() {
+export default function LogScreen({logsByPublisher}: { logsByPublisher: { [publisher: string]: LogEvent[] } }) {
     const [selectedLog, setSelectedLog] = useState<string>();
     const [showTimestamp, setShowTimestamp] = useState(true);
     const [events, setEvents] = useState<LogEvent[]>([
@@ -19,79 +16,31 @@ export default function LogScreen() {
         }
     ]);
 
+    const getStyle = (publisher: string): "normal" | "error" => {
+        return logsByPublisher[publisher].length == 0 || logsByPublisher[publisher].some(e => e.message.toLowerCase().includes('error')) ? 'error' : 'normal';
+    }
+
     return (
         <div className="flex flex-col">
             <div className="w-full flex items-center gap-x-2 overflow-y-scroll">
-                <LogSelector
-                    name={'daily-bluesky'}
-                    displayName={['Daily', 'Bluesky']}
+                {EXPECTED_PUBLISHERS.map(publisher => <LogSelector
+                    name={publisher}
+                    displayName={publisher.split('|')}
                     type={'publish'}
+                    style={getStyle(publisher)}
                     onClick={setSelectedLog}
-                    active={selectedLog === 'daily-bluesky'}
-                />
-                <LogSelector
-                    name={'daily-threads'}
-                    displayName={['Daily', 'Threads']}
-                    type={'publish'}
-                    onClick={setSelectedLog}
-                    active={selectedLog === 'daily-threads'}
-                />
-                <LogSelector
-                    name={'daily-twitter'}
-                    displayName={['Daily', 'Twitter']}
-                    type={'publish'}
-                    onClick={setSelectedLog}
-                    active={selectedLog === 'daily-twitter'}
-                />
-                <LogSelector
-                    name={'5min-bluesky'}
-                    displayName={['5min', 'Bluesky']}
-                    type={'publish'}
-                    onClick={setSelectedLog}
-                    active={selectedLog === '5min-bluesky'}
-                />
-                <LogSelector
-                    name={'5min-threads'}
-                    displayName={['5min', 'Threads']}
-                    type={'publish'}
-                    onClick={setSelectedLog}
-                    active={selectedLog === '5min-threads'}
-                />
-                <LogSelector
-                    name={'5min-twitter'}
-                    displayName={['5min', 'Twitter']}
-                    type={'publish'}
-                    onClick={setSelectedLog}
-                    active={selectedLog === '5min-twitter'}
-                />
-                <LogSelector
-                    name={'weekly-bluesky'}
-                    displayName={['Weekly', 'Bluesky']}
-                    type={'publish'}
-                    onClick={setSelectedLog}
-                    active={selectedLog === 'weekly-bluesky'}
-                />
-                <LogSelector
-                    name={'weekly-threads'}
-                    displayName={['Weekly', 'Threads']}
-                    type={'publish'}
-                    onClick={setSelectedLog}
-                    active={selectedLog === 'weekly-threads'}
-                />
-                <LogSelector
-                    name={'weekly-twitter'}
-                    displayName={['Weekly', 'Twitter']}
-                    type={'publish'}
-                    onClick={setSelectedLog}
-                    active={selectedLog === 'weekly-twitter'}
-                />
+                    active={selectedLog === publisher}
+                />)}
             </div>
 
-            <div className="relative w-full grow flex flex-col mt-2 p-3 rounded-xl bg-background border-1 border-foreground/10 dark:border-0 font-mono">
-                <div className="absolute top-0 right-0 py-1 px-2 bg-foreground/10 rounded-bl-xl rounded-tr-xl">
+            <div
+                className="relative w-full grow flex flex-col mt-2 p-3 rounded-xl bg-background border-1 border-foreground/10 dark:border-0 font-mono">
+                <div
+                    className="absolute top-0 right-0 py-1 px-2 bg-foreground/10 dark:bg-neutral-900 rounded-bl-xl rounded-tr-xl">
                     <div className="flex items-center">
                         <ClockIcon className="w-4 shrink-0"/>
-                        <label className="hidden md:flex items-center ms-1 font-sans text-sm" htmlFor="show-timestamps">Show timestamps</label>
+                        <label className="hidden md:flex items-center ms-1 font-sans text-sm" htmlFor="show-timestamps">Show
+                            timestamps</label>
                         <div className="grow"></div>
                         <input
                             type="checkbox"
@@ -103,21 +52,28 @@ export default function LogScreen() {
                         />
                     </div>
                 </div>
-                {events.map((log: LogEvent) => (
-                    <div>
-                        {showTimestamp && <span className="text-foreground/50 me-3">{log.timestamp}</span>}
-                        <span>{log.message}</span>
-                    </div>
-                ))}
+                {!!selectedLog
+                    ? selectedLog in logsByPublisher && logsByPublisher[selectedLog].length > 0
+                        ? logsByPublisher[selectedLog].map(log => (
+                            <div className="text-sm">
+                                {showTimestamp && <span className="text-foreground/50 me-3">{log.timestamp}</span>}
+                                <span>{log.message}</span>
+                            </div>
+                        )) : ('No log found for this process')
+                    : (
+                        'Select logs to display'
+                    )
+                }
             </div>
         </div>
     )
 }
 
-function LogSelector({name, displayName, type, onClick, active}: {
+function LogSelector({name, displayName, type, style, onClick, active}: {
     name: string,
     displayName: string[],
-    type: 'publish' | 'technical'
+    type: 'publish' | 'technical',
+    style: 'normal' | 'error'
     onClick: (name: string) => void,
     active: boolean
 }) {
@@ -127,8 +83,9 @@ function LogSelector({name, displayName, type, onClick, active}: {
         <button
             className={clsx('rounded bg-foreground/10 text-sm px-1 py-1.5',
                 {
-                    'bg-foreground/10': !active,
-                    'bg-sky-500 text-background': active
+                    'bg-foreground/10': !active && style == 'normal',
+                    'bg-sky-500 text-background': active && style == 'normal',
+                    'bg-red-300 dark:bg-red-900': !active && style == 'error'
                 }
             )}
             onClick={select}
@@ -139,7 +96,7 @@ function LogSelector({name, displayName, type, onClick, active}: {
                 {displayName.map(
                     (segment, index) => (
                         <>
-                            {segment}
+                            <span className="capitalize">{segment}</span>
                             {index < displayName.length - 1 && <ChevronRightIcon className="w-3 mx-1"/>}
                         </>
                     )
