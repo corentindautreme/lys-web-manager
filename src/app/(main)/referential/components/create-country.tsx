@@ -39,7 +39,7 @@ export default function CreateCountry() {
         countryCode: '',
         eventName: '',
         altEventNames: [],
-        stages: [],
+        stages: ['Night...', 'Final'],
         watchLinks: [],
         defaultChannel: '',
         likelyDates: [],
