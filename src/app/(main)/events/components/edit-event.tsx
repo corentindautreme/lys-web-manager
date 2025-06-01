@@ -1,7 +1,7 @@
 'use client';
 
 import { Event } from '@/app/types/events/event'
-import { redirect } from 'next/navigation';
+import { redirect, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useEvents } from '@/app/(main)/events/utils';
 import EventDetails from '@/app/(main)/events/components/event-details';
@@ -9,6 +9,7 @@ import EventDetails from '@/app/(main)/events/components/event-details';
 export default function EditEvent({eventId}: { eventId: number }) {
     const {events, mutate, isLoading} = useEvents();
     const [event, setEvent] = useState<Event>();
+    const router = useRouter();
 
     // once SWR has loaded the data, set the event, so we can start editing it (and hide the loading screen)
     useEffect(() => {
@@ -27,14 +28,14 @@ export default function EditEvent({eventId}: { eventId: number }) {
 
     const saveEvent = async (event: Event) => {
         await updateCache(event);
-        redirect('/events');
+        router.back();
     };
 
     const toggleDelete = async (event: Event) => {
         event.deleted = !event.deleted;
         await updateCache(event);
         if (event.deleted) {
-            redirect('/events');
+            router.back();
         } else {
             setEvent(event);
             // redirect to the current event to force a component remount (and thus display the mutations made to the event list)

@@ -4,9 +4,9 @@ import { clsx } from 'clsx';
 import { BellIcon, ChevronRightIcon, ClockIcon, CogIcon } from '@heroicons/react/24/outline';
 import { ExclamationCircleIcon as ExclamationCircleFullIcon } from '@heroicons/react/16/solid';
 import { useEffect, useState } from 'react';
-import { ProcessStatuses } from '@/app/types/logs';
 import { useSearchParams } from 'next/navigation';
 import { useStatuses } from '@/app/(main)/logs/utils';
+import { ProcessStatuses } from '@/app/types/status';
 
 export default function LogScreen() {
     const {statuses: loadedStatuses} = useStatuses();
@@ -20,15 +20,47 @@ export default function LogScreen() {
         setStatuses(loadedStatuses);
     }, [loadedStatuses]);
 
+    const publishers = [
+        'daily|bluesky',
+        'daily|threads',
+        'daily|twitter',
+        '5min|bluesky',
+        '5min|threads',
+        '5min|twitter',
+        'weekly|bluesky',
+        'weekly|threads',
+        'weekly|twitter'
+    ];
+
     return (!statuses ? <LogScreenSkeleton/> :
             <div className="flex flex-col h-full">
-                <div className="w-full shrink-0 flex items-center gap-x-2 overflow-y-scroll">
-                    {Object.keys(statuses).map((process, index) => <LogSelector
+                <div className="w-full shrink-0 flex items-center gap-x-2 overflow-y-scroll pb-2">
+                    <BellIcon className="shrink-0 w-5 me-[-0.25em]"/>
+                    <div className="font-bold">Publishers</div>
+                    {
+                        publishers.map((process, index) => (
+                            <>
+                                {index > 0 && process.substring(0, 4) != publishers[index - 1].substring(0, 4) &&
+                                    <div className="border-l-1 border-foreground/10 h-full"></div>
+                                }
+                                <LogSelector
+                                    key={process}
+                                    index={index}
+                                    name={process}
+                                    displayName={process.split('|')}
+                                    style={statuses[process].success ? 'normal' : 'error'}
+                                    onClick={setSelectedLog}
+                                    active={selectedLog === process}
+                                />
+                            </>
+                        ))}
+                    <CogIcon className="shrink-0 w-5 me-[-0.25em]"/>
+                    <div className="font-bold">Technical</div>
+                    {['fetcher', 'dump', 'refresh'].map((process, index) => <LogSelector
                         key={process}
                         index={index}
                         name={process}
                         displayName={process.split('|')}
-                        type={process.includes('|') ? 'publish' : 'technical'}
                         style={statuses[process].success ? 'normal' : 'error'}
                         onClick={setSelectedLog}
                         active={selectedLog === process}
@@ -36,7 +68,7 @@ export default function LogScreen() {
                 </div>
 
                 <div
-                    className="relative w-full grow overflow-y-scroll flex flex-col mt-2 p-3 rounded-xl bg-background border-1 border-foreground/10 dark:border-0 font-mono">
+                    className="relative w-full grow overflow-y-scroll flex flex-col p-3 rounded-xl bg-background border-1 border-foreground/10 dark:border-0 font-mono">
                     <div
                         className="absolute top-0 right-0 py-1 px-2 bg-foreground/10 dark:bg-neutral-900 rounded-bl-xl rounded-tr-xl">
                         <div className="flex items-center">
@@ -57,7 +89,7 @@ export default function LogScreen() {
                     </div>
                     {!!selectedLog
                         ? selectedLog in statuses && statuses[selectedLog].logs.length > 0
-                            ? statuses[selectedLog].logs.map(log => (
+                            ? statuses[selectedLog].logs.map((log, index) => (
                                 <>
                                     <div className={clsx('text-sm',
                                         {
@@ -71,7 +103,7 @@ export default function LogScreen() {
                                         )}>{log.timestamp}</span>}
                                         <span>{log.message}</span>
                                     </div>
-                                    {log.message.startsWith('START RequestId') &&
+                                    {index < statuses[selectedLog].logs.length - 1 && log.message.startsWith('START RequestId') &&
                                         <div className="w-full my-1 border-t-1 border-foreground/30"></div>}
                                 </>
                             )) : ('No log found for this process')
@@ -84,11 +116,10 @@ export default function LogScreen() {
     )
 }
 
-function LogSelector({index, name, displayName, type, style, onClick, active}: {
+function LogSelector({index, name, displayName, style, onClick, active}: {
     index: number,
     name: string,
     displayName: string[],
-    type: 'publish' | 'technical',
     style: 'normal' | 'error'
     onClick: (name: string) => void,
     active: boolean
@@ -113,8 +144,6 @@ function LogSelector({index, name, displayName, type, style, onClick, active}: {
             onClick={select}
         >
             <div className="flex items-center">
-                {type === 'publish' && <BellIcon className="w-4 me-1"/>}
-                {type === 'technical' && <CogIcon className="w-4 me-1"/>}
                 {displayName.map(
                     (segment, index) => (
                         <>
@@ -124,7 +153,7 @@ function LogSelector({index, name, displayName, type, style, onClick, active}: {
                     )
                 )}
                 {style == 'error' && <div
-                    className={clsx('flex items-center justify-center rounded-xl ms-1 p-0.5 ',
+                    className={clsx('flex items-center justify-center rounded-xl ms-1',
                         {
                             'text-red-700 dark:text-red-300': !active,
                         }
@@ -140,13 +169,15 @@ const shimmer =
 
 export function LogScreenSkeleton() {
     return (<div className={`relative overflow-hidden flex flex-col h-full`}>
-        <div className="relative overflow-hidden w-fit shrink-0 flex items-center gap-x-2 mb-1">
-            <div className={`${shimmer} h-6 w-20 rounded bg-gray-300 dark:bg-gray-400/10`}/>
-            <div className="h-6 w-20 rounded bg-gray-300 dark:bg-gray-400/10"/>
-            <div className="h-6 w-20 rounded bg-gray-300 dark:bg-gray-400/10"/>
+        <div className="relative overflow-hidden w-fit shrink-0 flex items-center gap-x-2 mb-2">
+            <div className={`${shimmer} h-4 w-28 rounded bg-gray-200 dark:bg-gray-400/20`}/>
+            <div className={`h-6 w-28 rounded bg-gray-300 dark:bg-gray-400/10`}/>
+            <div className="h-6 w-28 rounded bg-gray-300 dark:bg-gray-400/10"/>
+            <div className="h-6 w-28 rounded bg-gray-300 dark:bg-gray-400/10"/>
         </div>
 
-        <div className="flex flex-col gap-y-1 relative overflow-hidden w-full grow rounded-xl bg-background border-1 border-foreground/10 dark:border p-3">
+        <div
+            className="flex flex-col gap-y-1 relative overflow-hidden w-full grow rounded-xl bg-background border-1 border-foreground/10 dark:border p-3">
             <div className={`${shimmer} h-4 w-200 rounded bg-gray-300 dark:bg-gray-400/10`}/>
             <div className="h-4 w-250 rounded bg-gray-300 dark:bg-gray-400/10"/>
             <div className="h-4 w-175 rounded bg-gray-300 dark:bg-gray-400/10"/>

@@ -17,3 +17,7 @@ export interface Event extends LysEvent {
     rescheduled?: boolean;
     previousDateTimeCet?: string;
 }
+
+export type ValidEvent = Event & {
+    error: boolean;
+}

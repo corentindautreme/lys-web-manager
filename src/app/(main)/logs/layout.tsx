@@ -2,8 +2,8 @@ import Breadcrumbs from '@/app/components/breadcrumbs';
 
 export default function Layout({children}: { children: React.ReactNode }) {
     return (
-        <main className="h-full md:flex md:flex-col">
-            <div className="flex flex-col w-full px-3 md:px-0 mb-2">
+        <main className="h-full md:flex md:flex-col p-3 md:p-6">
+            <div className="flex flex-col w-full mb-2">
                 <Breadcrumbs breadcrumbs={[
                     {
                         label: 'Dashboard',

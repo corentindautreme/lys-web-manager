@@ -22,8 +22,7 @@ import {
     TvIcon,
     XMarkIcon
 } from '@heroicons/react/24/outline';
-import { useSearchParams } from 'next/navigation';
-import { getQueryParamString } from '@/app/utils/event-utils';
+import { useRouter } from 'next/navigation';
 import { ChangeEvent, useEffect, useState } from 'react';
 import { clsx } from 'clsx';
 import { useCountries } from '@/app/(main)/referential/utils';
@@ -36,13 +35,12 @@ type EventKey = ('country' | 'name' | 'stage' | 'dateTimeCet' | 'endDateTimeCet'
 
 export default function EventDetails({eventParam, onSave, onDelete}: {
     eventParam: Event,
-    onSave: (event: Event) => Promise<never>,
-    onDelete?: ((event: Event) => Promise<never>)
+    onSave: (event: Event) => Promise<void>,
+    onDelete?: ((event: Event) => Promise<void>)
 }) {
+    const router = useRouter();
     const isNewEvent = !onDelete && !eventParam.name;
     const [templateSelected, setTemplateSelected] = useState(false);
-    const searchParams = useSearchParams();
-    const queryString = getQueryParamString(searchParams);
     const initialDateTime = eventParam.dateTimeCet;
     const [event, setEvent] = useState(eventParam);
     const {countryData, isLoading: countryDataLoading, error: countryDataError} = useCountries();
@@ -64,7 +62,6 @@ export default function EventDetails({eventParam, onSave, onDelete}: {
         if (!!eventParam.country) {
             const currentCountryData = countryData.filter(c => c.country == eventParam.country)[0];
             setCurrentCountryData(currentCountryData);
-            console.log(currentCountryData);
             setNewWatchLink({
                 link: '',
                 comment: '',
@@ -200,13 +197,13 @@ export default function EventDetails({eventParam, onSave, onDelete}: {
     return (
         <div className="bg-background dark:bg-neutral-900 px-1 py-3 md:p-3 rounded-xl">
             <div className="flex px-1 flex-row justify-between space-x-2">
-                <Link
-                    href={`/events${queryString}`}
+                <button
+                    onClick={() => router.back()}
                     className="flex flex-row items-center"
                 >
                     <ArrowLeftIcon className="w-6"/>
                     <span className="hidden md:block md:ml-1">Back</span>
-                </Link>
+                </button>
                 <div className="hidden w-auto grow"></div>
                 <div className="flex">
                     <button className="px-2">
