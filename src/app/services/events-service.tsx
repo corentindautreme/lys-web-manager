@@ -236,7 +236,7 @@ export function getEvents(): Event[] {
 export async function fetchEvents(): Promise<Event[]> {
     try {
         const client = new DynamoDBClient({
-            region: 'eu-west-3',
+            region: 'eu-west-3'
         });
         const {Items: events} = await client.send(new ScanCommand({
             TableName: 'lys_events'
@@ -260,7 +260,7 @@ function toLysEvent(event: Event): LysEvent {
 
 export async function publishEventChanges(updatedEvents: Event[], rescheduledEvents: Event[], deletedEvents: Event[]) {
     const client = new DynamoDBClient({
-        region: 'eu-west-3',
+        region: 'eu-west-3'
     });
 
     const requests: WriteRequest[] = [];
