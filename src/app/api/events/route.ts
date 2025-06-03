@@ -1,10 +1,10 @@
-import { fetchEvents } from '@/app/services/events-service';
+import { fetchEvents, getEvents } from '@/app/services/events-service';
 import { NextResponse } from 'next/server';
 import { DynamoDBServiceException } from '@aws-sdk/client-dynamodb';
 
 export async function GET() {
     try {
-        return NextResponse.json(await fetchEvents());
+        return process.env.DEBUG === "TRUE" ? NextResponse.json(getEvents()) : NextResponse.json(await fetchEvents());
     } catch (error) {
         if (error instanceof DynamoDBServiceException) {
             return NextResponse.json({error: error.name, message: error.message}, {status: error.$metadata.httpStatusCode || 500});
