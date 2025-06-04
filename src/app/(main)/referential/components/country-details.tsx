@@ -229,7 +229,7 @@ export default function CountryDetails({countryDataParam, onSave, onDelete}: {
     }
 
     return (
-        <div className="bg-background px-1 py-3 md:p-3 rounded-xl dark:bg-neutral-900">
+        <div className="bg-background px-1 py-3 md:p-3 rounded-xl dark:bg-neutral-900 md:overflow-y-auto">
             <div className="flex px-1 flex-row justify-between space-x-2">
                 <Link
                     href={`/referential`}

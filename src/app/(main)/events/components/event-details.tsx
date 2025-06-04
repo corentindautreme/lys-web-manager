@@ -59,7 +59,7 @@ export default function EventDetails({eventParam, onSave, onDelete}: {
     } as WatchLink);
 
     useEffect(() => {
-        if (!!eventParam.country) {
+        if (!!eventParam.country && !!countryData) {
             const currentCountryData = countryData.filter(c => c.country == eventParam.country)[0];
             setCurrentCountryData(currentCountryData);
             setNewWatchLink({
@@ -195,7 +195,7 @@ export default function EventDetails({eventParam, onSave, onDelete}: {
     }
 
     return (
-        <div className="bg-background dark:bg-neutral-900 px-1 py-3 md:p-3 rounded-xl">
+        <div className="bg-background dark:bg-neutral-900 px-1 py-3 md:p-3 rounded-xl md:overflow-y-auto">
             <div className="flex px-1 flex-row justify-between space-x-2">
                 <button
                     onClick={() => router.back()}

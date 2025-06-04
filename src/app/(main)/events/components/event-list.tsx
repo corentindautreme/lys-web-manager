@@ -114,11 +114,11 @@ export default function EventList({currentEventId}: { currentEventId?: number | 
                 />
             ) : (!isLoading && !!events ? (
                     <>
-                        <div className="h-full flex flex-col">
+                        <div className="h-full flex flex-col gap-y-1">
                             {modifiedCount > 0 &&
                                 <UnsavedEventsBanner count={modifiedCount} events={events} callback={mutate}/>}
 
-                            <div className="flex mt-2 overflow-y-auto flex-col">
+                            <div className="flex flex-col gap-y-1 overflow-y-auto">
                                 {events?.map((event, idx) => {
                                         return (
                                             <div key={event.id}>

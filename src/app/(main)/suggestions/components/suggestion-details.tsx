@@ -173,7 +173,7 @@ export default function SuggestionDetails({suggestionParam, countryData, onSubmi
                     reprocess={reprocessSuggestion}
                 />
             </div>
-            <div className="bg-background px-1 py-3 md:p-3 rounded-xl dark:bg-neutral-900">
+            <div className="bg-background px-1 py-3 md:p-3 rounded-xl dark:bg-neutral-900 md:overflow-y-auto">
                 <div className="flex items-center justify-between px-1 space-x-2">
                     <Link
                         href={`/suggestions`}

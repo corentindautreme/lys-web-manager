@@ -5,7 +5,7 @@ const shimmer =
 export function SuggestionCardSkeleton() {
     return (
         <div
-            className={`${shimmer} relative overflow-hidden w-full md:w-[300px] h-auto mb-1 p-3 flex shadow-sm rounded-md bg-background dark:bg-gray-500/10`}
+            className={`${shimmer} relative overflow-hidden w-full md:w-[300px] h-auto p-3 flex shadow-sm rounded-md bg-background dark:bg-gray-500/10`}
         >
             <div className="h-fill border-e-3 me-3 border-gray-300 dark:border-gray-400/20"></div>
             <div className="flex flex-col space-y-1">

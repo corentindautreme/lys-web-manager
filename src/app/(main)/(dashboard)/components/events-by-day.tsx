@@ -5,6 +5,8 @@ import { EventCardLite } from '@/app/components/events/event/event-cards';
 import { useEffect, useState } from 'react';
 import { CheckIcon, CubeTransparentIcon } from '@heroicons/react/24/outline';
 import { EventCardLiteSkeleton } from '@/app/components/events/event/event-card-skeletons';
+import { clsx } from 'clsx';
+import Link from 'next/link';
 
 export default function EventsByDay({eventsParam, showErrorOnly, errorPredicate, showLinks}: {
     eventsParam: Event[],
@@ -13,6 +15,7 @@ export default function EventsByDay({eventsParam, showErrorOnly, errorPredicate,
     showLinks: 'live' | 'vod' | 'both'
 }) {
     const [eventsByDate, setEventsByDate] = useState<{ [date: string]: ValidEvent[] }>();
+    const dateBackgroundShift = ['0 0', '0 -100%', '-100% 0', '-100% -100%', '-200% 0', '-200% -100%']
 
     const computeEventsByDate = (events: ValidEvent[]): { [date: string]: ValidEvent[] } => {
         const eventsByDate = events.reduce((out, e) => {
@@ -42,30 +45,47 @@ export default function EventsByDay({eventsParam, showErrorOnly, errorPredicate,
         setEventsByDate(computeEventsByDate(events));
     }, [showErrorOnly]);
 
-    return !!eventsByDate ? <div className="rounded-xl border-1 border-foreground/30">
+    return !!eventsByDate ? <>
         {
             Object.keys(eventsByDate).length == 0 ? <EmptyEventsByDay showErrorOnly={showErrorOnly}/> : (
-                <div className="flex flex-col gap-y-2 py-2 pl-3">
+                <div className="relative flex gap-x-2 overflow-x-scroll">
                     {Object.entries(eventsByDate).map(([date, events], index) => (
-                        <>
-                            {index > 0 && <div className="border-t-1 border-foreground/30 me-3"></div>}
-                            <div className="flex items-center gap-x-2">
-                                <div
-                                    className="shrink-0 w-12 flex flex-col items-center md:items-start text-sm md:text-left">
-                                    <div className="text-center">{date}</div>
-                                    <div
-                                        className="block md:hidden bg-foreground/10 rounded-lg mt-1 px-1 py-0.5 text-xs">{events.length}</div>
-                                </div>
-                                <div className="flex overflow-x-scroll gap-x-2 pe-3">
-                                    {events.map(e => <EventCardLite key={`event-${e.id}`} event={e} showLinks={showLinks}/>)}
+                        <div className="relative grow min-w-65 pt-5" key={date}>
+                            <div
+                                className="absolute top-1 left-[50%] rounded-xl transform-[translateX(-50%)] w-fit px-3 py-1 text-white"
+                                style={{
+                                    background: 'linear-gradient(red, transparent), linear-gradient(to top left, lime, transparent), linear-gradient(to top right, blue, transparent)',
+                                    backgroundBlendMode: 'screen',
+                                    backgroundSize: '200% 200%',
+                                    backgroundPosition: `${dateBackgroundShift[index % dateBackgroundShift.length]}`
+                                }}
+                            >
+                                {date}
+                            </div>
+                            <div className=" p-3 pt-8 rounded-xl bg-white dark:bg-foreground/10">
+                                <div className="flex flex-col gap-y-1.5 h-80 overflow-y-scroll">
+                                    {events.map(e =>
+                                        <div key={e.id} className={clsx('rounded',
+                                            {
+                                                'border-1 border-foreground/10 dark:border-0': !e.error
+                                            }
+                                        )}>
+                                            <Link href={`/events/edit/${e.id}#${e.id}`}>
+                                                <EventCardLite
+                                                    event={e}
+                                                    showLinks={showLinks}
+                                                />
+                                            </Link>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
-                        </>
+                        </div>
                     ))}
                 </div>
             )
         }
-    </div> : (
+    </> : (
         <EventsByDaySkeleton/>
     );
 }
@@ -92,9 +112,10 @@ export function EventsByDaySkeleton() {
     </div>);
 }
 
-function EmptyEventsByDay({showErrorOnly}: {showErrorOnly: boolean}) {
-    return (<div className="flex flex-col items-center py-10 text-foreground/50">
-        {showErrorOnly ? <CheckIcon className="w-12 mb-1"/> : <CubeTransparentIcon className="w-12 mb-1"></CubeTransparentIcon>}
+function EmptyEventsByDay({showErrorOnly}: { showErrorOnly: boolean }) {
+    return (<div className="flex flex-col items-center py-10 text-foreground/50 rounded-xl border-1 border-foreground/30">
+        {showErrorOnly ? <CheckIcon className="w-12 mb-1"/> :
+            <CubeTransparentIcon className="w-12 mb-1"></CubeTransparentIcon>}
         <div className="text-center">No event {showErrorOnly && 'in error '} to display</div>
         {showErrorOnly && <div className="text-center text-sm">Try removing the error filter to show more</div>}
     </div>);

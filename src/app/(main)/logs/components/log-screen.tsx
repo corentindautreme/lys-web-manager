@@ -1,7 +1,7 @@
 'use client';
 
 import { clsx } from 'clsx';
-import { BellIcon, ChevronRightIcon, ClockIcon, CogIcon } from '@heroicons/react/24/outline';
+import { BellIcon, ChevronRightIcon, ClockIcon, CogIcon, ExclamationCircleIcon } from '@heroicons/react/24/outline';
 import { ExclamationCircleIcon as ExclamationCircleFullIcon } from '@heroicons/react/16/solid';
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
@@ -9,7 +9,7 @@ import { useStatuses } from '@/app/(main)/logs/utils';
 import { ProcessStatuses } from '@/app/types/status';
 
 export default function LogScreen() {
-    const {statuses: loadedStatuses} = useStatuses();
+    const {statuses: loadedStatuses, isLoading, error} = useStatuses();
     const [statuses, setStatuses] = useState<ProcessStatuses>();
     const queryParams = useSearchParams();
     const lambdaParam = queryParams.get('lambda');
@@ -32,9 +32,14 @@ export default function LogScreen() {
         'weekly|twitter'
     ];
 
-    return (!statuses ? <LogScreenSkeleton/> :
-            <div className="flex flex-col h-full">
-                <div className="w-full shrink-0 flex items-center gap-x-2 overflow-y-scroll pb-2">
+    if (isLoading) {
+        return <LogScreenSkeleton/>;
+    }
+
+    return (
+        <div className="flex flex-col h-full">
+            <div className="w-full shrink-0 flex items-center gap-x-2 overflow-y-scroll pb-2">
+                {!error && !!statuses && <>
                     <BellIcon className="shrink-0 w-5 me-[-0.25em]"/>
                     <div className="font-bold">Publishers</div>
                     {
@@ -65,54 +70,69 @@ export default function LogScreen() {
                         onClick={setSelectedLog}
                         active={selectedLog === process}
                     />)}
-                </div>
-
-                <div
-                    className="relative w-full grow overflow-y-scroll flex flex-col p-3 rounded-xl bg-background border-1 border-foreground/10 dark:border-0 font-mono">
-                    <div
-                        className="absolute top-0 right-0 py-1 px-2 bg-foreground/10 dark:bg-neutral-900 rounded-bl-xl rounded-tr-xl">
-                        <div className="flex items-center">
-                            <ClockIcon className="w-4 shrink-0"/>
-                            <label className="hidden md:flex items-center ms-1 font-sans text-sm"
-                                   htmlFor="show-timestamps">Show
-                                timestamps</label>
-                            <div className="grow"></div>
-                            <input
-                                type="checkbox"
-                                className="relative peer ms-1 appearance-none shrink-0 rounded-md w-5 h-5 bg-foreground/10 after:content-[''] after:hidden checked:after:inline-block after:w-2 after:h-3.5 after:ms-1.5 after:mb-0.5 after:rotate-[40deg] after:border-b-3 after:border-r-3 checked:bg-sky-500 after:border-white dark:after:border-black"
-                                id="show-timestamps"
-                                name="show-timestamps"
-                                checked={showTimestamp}
-                                onChange={(e) => setShowTimestamp(e.target.checked)}
-                            />
-                        </div>
-                    </div>
-                    {!!selectedLog
-                        ? selectedLog in statuses && statuses[selectedLog].logs.length > 0
-                            ? statuses[selectedLog].logs.map((log, index) => (
-                                <>
-                                    <div className={clsx('text-sm',
-                                        {
-                                            'bg-red-700 dark:bg-red-300 text-background': log.message.toLowerCase().includes('error')
-                                        }
-                                    )}>
-                                        {showTimestamp && <span className={clsx('text-foreground/50 me-3',
-                                            {
-                                                'bg-red-700 dark:bg-red-300 text-background!': log.message.toLowerCase().includes('error')
-                                            }
-                                        )}>{log.timestamp}</span>}
-                                        <span>{log.message}</span>
-                                    </div>
-                                    {index < statuses[selectedLog].logs.length - 1 && log.message.startsWith('START RequestId') &&
-                                        <div className="w-full my-1 border-t-1 border-foreground/30"></div>}
-                                </>
-                            )) : ('No log found for this process')
-                        : (
-                            'Select logs to display'
-                        )
-                    }
-                </div>
+                </>}
             </div>
+
+            <div
+                className="relative w-full grow overflow-y-scroll flex flex-col p-3 rounded-xl bg-background border-1 border-foreground/10 dark:border-0 font-mono">
+                <div
+                    className="absolute top-0 right-0 py-1 px-2 bg-foreground/10 dark:bg-neutral-900 rounded-bl-xl rounded-tr-xl">
+                    <div className="flex items-center">
+                        <ClockIcon className="w-4 shrink-0"/>
+                        <label className="hidden md:flex items-center ms-1 font-sans text-sm"
+                               htmlFor="show-timestamps">Show
+                            timestamps</label>
+                        <div className="grow"></div>
+                        <input
+                            type="checkbox"
+                            className="relative peer ms-1 appearance-none shrink-0 rounded-md w-5 h-5 bg-foreground/10 after:content-[''] after:hidden checked:after:inline-block after:w-2 after:h-3.5 after:ms-1.5 after:mb-0.5 after:rotate-[40deg] after:border-b-3 after:border-r-3 checked:bg-sky-500 after:border-white dark:after:border-black"
+                            id="show-timestamps"
+                            name="show-timestamps"
+                            checked={showTimestamp}
+                            onChange={(e) => setShowTimestamp(e.target.checked)}
+                        />
+                    </div>
+                </div>
+                {!!selectedLog && !!statuses
+                    ? selectedLog in statuses && statuses[selectedLog].logs.length > 0
+                        ? statuses[selectedLog].logs.map((log, index) => (
+                            <>
+                                <div className={clsx('text-sm',
+                                    {
+                                        'bg-red-700 dark:bg-red-300 text-background': log.message.toLowerCase().includes('error')
+                                    }
+                                )}>
+                                    {showTimestamp && <span className={clsx('text-foreground/50 me-3',
+                                        {
+                                            'bg-red-700 dark:bg-red-300 text-background!': log.message.toLowerCase().includes('error')
+                                        }
+                                    )}>{log.timestamp}</span>}
+                                    <span>{log.message}</span>
+                                </div>
+                                {index < statuses[selectedLog].logs.length - 1 && log.message.startsWith('START RequestId') &&
+                                    <div className="w-full my-1 border-t-1 border-foreground/30"></div>}
+                            </>
+                        )) : ('No log found for this process')
+                    : (
+                        <div className="flex items-center justify-center h-full font-sans">
+                            {error
+                                ? <div
+                                    className="w-full md:w-100 p-3 flex flex-col items-center justify-center text-center">
+                                    <ExclamationCircleIcon className="w-16"/>
+                                    <div className="py-1">
+                                        <span className="font-bold">{error.name}</span> occurred while trying to fetch
+                                        statuses and logs: {error.message}
+                                    </div>
+                                </div>
+                                : <div className="text-foreground/50">
+                                    Select logs to display
+                                </div>
+                            }
+                        </div>
+                    )
+                }
+            </div>
+        </div>
     )
 }
 

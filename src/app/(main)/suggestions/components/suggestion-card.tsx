@@ -9,7 +9,7 @@ export default function SuggestionCard({suggestion, active}: { suggestion: Sugge
     return (
         <div
             className={clsx(
-                'w-full h-auto mb-1 p-3 flex rounded-md',
+                'w-full h-auto p-3 flex rounded-md',
                 {
                     'text-white shadow-lg': active === true,
                     'bg-background dark:bg-neutral-900 shadow-sm': active !== true

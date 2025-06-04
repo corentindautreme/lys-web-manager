@@ -162,7 +162,7 @@ async function fetchLysPublisherLogsForDateAndMode(date: Date, mode: 'daily' | '
                     return arr;
                 }, [])
                 // inject the index of the next header, regardless of the mode: that's the end of the logs of the mode
-                // we actually target)
+                // we actually target
                 .map(headerIndex => [headerIndex, logs.findIndex((e, idx) => idx > headerIndex && /(daily|weekly|5min)\\|(bluesky|threads|twitter)/.test(e.message))])
                 .flat();
             // drop last header (and subsequent logs) if the logs after it don't describe a full run
@@ -181,6 +181,7 @@ async function fetchLysPublisherLogsForDateAndMode(date: Date, mode: 'daily' | '
                 // can't close the last sub-window)
                 // !NOTE: we only iterate over even indices, since we injected an "end" boundary that we don't want to
                 // use as the start of the next window - hence the below filter
+                // eslint-disable-next-line @typescript-eslint/no-unused-vars
                 .filter((headerIndex, idx) => idx % 2 == 0)
                 .map((headerIndex, idx) => [headerIndex, idx < headerIndices.length - 1 ? headerIndices[idx + 1] : -1])
                 // for each sub-window, build a {publisher: LogEvent[]} object

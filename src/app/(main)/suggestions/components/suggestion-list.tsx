@@ -119,13 +119,13 @@ export default function SuggestionList({currentSuggestionId}: { currentSuggestio
                             </div>
                         ) : (
                             <>
-                                <div className="h-full flex flex-col">
+                                <div className="h-full flex flex-col gap-y-1">
                                     {modifiedCount > 0 &&
                                         <UnsavedSuggestionsBanner count={modifiedCount} suggestions={suggestions}
                                                                   events={events}
                                                                   callback={submittedSuggestionsCallback}/>}
 
-                                    <div className="flex mt-2 overflow-y-auto flex-col">
+                                    <div className="flex overflow-y-auto flex-col gap-y-1">
                                         {suggestions?.map(suggestion => {
                                                 return (
                                                     <div key={suggestion.id}>

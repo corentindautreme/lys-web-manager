@@ -2,7 +2,6 @@ import { Event, ValidEvent } from '@/app/types/events/event';
 import { clsx } from 'clsx';
 import { BackwardIcon, CheckIcon, ExclamationTriangleIcon, LinkIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { JSX } from 'react';
-import Link from 'next/link';
 
 export function EventCard({event, active, shorten}: { event: Event, active: boolean | undefined, shorten?: boolean }) {
     const date = new Date(event.dateTimeCet);
@@ -11,7 +10,7 @@ export function EventCard({event, active, shorten}: { event: Event, active: bool
     return (
         <div
             className={clsx(
-                'w-full h-auto mb-1 p-3 flex rounded-md',
+                'w-full h-auto p-3 flex rounded-md',
                 {
                     'text-white shadow-lg': active === true,
                     'bg-background dark:bg-neutral-900 shadow-sm': active !== true
@@ -80,54 +79,83 @@ export function EventCard({event, active, shorten}: { event: Event, active: bool
     );
 }
 
-export function EventCardLite({event, showLinks}: { event: ValidEvent, showLinks: 'live' | 'vod' | 'both' }) {
+export function EventCardLite({event, showLinks}: {
+    event: ValidEvent,
+    showLinks: 'live' | 'vod' | 'both'
+}) {
+    const date = new Date(event.dateTimeCet);
     const liveLinkCount = event.watchLinks.filter(l => l.live == 1).length;
     const replayableLinkCount = event.watchLinks.filter(l => l.replayable == 1).length;
     const time = event.dateTimeCet.substring(11, 16);
-
     return (
-        <Link href={`/events/edit/${event.id}#${event.id}`}>
-            <div className={clsx('shrink-0 flex rounded p-3',
+        <div className={clsx('flex rounded p-3',
+            {
+                'bg-background dark:bg-neutral-900 shadow-sm': !event.error,
+                'bg-red-400 text-white': event.error
+            }
+        )}>
+            <div className={clsx('flex grow',
                 {
-                    'bg-foreground/10': !event.error,
-                    'bg-red-400 text-white': event.error
+                    'line-through opacity-55 dark:opacity-30': !!event.deleted
                 }
             )}>
-                <div className={clsx('h-fill border-e-3 me-3',
+                <div className="flex flex-col justify-center items-center">
+                    <div
+                        className="text-3xl font-bold">{date.toLocaleString('default', {day: '2-digit'})}</div>
+                    <div className="text-base/3">{date.toLocaleString('en-GB', {month: 'short'})}</div>
+                </div>
+                <div className={clsx('h-fill border-e-3 mx-3',
                     {
-                        'border-sky-500': !event.error,
-                        'border-white': event.error
+                        'white': event.error,
+                        'border-sky-500': !event.error
                     }
                 )}></div>
                 <div className="flex-col">
-                    <div className="">
-                        <div className="text">{event.country}</div>
-                        <div className="text-sm">{event.stage}</div>
-                    </div>
-                    <div className="mt-1 flex">
-                        <Label icon={time != '00:00' ? 'ok' : 'ko'} style={event.error ? 'normal' : 'valid'}
-                               active={event.error} content={time}/>
-                        {/* When showing "both",
-                        * if no live link, show the "link" indicator (ko)
-                        * if live link(s) AND replayable links, show the "link" indicator (ok)
-                        * if live link(s) BUT no replayable links, show the "vod" indicator (ko)
-                    */}
-                        {/* When showing "live", show the "link" indicator (ok if live links, ko otherwise)) */}
-                        {/* When showing "vod", show the "vod link" indicator (ok if vod links, ko otherwise)) */}
-                        {(showLinks == 'live' || (showLinks == 'both' && (liveLinkCount == 0 || replayableLinkCount > 0))) &&
-                            <Label icon={liveLinkCount > 0 ? 'ok' : 'ko'} style={liveLinkCount > 0 ? 'valid' : 'error'}
-                                   active={event.error} content={<LinkIcon className="w-3.5"/>}/>
+                    <div className="text-xl/5 font-bold my-1">{event.country}</div>
+                    <div className={clsx('text-base/4 text-foreground/70',
+                        {
+                            'text-foreground/70': !event.error,
+                            'text-white': event.error
                         }
-                        {(showLinks == 'vod' || (showLinks == 'both' && liveLinkCount > 0 && replayableLinkCount == 0)) &&
-                            <Label icon={replayableLinkCount > 0 ? 'ok' : 'warn'}
-                                   style={replayableLinkCount > 0 ? 'valid' : 'error'}
-                                   active={event.error} content={<BackwardIcon className="w-3.5"/>}/>
-                        }
-                    </div>
+                    )}>{event.stage}</div>
+                    {event.watchLinks && (
+                        <div className="mt-2 flex">
+                            <Label icon={time != '00:00' ? 'ok' : 'ko'} style={event.error ? 'normal' : 'valid'}
+                                   active={event.error} content={time}/>
+                            {/* When showing "both",
+                                * if no live link, show the "link" indicator (ko)
+                                * if live link(s) AND replayable links, show the "link" indicator (ok)
+                                * if live link(s) BUT no replayable links, show the "vod" indicator (ko)
+                            */}
+                            {/* When showing "live", show the "link" indicator (ok if live links, ko otherwise)) */}
+                            {/* When showing "vod", show the "vod link" indicator (ok if vod links, ko otherwise)) */}
+                            {(showLinks == 'live' || (showLinks == 'both' && (liveLinkCount == 0 || replayableLinkCount > 0))) &&
+                                <Label icon={liveLinkCount > 0 ? 'ok' : 'ko'}
+                                       style={liveLinkCount > 0 ? 'valid' : 'error'}
+                                       active={event.error} content={<LinkIcon className="w-3.5"/>}/>
+                            }
+                            {(showLinks == 'vod' || (showLinks == 'both' && liveLinkCount > 0 && replayableLinkCount == 0)) &&
+                                <Label icon={replayableLinkCount > 0 ? 'ok' : 'warn'}
+                                       style={replayableLinkCount > 0 ? 'valid' : 'error'}
+                                       active={event.error} content={<BackwardIcon className="w-3.5"/>}/>
+                            }
+                        </div>
+                    )}
                 </div>
+                <div className="grow"></div>
+                {event.modified && !event.deleted && (
+                    <div className="flex items-center">
+                        <div className={clsx('rounded-xl w-2.5 h-2.5',
+                            {
+                                'bg-sky-500': !event.error,
+                                'bg-white': event.error
+                            }
+                        )}></div>
+                    </div>
+                )}
             </div>
-        </Link>
-    )
+        </div>
+    );
 }
 
 function Label({icon, content, style, active}: {

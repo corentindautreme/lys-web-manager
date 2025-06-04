@@ -2,7 +2,7 @@ import { SuggestionCardSkeleton } from '@/app/(main)/suggestions/components/sugg
 
 export default function SuggestionListSkeleton() {
     return (
-        <div className="mt-2">
+        <div className="flex flex-col gap-y-1">
             <SuggestionCardSkeleton/>
             <SuggestionCardSkeleton/>
             <SuggestionCardSkeleton/>

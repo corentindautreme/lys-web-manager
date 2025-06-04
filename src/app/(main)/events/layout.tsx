@@ -30,14 +30,14 @@ export default function Layout({children, events}: { children: React.ReactNode, 
                 ]}/>
                 {/*<EventFilters/>*/}
             </div>
-            <div className="h-full md:flex md:flex-row md:overflow-y-auto">
+            <div className="h-full md:flex md:flex-row md:gap-x-3 md:overflow-y-auto">
                 <div className="w-full flex-none md:w-[300px]">
                     {events}
                 </div>
                 <div className={clsx(
-                    'w-full flex-col md:flex md:flex-grow md:pl-8 md:overflow-y-auto',
+                    'w-full flex-col md:flex md:grow',
                     {
-                        'flex p-1 md:p-3 md:py-0': layoutSegment === 'edit' || layoutSegment === 'new',
+                        'flex': layoutSegment === 'edit' || layoutSegment === 'new',
                         'hidden': layoutSegment == null
                     }
                 )}>
