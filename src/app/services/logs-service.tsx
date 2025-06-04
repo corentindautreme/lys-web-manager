@@ -5,25 +5,49 @@ import {
     GetLogEventsCommand,
     GetLogEventsCommandOutput
 } from '@aws-sdk/client-cloudwatch-logs';
-import { LogEvent, LogsByProcess, ProcessStatuses } from '@/app/types/logs';
+import { LogEvent, LogsByProcess } from '@/app/types/logs';
+import { ProcessStatuses } from '@/app/types/status';
 
 const LYS_PUBLISHER_LAMBDA_NAME = 'Lys';
 
-export const EXPECTED_PUBLISHERS = ["daily|bluesky", "daily|threads", "daily|twitter", "5min|bluesky", "5min|threads", "5min|twitter", "weekly|bluesky", "weekly|threads", "weekly|twitter"]
+export const EXPECTED_PUBLISHERS = ['daily|bluesky', 'daily|threads', 'daily|twitter', '5min|bluesky', '5min|threads', '5min|twitter', 'weekly|bluesky', 'weekly|threads', 'weekly|twitter']
+
+const EXPECTED_DOWNTIME_IN_HOURS_BY_PROCESS: { [process: string]: number } = {
+    'daily|bluesky': 17,
+    'daily|threads': 17,
+    'daily|twitter': 17,
+    '5min|bluesky': 18,
+    '5min|threads': 18,
+    '5min|twitter': 18,
+    'weekly|bluesky': 7 * 24,
+    'weekly|threads': 7 * 24,
+    'weekly|twitter': 7 * 24,
+    'fetcher': 24,
+    'dump': 24,
+    'refresh': 24 * 31
+}
+
+function isLate(process: string, lastRun: string) {
+    const limitDate = new Date();
+    limitDate.setTime(limitDate.getTime() - EXPECTED_DOWNTIME_IN_HOURS_BY_PROCESS[process] * 3_600_000);
+    return lastRun < limitDate.toISOString();
+}
 
 export async function fetchLysProcessStatuses(): Promise<ProcessStatuses> {
     try {
         return Promise.all([
             fetchLysPublisherLogs(),
-            fetchLogsForLambda("LysEventFetcher").then(logs => ({"fetcher": logs} as LogsByProcess)),
-            fetchLogsForLambda("LysRefresh").then(logs => ({"refresh": logs} as LogsByProcess)),
-            fetchLogsForLambda("LysDump").then(logs => ({"dump": logs} as LogsByProcess))
+            fetchLogsForLambda('LysEventFetcher').then(logs => ({'fetcher': logs} as LogsByProcess)),
+            fetchLogsForLambda('LysRefresh').then(logs => ({'refresh': logs} as LogsByProcess)),
+            fetchLogsForLambda('LysDump').then(logs => ({'dump': logs} as LogsByProcess))
         ]).then(allLogsByProcess => {
             const logsByProcess: LogsByProcess = Object.assign({}, ...allLogsByProcess);
             const statuses: ProcessStatuses = {};
             Object.keys(logsByProcess).forEach(process => statuses[process] = {
-                success: logsByProcess[process].length > 0 && !logsByProcess[process].some(e => e.message.toLowerCase().includes("error")),
-                logs: logsByProcess[process].toSorted((e1, e2) => e2.timestamp.localeCompare(e1.timestamp))
+                success: logsByProcess[process].length > 0 && !logsByProcess[process].some(e => e.message.toLowerCase().includes('error')),
+                logs: logsByProcess[process].toSorted((e1, e2) => e2.timestamp.localeCompare(e1.timestamp)),
+                lastRun: logsByProcess[process].length == 0 ? undefined : logsByProcess[process][logsByProcess[process].length - 1].timestamp,
+                isLate: logsByProcess[process].length == 0 || isLate(process, logsByProcess[process][logsByProcess[process].length - 1].timestamp)
             });
             return statuses;
         });
@@ -32,7 +56,7 @@ export async function fetchLysProcessStatuses(): Promise<ProcessStatuses> {
     }
 }
 
-export async function fetchLogsForLambda(lambda: string): Promise<LogEvent[]> {
+export async function fetchLogsForLambda(lambda: string, logStreamPrefix?: string): Promise<LogEvent[]> {
     try {
         const client = new CloudWatchLogsClient({
             region: 'eu-west-3',
@@ -40,7 +64,8 @@ export async function fetchLogsForLambda(lambda: string): Promise<LogEvent[]> {
         const res: DescribeLogStreamsCommandOutput = await client.send(new DescribeLogStreamsCommand({
             logGroupName: `/aws/lambda/${lambda}`,
             descending: true,
-            orderBy: 'LastEventTime',
+            orderBy: !logStreamPrefix ? 'LastEventTime' : undefined,
+            logStreamNamePrefix: logStreamPrefix,
             limit: 10
         }));
         return Promise.all(res.logStreams!
@@ -94,16 +119,84 @@ export async function fetchLysPublisherLogs(): Promise<LogsByProcess> {
                         ? [...logsByPublisher[header], ...logs]
                         : logs;
                 });
+            return logsByPublisher;
+        }).then(logsByPublisher => {
+            // if the logs of at least one weekly publisher are missing, "manually" fetch them at the expected date (last
+            // sunday)
+            if (Object.keys(logsByPublisher).filter(p => p.includes("weekly")).length < 3) {
+                const lastSunday = new Date();
+                if (lastSunday.getDay() != 0 || lastSunday.getHours() <= 17) {
+                    lastSunday.setDate(lastSunday.getDate() - lastSunday.getDay());
+                }
+                return fetchLysPublisherLogsForDateAndMode(lastSunday, "weekly").then(weeklyPublisherLogs => {
+                    return Object.assign(logsByPublisher, weeklyPublisherLogs);
+                });
+            } else {
+                return logsByPublisher;
+            }
+        }).then(logsByPublisher => {
             // enrich with any expected but missing publisher
             EXPECTED_PUBLISHERS.forEach(publisher => {
                 if (!(publisher in logsByPublisher)) {
                     logsByPublisher[publisher] = [];
                 }
-            })
+            });
             return logsByPublisher;
         });
     } catch (error) {
         console.error(error);
+        throw error;
+    }
+}
+
+async function fetchLysPublisherLogsForDateAndMode(date: Date, mode: 'daily' | '5min' | 'weekly'): Promise<LogsByProcess> {
+    try {
+        const logStreamPrefixForDate = date.toLocaleString('eu', {year: 'numeric', month: '2-digit', day: '2-digit'});
+        return fetchLogsForLambda(LYS_PUBLISHER_LAMBDA_NAME, logStreamPrefixForDate).then(logs => {
+            // find where the run headers of the target mode (i.e. {mode}|{target}) are located
+            const headerIndices = logs
+                .reduce((arr: number[], e, i) => {
+                    if (new RegExp(mode + '\\|(bluesky|threads|twitter)').test(e.message)) {
+                        arr.push(i);
+                    }
+                    return arr;
+                }, [])
+                // inject the index of the next header, regardless of the mode: that's the end of the logs of the mode
+                // we actually target)
+                .map(headerIndex => [headerIndex, logs.findIndex((e, idx) => idx > headerIndex && /(daily|weekly|5min)\\|(bluesky|threads|twitter)/.test(e.message))])
+                .flat();
+            // drop last header (and subsequent logs) if the logs after it don't describe a full run
+            const lastHeaderIndex = headerIndices[headerIndices.length - 1];
+            let consideredLogs: LogEvent[];
+            if (!logs.slice(lastHeaderIndex, logs.length).some(e => e.message.startsWith('REPORT'))) {
+                consideredLogs = logs.slice(0, lastHeaderIndex)
+                headerIndices.splice(headerIndices.length - 1);
+            } else {
+                consideredLogs = logs;
+            }
+            const logsByPublisher: LogsByProcess = {};
+            headerIndices
+                // create sub-windows of 2 indices
+                // (the last index of the last window is defaulted to -1 if we've reached the end of the indices array and
+                // can't close the last sub-window)
+                // !NOTE: we only iterate over even indices, since we injected an "end" boundary that we don't want to
+                // use as the start of the next window - hence the below filter
+                .filter((headerIndex, idx) => idx % 2 == 0)
+                .map((headerIndex, idx) => [headerIndex, idx < headerIndices.length - 1 ? headerIndices[idx + 1] : -1])
+                // for each sub-window, build a {publisher: LogEvent[]} object
+                .forEach(([from, to]) => {
+                    // there's always a "START RequestId..." log before the header => to catch all logs of a run, we
+                    // need to pick one log before the header, and drop one log before the next one
+                    const logs = consideredLogs.slice(from - 1, to == -1 ? consideredLogs.length : to - 1);
+                    const header = logs[1].message
+                    logsByPublisher[header] = header in logsByPublisher
+                        ? [...logsByPublisher[header], ...logs]
+                        : logs;
+                });
+            return logsByPublisher;
+        })
+    } catch (error) {
+        console.log(error);
         throw error;
     }
 }

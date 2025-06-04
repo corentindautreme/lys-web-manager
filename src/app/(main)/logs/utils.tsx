@@ -2,7 +2,7 @@
 
 import useSWR from 'swr';
 import { fetcher } from '@/app/utils/fetching-utils';
-import { ProcessStatuses } from '@/app/types/logs';
+import { ProcessStatuses } from '@/app/types/status';
 
 export function useStatuses(): {
     statuses: ProcessStatuses,

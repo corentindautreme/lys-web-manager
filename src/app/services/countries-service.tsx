@@ -165,6 +165,90 @@ export function getCountries(): Country[] {
                     'replayable': 0
                 }
             ]
+        },
+        {
+            "eventName": "Uuden Musiikin Kilpailu",
+            "scheduleDeviceTime": 0,
+            "watchLinks": [
+                {
+                    "accountRequired": 0,
+                    "replayable": 0,
+                    "castable": 1,
+                    "channel": "Yle TV1",
+                    "link": "https://areena.yle.fi/tv/ohjelmat/yle-tv1",
+                    "comment": "Recommended link",
+                    "geoblocked": 0,
+                    "live": 1
+                }
+            ],
+            "countryCode": "FI",
+            "likelyDates": [
+                "03A",
+                "02B",
+                "02A"
+            ],
+            "stages": [
+                "Semi-final...",
+                "Final"
+            ],
+            "scheduleLink": "https://areena.yle.fi/tv/opas",
+            "defaultChannel": "Yle TV1",
+            "id": 15,
+            "altEventNames": [
+                "UMK"
+            ],
+            "country": "Finland"
+        },
+        {
+            "eventName": "Eurovision: You Decide",
+            "watchLinks": [],
+            "countryCode": "GB",
+            "likelyDates": [
+                "02B",
+                "02A",
+                "01B"
+            ],
+            "stages": [
+                "Semi-final...",
+                "Final"
+            ],
+            "id": 50,
+            "altEventNames": [
+                "You Decide"
+            ],
+            "country": "United Kingdom"
+        },
+        {
+            "eventName": "Australia Decides",
+            "scheduleDeviceTime": 0,
+            "watchLinks": [
+                {
+                    "accountRequired": 0,
+                    "replayable": 0,
+                    "castable": 0,
+                    "channel": "SBS",
+                    "link": "https://www.facebook.com/SBSEurovision",
+                    "comment": "Recommended link",
+                    "geoblocked": 0,
+                    "live": 1
+                }
+            ],
+            "countryCode": "AU",
+            "likelyDates": [
+                "02B",
+                "02A"
+            ],
+            "stages": [
+                "Semi-final...",
+                "Final"
+            ],
+            "scheduleLink": "https://www.sbs.com.au/guide/day#/",
+            "defaultChannel": "SBS",
+            "id": 3,
+            "altEventNames": [
+                "-"
+            ],
+            "country": "Australia"
         }
     ];
 }

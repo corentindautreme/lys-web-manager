@@ -10,7 +10,7 @@ export default function Layout({children, countries}: { children: React.ReactNod
     const layoutSegment = useSelectedLayoutSegment();
 
     return (
-        <main className="h-full md:flex md:flex-col">
+        <main className="h-full md:flex md:flex-col p-3 md:p-6">
             <div className={clsx('flex flex-col w-full',
                 {
                     'hidden md:block': layoutSegment === 'edit' || layoutSegment === 'new',
