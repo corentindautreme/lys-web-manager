@@ -8,6 +8,7 @@ export function getSuggestions(): Suggestion[] {
     return [
         {
             "id": 1257,
+            "reprocessable": true,
             "accepted": false,
             "country": "Finland",
             "dateTimesCet": [
@@ -23,6 +24,7 @@ export function getSuggestions(): Suggestion[] {
         },
         {
             "id": 1256,
+            "reprocessable": true,
             "accepted": false,
             "country": "United Kingdom",
             "dateTimesCet": [
@@ -38,6 +40,7 @@ export function getSuggestions(): Suggestion[] {
         },
         {
             "id": 1255,
+            "reprocessable": true,
             "accepted": false,
             "country": "Australia",
             "dateTimesCet": [
@@ -130,8 +133,20 @@ export async function fetchSuggestions(): Promise<Suggestion[]> {
         return suggestions
             ? suggestions
                 .map(suggestion => unmarshall(suggestion) as Suggestion)
-                .filter(suggestion => !suggestion.processed)
+                .map(suggestion => {
+                    const dateInSourceLink = /https:\/\/eurovoix\.com\/(\d{4}\/\d{2}\/\d{2})\/.*/.exec(suggestion.sourceLink);
+                    const extractionDate = dateInSourceLink && dateInSourceLink[1]
+                        ? dateInSourceLink[1].replaceAll('/', '-') + "T00:00:00"
+                        : undefined;
+                    return {
+                    ...suggestion,
+                        reprocessable: false,
+                        extractionDate: extractionDate
+                    }
+                })
+                // .filter(suggestion => !suggestion.processed)
                 .sort((s1: Suggestion, s2: Suggestion) => s2.id - s1.id)
+                .slice(0, 30)
             : [];
     } catch (error) {
         console.log(error);
@@ -141,7 +156,7 @@ export async function fetchSuggestions(): Promise<Suggestion[]> {
 
 function toLysSuggestion(suggestion: Suggestion): LysSuggestion {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const {events: _, ...lysSuggestion} = suggestion;
+    const {events: _, reprocessable: __, extractionDate: ___, ...lysSuggestion} = suggestion;
     return lysSuggestion;
 }
 
