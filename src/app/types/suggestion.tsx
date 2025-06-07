@@ -23,6 +23,8 @@ export type GeneratedEvent = Event & {
 
 export interface Suggestion extends LysSuggestion {
     events?: GeneratedEvent[];
+    reprocessable: boolean;
+    extractionDate?: string;
 }
 
 export interface SourceDetails {

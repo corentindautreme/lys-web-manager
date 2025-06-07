@@ -24,13 +24,16 @@ import { clsx } from 'clsx';
 import { EventCard } from '@/app/components/events/event/event-cards';
 import { insertHeader } from '@/app/(main)/events/components/event-list';
 import { useBreakpoint } from '@/app/utils/display-utils';
-import SourcePreview from '@/app/(main)/suggestions/components/source-preview';
+import { SourcePreview } from '@/app/(main)/suggestions/components/source-preview';
+import { useSearchParams } from 'next/navigation';
 
 export default function SuggestionDetails({suggestionParam, countryData, onSubmit}: {
     suggestionParam: Suggestion,
     countryData: Country,
     onSubmit: (suggestion: Suggestion) => Promise<never>
 }) {
+    const queryParams = useSearchParams();
+    const showProcessed = queryParams.get('showProcessed') === 'true' || false;
     const [suggestion, setSuggestion] = useState(suggestionParam);
     const [events, setEvents] = useState<GeneratedEvent[]>([]);
     const [unfoldedAll, unfoldAll] = useState(false);
@@ -176,7 +179,7 @@ export default function SuggestionDetails({suggestionParam, countryData, onSubmi
             <div className="bg-background px-1 py-3 md:p-3 rounded-xl dark:bg-neutral-900 md:overflow-y-auto">
                 <div className="flex items-center justify-between px-1 space-x-2">
                     <Link
-                        href={`/suggestions`}
+                        href={`/suggestions${showProcessed ? '?showProcessed=true' : ''}`}
                         className="flex flex-row items-center"
                     >
                         <ArrowLeftIcon className="w-6"/>
@@ -244,7 +247,11 @@ export default function SuggestionDetails({suggestionParam, countryData, onSubmi
                         </h2>
 
                         <div className="mt-3 md:px-3">
-                            <SourcePreview sourceLink={suggestion.sourceLink}/>
+                            <SourcePreview
+                                sourceLink={suggestion.sourceLink}
+                                source="Eurovoix"
+                                date={suggestion.extractionDate}
+                            />
                         </div>
 
                         <h2 className="text-lg flex items-center my-2">
@@ -299,7 +306,7 @@ export default function SuggestionDetails({suggestionParam, countryData, onSubmi
                         ) : (
                             <div className="mt-4">
                                 <div className="bg-gray-100 dark:bg-background p-5 m-auto rounded-2xl">
-                                    <div className="w-full xl:w-[300px]">
+                                    <div className="flex flex-col gap-y-1 w-full xl:w-[300px]">
                                         {events.map((event, index) => (
                                             <>
                                                 {insertHeader(event, index > 0 ? events[index - 1] : undefined)}
@@ -333,7 +340,12 @@ function SuggestionActionButtons({suggestion, accept, discard, reprocess}: {
             {suggestion.processed ? (
                 <form className="grow md:grow-0" action={async () => await reprocess()}>
                     <button
-                        className="w-full px-2 rounded-md  bg-gray-200 dark:bg-neutral-800">
+                        disabled={!suggestion.reprocessable}
+                        className={clsx('w-full px-2 rounded-md',
+                            {
+                                'text-foreground/50 cursor-not-allowed': !suggestion.reprocessable,
+                                'bg-gray-200 dark:bg-neutral-800': suggestion.reprocessable
+                            })}>
                         <div className="flex items-center justify-center">
                             <ArrowUturnLeftIcon className="w-5 me-1"/>
                             <span className="block py-2 md:py-1 md:text-base">Reprocess</span>
