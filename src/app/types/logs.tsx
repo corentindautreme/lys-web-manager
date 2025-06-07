@@ -1,6 +1,8 @@
-export type LogEvent = {
+export interface LogEvent {
     timestamp: string;
     message: string;
 }
 
-export type LogsByProcess = { [process: string]: LogEvent[] };
+export interface LogsByProcess {
+    [process: string]: LogEvent[];
+}

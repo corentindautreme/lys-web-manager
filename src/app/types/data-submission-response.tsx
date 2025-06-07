@@ -1,4 +1,4 @@
-export type DataSubmissionResponse = {
+export interface DataSubmissionResponse {
     success: boolean;
     error?: string;
     message?: string;

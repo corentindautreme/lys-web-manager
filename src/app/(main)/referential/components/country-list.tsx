@@ -84,13 +84,13 @@ export default function CountryList({currentCountryId}: { currentCountryId?: num
         <>
             {!isLoading && !!countryData ? (
                 <>
-                    <div className="h-full flex flex-col">
+                    <div className="h-full flex flex-col gap-y-1">
                         {modifiedCount > 0 &&
                             <UnsavedCountryDataBanner count={modifiedCount} countryData={countryData}
                                                       callback={mutate}/>
                         }
 
-                        <div className="flex mt-2 overflow-y-auto flex-col">
+                        <div className="flex flex-col gap-y-1 overflow-y-auto">
                             {countryData?.map(countryData => {
                                     return (
                                         <div key={countryData.id}>

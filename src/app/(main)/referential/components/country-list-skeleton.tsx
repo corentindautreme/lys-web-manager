@@ -2,7 +2,7 @@ import { CountryCardSkeleton } from '@/app/(main)/referential/components/country
 
 export default function CountryListSkeleton() {
     return (
-        <div className="mt-4">
+        <div className="flex flex-col gap-y-1">
             <CountryCardSkeleton/>
             <CountryCardSkeleton/>
             <CountryCardSkeleton/>

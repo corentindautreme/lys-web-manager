@@ -7,7 +7,7 @@ import { publishEventChanges } from '@/app/services/events-service';
 import { Event } from '@/app/types/events/event';
 
 export async function submitSuggestions(suggestions: Suggestion[]): Promise<DataSubmissionResponse> {
-    const processedSuggestions = suggestions.filter(s => s.processed);
+    const processedSuggestions = suggestions.filter(s => s.reprocessable && s.processed);
     try {
         const events = processedSuggestions
             .filter(s => s.accepted)

@@ -219,6 +219,577 @@ export function getCountries(): Country[] {
             "country": "United Kingdom"
         },
         {
+            "eventName": "Depi Evratesil",
+            "scheduleDeviceTime": 0,
+            "watchLinks": [
+                {
+                    "accountRequired": 0,
+                    "replayable": 0,
+                    "castable": 1,
+                    "channel": "1TV",
+                    "link": "https://live.1tv.am/watch/First%20Channel%20International",
+                    "comment": "Recommended link",
+                    "geoblocked": 0,
+                    "live": 1
+                }
+            ],
+            "countryCode": "AM",
+            "likelyDates": [
+                "02A",
+                "02B",
+                "03A"
+            ],
+            "stages": [
+                "Semi-final...",
+                "Final"
+            ],
+            "scheduleLink": "https://www.1tv.am/en/schedule",
+            "defaultChannel": "1TV",
+            "id": 2,
+            "altEventNames": [
+                "-"
+            ],
+            "country": "Armenia"
+        },
+        {
+            "eventName": "Eurosong",
+            "scheduleDeviceTime": 0,
+            "watchLinks": [
+                {
+                    "accountRequired": 0,
+                    "replayable": 0,
+                    "castable": 0,
+                    "channel": "VRT1",
+                    "link": "https://www.vrt.be/vrtnu/livestream/video/een/https://www.vrt.be/vrtmax/livestream/video/vrt1/",
+                    "comment": "Recommended link",
+                    "geoblocked": 1,
+                    "live": 1
+                },
+                {
+                    "accountRequired": 0,
+                    "replayable": 0,
+                    "castable": 0,
+                    "channel": "VRT1",
+                    "link": "https://live.esc-plus.com/",
+                    "geoblocked": 0,
+                    "live": 1
+                }
+            ],
+            "countryCode": "BE",
+            "likelyDates": [
+                "01A",
+                "01B"
+            ],
+            "stages": [
+                "Semi-final...",
+                "Final"
+            ],
+            "scheduleLink": "https://www.vrt.be/vrtnu/tv-gids/",
+            "defaultChannel": "VRT1",
+            "id": 7,
+            "altEventNames": [
+                "-"
+            ],
+            "country": "Belgium"
+        },
+        {
+            "eventName": "Germany 12 Points",
+            "scheduleDeviceTime": 0,
+            "watchLinks": [
+                {
+                    "accountRequired": 0,
+                    "replayable": 0,
+                    "castable": 0,
+                    "channel": "RTL1",
+                    "link": "https://plus.rtl.de/video-tv/live-tv/rtl-1",
+                    "comment": "Recommended link",
+                    "geoblocked": 0,
+                    "live": 1
+                }
+            ],
+            "countryCode": "DE",
+            "likelyDates": [
+                "02B",
+                "02A",
+                "03A"
+            ],
+            "stages": [
+                "Night...",
+                "Final"
+            ],
+            "defaultChannel": "Das Erste",
+            "id": 18,
+            "altEventNames": [
+                "-"
+            ],
+            "country": "Germany"
+        },
+        {
+            "eventName": "Söngvakeppnin",
+            "scheduleDeviceTime": 0,
+            "watchLinks": [
+                {
+                    "accountRequired": 0,
+                    "replayable": 0,
+                    "castable": 0,
+                    "channel": "RÚV",
+                    "link": "https://www.ruv.is/sjonvarp/beint?channel=ruv",
+                    "comment": "Recommended link",
+                    "geoblocked": 0,
+                    "live": 1
+                },
+                {
+                    "accountRequired": 0,
+                    "replayable": 1,
+                    "castable": 0,
+                    "channel": "RÚV",
+                    "link": "https://www.ruv.is/sjonvarp/leit/s%C3%B6ngvakeppnin",
+                    "geoblocked": 0,
+                    "live": 0
+                }
+            ],
+            "countryCode": "IS",
+            "likelyDates": [
+                "02A",
+                "02B",
+                "03A"
+            ],
+            "stages": [
+                "Semi-final...",
+                "Final"
+            ],
+            "scheduleLink": "https://www.ruv.is/sjonvarp/dagskra/ruv/",
+            "defaultChannel": "RÚV",
+            "id": 21,
+            "altEventNames": [
+                "-"
+            ],
+            "country": "Iceland"
+        },
+        {
+            "eventName": "The Late Late Show",
+            "scheduleDeviceTime": 1,
+            "watchLinks": [
+                {
+                    "accountRequired": 0,
+                    "replayable": 0,
+                    "castable": 0,
+                    "channel": "RTÉ One",
+                    "link": "https://www.rte.ie/player/onnow",
+                    "comment": "Recommended link",
+                    "geoblocked": 0,
+                    "live": 1
+                },
+                {
+                    "accountRequired": 0,
+                    "replayable": 1,
+                    "castable": 0,
+                    "channel": "RTÉ One",
+                    "link": "https://www.rte.ie/player/series/the-late-late-show/SI0000001694?epguid=IH000413628",
+                    "geoblocked": 0,
+                    "live": 0
+                }
+            ],
+            "countryCode": "IE",
+            "likelyDates": [],
+            "stages": [
+                "Night...",
+                "Final"
+            ],
+            "scheduleLink": "https://www.rte.ie/entertainment/listings/television/#!/rte1",
+            "defaultChannel": "RTÉ One",
+            "id": 22,
+            "altEventNames": [
+                "-"
+            ],
+            "country": "Ireland"
+        },
+        {
+            "eventName": "Festival di Sanremo",
+            "scheduleDeviceTime": 0,
+            "watchLinks": [
+                {
+                    "accountRequired": 0,
+                    "replayable": 0,
+                    "castable": 1,
+                    "channel": "Rai 1",
+                    "link": "https://www.raiplay.it/dirette/rai1",
+                    "comment": "Recommended link",
+                    "geoblocked": 0,
+                    "live": 1
+                },
+                {
+                    "accountRequired": 0,
+                    "replayable": 1,
+                    "castable": 1,
+                    "channel": "Rai 1",
+                    "link": "https://www.raiplay.it/programmi/festivaldisanremo/le-serate/le-serate",
+                    "geoblocked": 0,
+                    "live": 0
+                }
+            ],
+            "countryCode": "IT",
+            "likelyDates": [
+                "02A"
+            ],
+            "stages": [
+                "Night...",
+                "Final"
+            ],
+            "scheduleLink": "https://www.raiplay.it/guidatv",
+            "defaultChannel": "Rai 1",
+            "id": 24,
+            "altEventNames": [
+                "Sanremo"
+            ],
+            "country": "Italy"
+        },
+        {
+            "eventName": "Supernova",
+            "scheduleDeviceTime": 0,
+            "watchLinks": [
+                {
+                    "accountRequired": 0,
+                    "replayable": 0,
+                    "castable": 1,
+                    "channel": "LTV1",
+                    "link": "https://replay.lsm.lv/lv/skaties/tiesraide/ltv1/rita-panorama",
+                    "comment": "Recommended link",
+                    "geoblocked": 0,
+                    "live": 1
+                },
+                {
+                    "accountRequired": 0,
+                    "replayable": 1,
+                    "castable": 1,
+                    "channel": "LTV1",
+                    "link": "https://replay.lsm.lv/lv/raidijums/357/supernova?type=all",
+                    "geoblocked": 0,
+                    "live": 0
+                }
+            ],
+            "countryCode": "LV",
+            "likelyDates": [
+                "02A",
+                "02B",
+                "01B"
+            ],
+            "stages": [
+                "Semi-final...",
+                "Final"
+            ],
+            "scheduleLink": "https://replay.lsm.lv/lv/programma",
+            "defaultChannel": "LTV1",
+            "id": 25,
+            "altEventNames": [
+                "-"
+            ],
+            "country": "Latvia"
+        },
+        {
+            "eventName": "Eurovizija.LT",
+            "scheduleDeviceTime": 0,
+            "watchLinks": [
+                {
+                    "accountRequired": 0,
+                    "replayable": 0,
+                    "castable": 1,
+                    "channel": "LRT televizija",
+                    "link": "https://lrt.lt/mediateka/tiesiogiai/lrt-televizija",
+                    "comment": "Recommended link",
+                    "geoblocked": 0,
+                    "live": 1
+                },
+                {
+                    "accountRequired": 0,
+                    "replayable": 0,
+                    "castable": 1,
+                    "channel": "LRT televizija",
+                    "link": "https://youtube.com/@LRTinklas",
+                    "geoblocked": 0,
+                    "live": 1
+                },
+                {
+                    "accountRequired": 0,
+                    "replayable": 1,
+                    "castable": 1,
+                    "channel": "LRT televizija",
+                    "link": "https://www.lrt.lt/mediateka/video/eurovizija",
+                    "geoblocked": 0,
+                    "live": 0
+                }
+            ],
+            "countryCode": "LT",
+            "likelyDates": [
+                "01A",
+                "01B",
+                "02A"
+            ],
+            "stages": [
+                "Heat...",
+                "Semi-final 1",
+                "Semi-final 2",
+                "Final"
+            ],
+            "scheduleLink": "https://www.lrt.lt/programa",
+            "defaultChannel": "LRT televizija",
+            "id": 26,
+            "altEventNames": [],
+            "country": "Lithuania"
+        },
+        {
+            "eventName": "Malta Eurovision Song Contest",
+            "scheduleDeviceTime": 0,
+            "watchLinks": [
+                {
+                    "accountRequired": 0,
+                    "replayable": 0,
+                    "castable": 0,
+                    "channel": "TVM",
+                    "link": "https://tvmi.mt/live/2",
+                    "comment": "Recommended link",
+                    "geoblocked": 0,
+                    "live": 1
+                },
+                {
+                    "accountRequired": 0,
+                    "replayable": 1,
+                    "castable": 1,
+                    "channel": "TVM",
+                    "link": "https://tvmi.mt/series/383",
+                    "geoblocked": 0,
+                    "live": 0
+                }
+            ],
+            "countryCode": "MT",
+            "likelyDates": [
+                "02A",
+                "02B",
+                "01B"
+            ],
+            "stages": [
+                "Semi-final...",
+                "Final"
+            ],
+            "scheduleLink": "https://tvmi.mt/schedule",
+            "defaultChannel": "TVM",
+            "id": 28,
+            "altEventNames": [
+                "MESC"
+            ],
+            "country": "Malta"
+        },
+        {
+            "eventName": "EMA",
+            "scheduleDeviceTime": 0,
+            "watchLinks": [
+                {
+                    "accountRequired": 0,
+                    "replayable": 0,
+                    "castable": 1,
+                    "channel": "TV SLO 1",
+                    "link": "https://www.rtvslo.si/tv/vzivo/tvs1",
+                    "comment": "Recommended link",
+                    "geoblocked": 0,
+                    "live": 1
+                },
+                {
+                    "accountRequired": 0,
+                    "replayable": 1,
+                    "castable": 1,
+                    "channel": "TV SLO 1",
+                    "link": "https://365.rtvslo.si/oddaja/ema/484",
+                    "geoblocked": 0,
+                    "live": 0
+                }
+            ],
+            "countryCode": "SI",
+            "likelyDates": [
+                "02B",
+                "02A"
+            ],
+            "stages": [
+                "Semi-final...",
+                "Final"
+            ],
+            "scheduleLink": "https://www.rtvslo.si/tv/spored/tvs1/",
+            "defaultChannel": "TV SLO 1",
+            "id": 43,
+            "altEventNames": [
+                "Evrovizijska Melodija",
+                "EMA"
+            ],
+            "country": "Slovenia"
+        },
+        {
+            "eventName": "National Selection",
+            "scheduleDeviceTime": 0,
+            "watchLinks": [
+                {
+                    "accountRequired": 0,
+                    "replayable": 0,
+                    "castable": 0,
+                    "channel": "TVP Polonia",
+                    "link": "https://vod.tvp.pl/live,1/tvp-polonia,399723",
+                    "comment": "Recommended link",
+                    "geoblocked": 0,
+                    "live": 1
+                },
+                {
+                    "accountRequired": 0,
+                    "replayable": 0,
+                    "castable": 0,
+                    "channel": "TVP Polonia",
+                    "link": "https://vod.tvp.pl/na-zywo",
+                    "geoblocked": 0,
+                    "live": 1
+                }
+            ],
+            "countryCode": "PL",
+            "likelyDates": [
+                "02A",
+                "02B",
+                "03A"
+            ],
+            "stages": [
+                "Show...",
+                "Final"
+            ],
+            "scheduleLink": "https://www.tvp.pl/program-tv",
+            "defaultChannel": "TVP1",
+            "id": 36,
+            "altEventNames": [
+                "-"
+            ],
+            "country": "Poland"
+        },
+        {
+            "eventName": "Eesti Laul",
+            "scheduleDeviceTime": 0,
+            "watchLinks": [
+                {
+                    "accountRequired": 0,
+                    "replayable": 0,
+                    "castable": 0,
+                    "channel": "ETV",
+                    "link": "https://otse.err.ee/k/etv",
+                    "comment": "Recommended link",
+                    "geoblocked": 0,
+                    "live": 1
+                },
+                {
+                    "accountRequired": 0,
+                    "replayable": 0,
+                    "castable": 1,
+                    "channel": "ETV",
+                    "link": "https://jupiter.err.ee/etv",
+                    "geoblocked": 0,
+                    "live": 1
+                },
+                {
+                    "accountRequired": 0,
+                    "replayable": 1,
+                    "castable": 1,
+                    "channel": "ETV",
+                    "link": "https://jupiter.err.ee/search?phrase=Eesti%20laul",
+                    "geoblocked": 0,
+                    "live": 0
+                }
+            ],
+            "countryCode": "EE",
+            "likelyDates": [
+                "02A",
+                "02B",
+                "03A",
+                "01B",
+                "01A"
+            ],
+            "stages": [
+                "Semi-final...",
+                "Final"
+            ],
+            "scheduleLink": "https://jupiter.err.ee/etv",
+            "defaultChannel": "ETV",
+            "id": 14,
+            "altEventNames": [
+                "-"
+            ],
+            "country": "Estonia"
+        },
+        {
+            "eventName": "Festival de Benidorm",
+            "scheduleDeviceTime": 0,
+            "watchLinks": [
+                {
+                    "accountRequired": 0,
+                    "replayable": 0,
+                    "castable": 0,
+                    "channel": "La 1",
+                    "link": "https://www.rtve.es/play/videos/directo/canales-lineales/la-1/",
+                    "comment": "Recommended link",
+                    "geoblocked": 0,
+                    "live": 1
+                },
+                {
+                    "accountRequired": 0,
+                    "replayable": 1,
+                    "castable": 0,
+                    "channel": "La 1",
+                    "link": "https://www.rtve.es/play/videos/benidorm-fest/",
+                    "geoblocked": 0,
+                    "live": 0
+                }
+            ],
+            "countryCode": "ES",
+            "likelyDates": [
+                "01B",
+                "02A"
+            ],
+            "stages": [
+                "Semi-final...",
+                "Final"
+            ],
+            "scheduleLink": "https://www.rtve.es/play/guia-tve/",
+            "defaultChannel": "La 1",
+            "id": 44,
+            "altEventNames": [
+                "-"
+            ],
+            "country": "Spain"
+        },
+        {
+            "eventName": "Natsvidbir",
+            "scheduleDeviceTime": 0,
+            "watchLinks": [
+                {
+                    "accountRequired": 0,
+                    "replayable": 1,
+                    "castable": 1,
+                    "channel": "Suspilne Kultura",
+                    "link": "https://youtube.com/channel/UCHTl8A94cnvWKGntLjhSIHA",
+                    "comment": "Recommended link",
+                    "geoblocked": 0,
+                    "live": 1
+                }
+            ],
+            "countryCode": "UA",
+            "likelyDates": [
+                "02A",
+                "02B"
+            ],
+            "stages": [
+                "Semi-final...",
+                "Final"
+            ],
+            "scheduleLink": "https://vo.suspilne.media/schedule",
+            "defaultChannel": "Suspilne Kultura",
+            "id": 48,
+            "altEventNames": [
+                "Vidbir"
+            ],
+            "country": "Ukraine"
+        },
+        {
             "eventName": "Australia Decides",
             "scheduleDeviceTime": 0,
             "watchLinks": [

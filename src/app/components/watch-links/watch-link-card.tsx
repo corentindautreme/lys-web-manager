@@ -71,9 +71,9 @@ export default function WatchLinkCard({id, watchLinkParam, changeCallback, edita
     const deleteWatchLink = changeCallback.bind(null, id, watchLink, true);
 
     return (
-        <div data-swapy-slot={id}>
+        <div data-swapy-slot={id} className="data-[swapy-highlighted]:bg-foreground/10 data-[swapy-highlighted]:rounded-lg">
             <div
-                className={clsx('gap-2 p-3 rounded-lg bg-background dark:bg-neutral-900',
+                className={clsx('gap-2 p-3 rounded-lg bg-background dark:bg-neutral-900 data-[swapy-dragging]:opacity-60',
                     {
                         'border-1 border-foreground/20': !isNew,
                         'border-2 border-foreground/30 border-dashed': isNew

@@ -9,7 +9,7 @@ export default function SuggestionCard({suggestion, active}: { suggestion: Sugge
     return (
         <div
             className={clsx(
-                'w-full h-auto mb-1 p-3 flex rounded-md',
+                'w-full h-auto p-3 flex rounded-md',
                 {
                     'text-white shadow-lg': active === true,
                     'bg-background dark:bg-neutral-900 shadow-sm': active !== true
@@ -41,7 +41,7 @@ export default function SuggestionCard({suggestion, active}: { suggestion: Sugge
 
                     <div className="mt-2 flex flex-wrap">
                         {
-                            displayedDates.slice(0, 4).map((suggestedDate, index) => {
+                            displayedDates.slice(0, 3).map((suggestedDate, index) => {
                                 const date = new Date(suggestedDate.dateTimeCet);
                                 const formattedDate = date.toLocaleString('en-US', {month: 'short', day: 'numeric'});
                                 return (
@@ -55,12 +55,12 @@ export default function SuggestionCard({suggestion, active}: { suggestion: Sugge
                                 );
                             })
                         }
-                        {displayedDates.length > 4 && (
+                        {displayedDates.length > 3 && (
                             <Label
                                 style="accent"
                                 active={!!active}
                                 discarded={suggestion.processed && !suggestion.accepted}
-                                content={`+ ${displayedDates.length - 4}`}
+                                content={`+ ${displayedDates.length - 3}`}
                             />
                         )}
                     </div>

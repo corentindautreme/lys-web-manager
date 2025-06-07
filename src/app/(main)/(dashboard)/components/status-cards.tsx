@@ -4,7 +4,7 @@ import {
     CheckCircleIcon,
     CheckIcon,
     ChevronDownIcon,
-    ChevronUpIcon,
+    ChevronUpIcon, ExclamationCircleIcon,
     ExclamationTriangleIcon,
     XCircleIcon,
     XMarkIcon
@@ -17,7 +17,7 @@ import { clsx } from 'clsx';
 import Link from 'next/link';
 
 export function StatusCards() {
-    const {statuses: loadedStatuses} = useStatuses();
+    const {statuses: loadedStatuses, error} = useStatuses();
     const [statuses, setStatuses] = useState<ProcessStatuses>();
 
     useEffect(() => {
@@ -25,6 +25,17 @@ export function StatusCards() {
             setStatuses(loadedStatuses);
         }
     }, [loadedStatuses])
+
+    if (error) return (<div className="flex items-center justify-center h-full font-sans">
+        <div
+                className="w-full md:w-100 p-3 flex flex-col items-center justify-center text-center">
+                <ExclamationCircleIcon className="w-16"/>
+                <div className="py-1">
+                    <span className="font-bold">{error.name}</span> occurred while trying to fetch
+                    statuses and logs: {error.message}
+                </div>
+            </div>
+    </div>);
 
     return (
         !statuses
