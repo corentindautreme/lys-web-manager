@@ -28,5 +28,4 @@ jobs:
         env:
           DEPLOYED_URL: ${{ github.event.client_payload.url }}
         run: |
-          vercel alias rm lys-web-manager-preview.vercel.app --yes --token=${{ secrets.VERCEL_TOKEN }}
           vercel alias set $DEPLOYED_URL lys-web-manager-preview.vercel.app --token=${{ secrets.VERCEL_TOKEN }}
