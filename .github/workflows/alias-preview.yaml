@@ -1,5 +1,8 @@
 name: Create Alias For Vercel Preview Deployment
 
+env:
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
 on:
   repository_dispatch:
     types:
@@ -25,5 +28,5 @@ jobs:
         env:
           DEPLOYED_URL: ${{ github.event.client_payload.url }}
         run: |
-          vercel alias rm lys-web-manager-preview.vercel.app --yes
-          vercel alias set $DEPLOYED_URL lys-web-manager-preview.vercel.app
+          vercel alias rm lys-web-manager-preview.vercel.app --yes --token=${{ secrets.VERCEL_TOKEN }}
+          vercel alias set $DEPLOYED_URL lys-web-manager-preview.vercel.app --token=${{ secrets.VERCEL_TOKEN }}
