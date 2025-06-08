@@ -117,7 +117,7 @@ export default function SuggestionList({currentSuggestionId}: { currentSuggestio
             .filter(s => s.reprocessable && s.processed && s.accepted)
             .map(s => s.events || [])
             .flat();
-        await mutate(suggestions.map(s => ({...s, reprocessable: false})));
+        await mutate(suggestions.map(s => ({...s, reprocessable: !s.processed})));
         if (createdEvents.length > 0) {
             await mutateEvents([...events, ...createdEvents].toSorted((e1, e2) => e1.dateTimeCet.localeCompare(e2.dateTimeCet)));
         }
