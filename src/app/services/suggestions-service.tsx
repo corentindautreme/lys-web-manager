@@ -7,25 +7,92 @@ import { LysSuggestion, Suggestion } from '@/app/types/suggestion';
 export function getSuggestions(): Suggestion[] {
     return [
         {
-            'id': 1257,
+            'id': 1261,
             'reprocessable': true,
             'accepted': false,
+            'country': 'Italy',
+            'dateTimesCet': [
+                {
+                    'context': 'February 2',
+                    'dateTimeCet': '2026-02-02T00:00:00',
+                    'selected': false,
+                    'sentence': 'The Winter Olympics will take place from February 2 to February 26 and RAI will broadcast the Games in Italy'
+                },
+                {
+                    'context': 'from February 24 to February 28, right after the end of the Winter Olympic Games',
+                    'dateTimeCet': '2026-02-24T00:00:00',
+                    'selected': true,
+                    'sentence': 'The 76th Festival di Sanremo will take place from February 24 to February 28, right after the end of the Winter Olympic Games'
+                },
+                {
+                    'context': 'from February 24 to February 28, right after the end of the Winter Olympic Games',
+                    'dateTimeCet': '2026-02-25T00:00:00',
+                    'selected': true,
+                    'sentence': 'The 76th Festival di Sanremo will take place from February 24 to February 28, right after the end of the Winter Olympic Games'
+                },
+                {
+                    'context': 'February 26 and',
+                    'dateTimeCet': '2026-02-26T00:00:00',
+                    'selected': true,
+                    'sentence': 'The Winter Olympics will take place from February 2 to February 26 and RAI will broadcast the Games in Italy'
+                },
+                {
+                    'context': 'from February 24 to February 28, right after the end of the Winter Olympic Games',
+                    'dateTimeCet': '2026-02-27T00:00:00',
+                    'selected': true,
+                    'sentence': 'The 76th Festival di Sanremo will take place from February 24 to February 28, right after the end of the Winter Olympic Games'
+                },
+                {
+                    'context': 'in February',
+                    'dateTimeCet': '2026-02-28T00:00:00',
+                    'selected': true,
+                    'sentence': 'The 2026 edition of Festival di Sanremo will be held later than usual in February due to the Winter Olympic Games'
+                }
+            ],
+            'name': 'Festival di Sanremo',
+            'processed': false,
+            'sourceLink': 'https://eurovoix.com/2025/06/06/italy-festival-di-sanremo-2026-dates-announced/',
+            'extractionDate': '2025-06-06'
+        },
+        {
+            'id': 1260,
+            'reprocessable': true,
+            'accepted': false,
+            'country': 'Spain',
+            'dateTimesCet': [
+                {
+                    'context': 'in September, a',
+                    'dateTimeCet': '2025-09-01T00:00:00',
+                    'selected': false,
+                    'sentence': 'Once song submissions close in September, a panel will review the entries and select up to twenty to compete in Benidorm Fest 2026'
+                }
+            ],
+            'name': 'Festival de Benidorm',
+            'processed': false,
+            'sourceLink': 'https://eurovoix.com/2025/06/05/spain-opens-song-submissions-for-benidorm-fest-2026/',
+            'extractionDate': '2025-06-05'
+        },
+        {
+            'id': 1257,
+            'reprocessable': false,
+            'accepted': true,
             'country': 'Finland',
             'dateTimesCet': [
                 {
                     'context': 'on February 28',
                     'dateTimeCet': '2026-02-28T00:00:00',
-                    'sentence': 'Yle, the Finnish national broadcaster, has confirmed that Uuden Musiikin Kilpailu 2026 will take place on February 28'
+                    'sentence': 'Yle, the Finnish national broadcaster, has confirmed that Uuden Musiikin Kilpailu 2026 will take place on February 28',
+                    'selected': true
                 }
             ],
             'name': 'Uuden Musiikin Kilpailu',
-            'processed': false,
+            'processed': true,
             'sourceLink': 'https://eurovoix.com/2025/05/16/finland-uuden-musiikin-kilpailu-2026-february-28/',
             'extractionDate': '2025-05-16'
         },
         {
             'id': 1256,
-            'reprocessable': true,
+            'reprocessable': false,
             'accepted': false,
             'country': 'United Kingdom',
             'dateTimesCet': [
@@ -36,7 +103,7 @@ export function getSuggestions(): Suggestion[] {
                 }
             ],
             'name': 'Eurovision: You Decide',
-            'processed': false,
+            'processed': true,
             'sourceLink': 'https://eurovoix.com/2025/05/15/united-kingdom-sophie-ellis-bextor-replaces-ncuti-gatwa-as-spokesperson-for-eurovision-2025/',
             'extractionDate': '2025-05-15'
         },

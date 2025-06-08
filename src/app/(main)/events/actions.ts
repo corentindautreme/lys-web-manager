@@ -9,8 +9,12 @@ export async function submitEvents(events: Event[]): Promise<DataSubmissionRespo
     const rescheduledEvents = events.filter(e => !e.created && !e.deleted && e.rescheduled);
     const deletedEvents = events.filter(e => e.deleted && !e.created);
     try {
-        await publishEventChanges(updatedEvents, rescheduledEvents, deletedEvents);
-        console.log(`Updated ${updatedEvents.length + rescheduledEvents.length} and deleted ${deletedEvents.length} events on AWS`);
+        if (process.env.DEBUG === "TRUE") {
+            console.log(`Debug is TRUE - did not update ${updatedEvents.length + rescheduledEvents.length} nor delete ${deletedEvents.length} events on AWS`);
+        } else {
+            await publishEventChanges(updatedEvents, rescheduledEvents, deletedEvents);
+            console.log(`Updated ${updatedEvents.length + rescheduledEvents.length} and deleted ${deletedEvents.length} events on AWS`);
+        }
         return { success: true };
     } catch (error) {
         if (error instanceof Error) {

@@ -117,7 +117,7 @@ export default function SuggestionList({currentSuggestionId}: { currentSuggestio
             .filter(s => s.reprocessable && s.processed && s.accepted)
             .map(s => s.events || [])
             .flat();
-        await mutate(suggestions.map(s => ({...s, reprocessable: false})));
+        await mutate(suggestions.map(s => ({...s, reprocessable: !s.processed})));
         if (createdEvents.length > 0) {
             await mutateEvents([...events, ...createdEvents].toSorted((e1, e2) => e1.dateTimeCet.localeCompare(e2.dateTimeCet)));
         }
@@ -131,19 +131,6 @@ export default function SuggestionList({currentSuggestionId}: { currentSuggestio
                     message={`${error.message} (status: ${error.cause.status})`}/>
             ) : (!isLoading && !!suggestions && !!processableSuggestions && !!unprocessableSuggestions ? (
                     <div className="h-full overflow-y-auto">
-                        <div className="w-full justify-end flex items-center py-2">
-                            <DocumentCheckIcon className="w-5 me-1"/>
-                            <label className="flex items-center text-sm" htmlFor="hideProcessed">Hide
-                                recently processed</label>
-                            <input
-                                type="checkbox"
-                                className="relative peer ms-2 appearance-none shrink-0 rounded w-4 h-4 bg-foreground/10 after:content-[''] after:hidden checked:after:inline-block after:w-2 after:h-3.5 after:ms-1 after:mb-1.5 after:rotate-[40deg] after:border-b-3 after:border-r-3 checked:bg-sky-500 after:border-white dark:after:border-black"
-                                id="hideProcessed"
-                                name="hideProcessed"
-                                checked={hideProcessed}
-                                onChange={(e) => toggleHideProcessedSuggestions(e.target.checked)}
-                            />
-                        </div>
                         {hideProcessed && processableSuggestions.length == 0 ? (
                             <div
                                 className="h-[80dvh] flex flex-col items-center justify-center text-foreground/50">
@@ -159,8 +146,23 @@ export default function SuggestionList({currentSuggestionId}: { currentSuggestio
                                     {modifiedCount > 0 &&
                                         <UnsavedSuggestionsBanner count={modifiedCount} suggestions={suggestions}
                                                                   events={events}
-                                                                  callback={submittedSuggestionsCallback}/>}
-
+                                                                  callback={submittedSuggestionsCallback}
+                                        />
+                                    }
+                                    <div className="mt-2 mx-auto w-fit flex items-center p-2 bg-foreground/10 rounded-3xl">
+                                        <label className="flex items-center text-sm" htmlFor="hideProcessed">
+                                            <DocumentCheckIcon className="w-5 me-1"/>
+                                            Hide recently processed
+                                        </label>
+                                        <input
+                                            type="checkbox"
+                                            className="relative peer ms-2 appearance-none shrink-0 rounded w-4 h-4 bg-foreground/10 after:content-[''] after:hidden checked:after:inline-block after:w-2 after:h-3.5 after:ms-1 after:mb-1.5 after:rotate-[40deg] after:border-b-3 after:border-r-3 checked:bg-sky-500 after:border-white dark:after:border-black"
+                                            id="hideProcessed"
+                                            name="hideProcessed"
+                                            checked={hideProcessed}
+                                            onChange={(e) => toggleHideProcessedSuggestions(e.target.checked)}
+                                        />
+                                    </div>
                                     <div className="flex flex-col gap-y-1">
                                         {/* Unprocessed suggestions */}
                                         {processableSuggestions.map((suggestion, index) => {
