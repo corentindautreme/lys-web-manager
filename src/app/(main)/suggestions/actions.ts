@@ -19,7 +19,7 @@ export async function submitSuggestions(suggestions: Suggestion[]): Promise<Data
                 return event;
             });
         if (process.env.DEBUG === "TRUE") {
-            console.log(`Debug is TRUE - did not update ${processedSuggestions.length} suggestionsnor save ${events.length} events on AWS`);
+            console.log(`Debug is TRUE - did not update ${processedSuggestions.length} suggestions nor save ${events.length} events on AWS`);
         } else {
             await publishProcessedSuggestions(processedSuggestions);
             await publishEventChanges(events, [], []);
