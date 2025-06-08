@@ -66,7 +66,7 @@ export default function NavLinks() {
     const {suggestions, error: suggestionsError} = useSuggestions();
     const hasBadge: { [name: string]: boolean } = {
         'Home': false,
-        'Suggestions': !suggestionsError && suggestions?.length > 0,
+        'Suggestions': !suggestionsError && suggestions?.filter(s => s.reprocessable).length > 0,
         'Events': !eventsError && events?.some(e => e.modified || e.deleted),
         'Referential': !countryDataError && countryData?.some(e => e.modified || e.deleted),
         'Status': false

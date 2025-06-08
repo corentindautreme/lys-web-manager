@@ -96,9 +96,9 @@ export default function CountryList({currentCountryId}: { currentCountryId?: num
                                         <div key={countryData.id}>
                                             <Link href={`/referential/edit/${countryData.id}#${countryData.id}`}>
                                                 {/*
-                    Stick the ID on a relative div, so that navigating to # "scrolls back up" a litle bit, to
-                    give a visual cue that there's more above in the list
-                    */}
+                                                Stick the ID on a relative div, so that navigating to # "scrolls back up" a little bit, to
+                                                give a visual cue that there's more above in the list
+                                                */}
                                                 <div
                                                     id={countryData.id.toString()}
                                                     className="relative top-[-20px]"

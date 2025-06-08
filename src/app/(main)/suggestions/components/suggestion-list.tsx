@@ -3,7 +3,12 @@
 import Link from 'next/link';
 import { clsx } from 'clsx';
 import { redirect, useSearchParams } from 'next/navigation';
-import { CheckIcon, DocumentCheckIcon, ExclamationCircleIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
+import {
+    CheckIcon,
+    DocumentCheckIcon,
+    ExclamationCircleIcon,
+    ExclamationTriangleIcon
+} from '@heroicons/react/24/outline';
 import { JSX, useEffect, useState } from 'react';
 import ErrorScreen from '@/app/components/error-screen';
 import { DataSubmissionResponse } from '@/app/types/data-submission-response';
@@ -85,31 +90,34 @@ export default function SuggestionList({currentSuggestionId}: { currentSuggestio
     const {suggestions: loadedSuggestions, mutate, isLoading, error} = useSuggestions();
     const {events: events, mutate: mutateEvents} = useEvents();
     const [suggestions, setSuggestions] = useState(loadedSuggestions);
+    const [processableSuggestions, setProcessableSuggestions] = useState<Suggestion[]>();
+    const [unprocessableSuggestions, setUnprocessableSuggestions] = useState<Suggestion[]>();
     const [hideProcessed, toggleHideProcessed] = useState(!showProcessed || false);
     const modifiedCount = suggestions?.filter(s => s.reprocessable && s.processed).length;
 
     // once SWR has loaded the data, set the suggestion list, so we can start editing it (and hide the loading screen)
     useEffect(() => {
         if (!!loadedSuggestions) {
-            setSuggestions(hideProcessed ? loadedSuggestions.filter(e => e.reprocessable) : loadedSuggestions);
+            setSuggestions(loadedSuggestions);
+            setProcessableSuggestions(loadedSuggestions.filter(e => e.reprocessable));
+            setUnprocessableSuggestions(loadedSuggestions.filter(e => !e.reprocessable));
         }
     }, [loadedSuggestions]);
 
     const toggleHideProcessedSuggestions = (shouldHide: boolean) => {
-        const filteredSuggestions = shouldHide ? loadedSuggestions.filter(e => e.reprocessable) : loadedSuggestions;
-        setSuggestions(filteredSuggestions);
         toggleHideProcessed(shouldHide);
         window.history.replaceState(null, '', shouldHide ? '?' : '?showProcessed=true');
     }
 
     const submittedSuggestionsCallback = async (suggestions: Suggestion[]) => {
-        // after successfully submitting processed suggestions (and potential new events!) to AWS, update the
+        // after successfully submitting processed suggestions (and potential new events!) to AWS, flag the newly
+        // processed suggestions as un-reprocessable (= as if they were coming straight from the backend) and update the
         // suggestions and event caches
-        await mutate(suggestions.filter(s => !s.processed));
         const createdEvents = suggestions
-            .filter(s => s.processed && s.accepted)
+            .filter(s => s.reprocessable && s.processed && s.accepted)
             .map(s => s.events || [])
             .flat();
+        await mutate(suggestions.map(s => ({...s, reprocessable: false})));
         if (createdEvents.length > 0) {
             await mutateEvents([...events, ...createdEvents].toSorted((e1, e2) => e1.dateTimeCet.localeCompare(e2.dateTimeCet)));
         }
@@ -121,7 +129,7 @@ export default function SuggestionList({currentSuggestionId}: { currentSuggestio
                 <ErrorScreen
                     title={error.name}
                     message={`${error.message} (status: ${error.cause.status})`}/>
-            ) : (!isLoading && !!suggestions ?
+            ) : (!isLoading && !!suggestions && !!processableSuggestions && !!unprocessableSuggestions ? (
                     <div className="h-full overflow-y-auto">
                         <div className="w-full justify-end flex items-center py-2">
                             <DocumentCheckIcon className="w-5 me-1"/>
@@ -136,7 +144,7 @@ export default function SuggestionList({currentSuggestionId}: { currentSuggestio
                                 onChange={(e) => toggleHideProcessedSuggestions(e.target.checked)}
                             />
                         </div>
-                        {suggestions.length == 0 ? (
+                        {hideProcessed && processableSuggestions.length == 0 ? (
                             <div
                                 className="h-[80dvh] flex flex-col items-center justify-center text-foreground/50">
                                 <CheckIcon className="w-18"/>
@@ -154,21 +162,53 @@ export default function SuggestionList({currentSuggestionId}: { currentSuggestio
                                                                   callback={submittedSuggestionsCallback}/>}
 
                                     <div className="flex flex-col gap-y-1">
-                                        {suggestions?.map((suggestion, index) => {
+                                        {/* Unprocessed suggestions */}
+                                        {processableSuggestions.map((suggestion, index) => {
                                                 return (
                                                     <>
-                                                        {(index == 0 || (!!suggestion.extractionDate && suggestion.extractionDate != suggestions[index - 1].extractionDate)) &&
+                                                        {(index == 0 || (!!suggestion.extractionDate && suggestion.extractionDate != suggestions.filter(s => s.reprocessable)[index - 1].extractionDate)) &&
                                                             <div className="py-1 font-bold">
-                                                                {new Date(suggestion.extractionDate!).toLocaleString('en-US', {month: 'long', day: 'numeric'})}
+                                                                {new Date(suggestion.extractionDate!).toLocaleString('en-US', {
+                                                                    month: 'long',
+                                                                    day: 'numeric'
+                                                                })}
                                                             </div>
                                                         }
                                                         <div key={suggestion.id}>
                                                             <Link
                                                                 href={`/suggestions/process/${suggestion.id}${!hideProcessed ? '?showProcessed=true' : ''}#${suggestion.id}`}>
                                                                 {/*
-                    Stick the ID on a relative div, so that navigating to # "scrolls back up" a litle bit, to
-                    give a visual cue that there's more above in the list
-                    */}
+                                                                Stick the ID on a relative div, so that navigating to # "scrolls back up" a little bit, to
+                                                                give a visual cue that there's more above in the list
+                                                                */}
+                                                                <div
+                                                                    id={suggestion.id.toString()}
+                                                                    className="relative top-[-20px]"
+                                                                />
+                                                                <SuggestionCard suggestion={suggestion}
+                                                                                active={currentSuggestionId == suggestion.id}/>
+                                                            </Link>
+                                                        </div>
+                                                    </>
+                                                )
+                                            }
+                                        )}
+                                        {/* Already processed suggestions (loaded from AWS) */}
+                                        {!hideProcessed && unprocessableSuggestions.map((suggestion, index) => {
+                                                return (
+                                                    <>
+                                                        {(index == 0 || (!!suggestion.extractionDate && suggestion.extractionDate.substring(5, 7) != suggestions.filter(s => !s.reprocessable)[index - 1].extractionDate?.substring(5, 7))) &&
+                                                            <div className="py-1 font-bold">
+                                                                {new Date(suggestion.extractionDate!).toLocaleString('en-US', {month: 'long'})}
+                                                            </div>
+                                                        }
+                                                        <div key={suggestion.id}>
+                                                            <Link
+                                                                href={`/suggestions/process/${suggestion.id}${!hideProcessed ? '?showProcessed=true' : ''}#${suggestion.id}`}>
+                                                                {/*
+                                                                Stick the ID on a relative div, so that navigating to # "scrolls back up" a little bit, to
+                                                                give a visual cue that there's more above in the list
+                                                                */}
                                                                 <div
                                                                     id={suggestion.id.toString()}
                                                                     className="relative top-[-20px]"
@@ -185,7 +225,7 @@ export default function SuggestionList({currentSuggestionId}: { currentSuggestio
                                 </div>
                             </>
                         )}
-                    </div> : <SuggestionListSkeleton/>
+                    </div>) : <SuggestionListSkeleton/>
             )}
         </>
     );

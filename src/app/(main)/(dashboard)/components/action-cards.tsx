@@ -101,12 +101,12 @@ export default function ActionCards() {
                 type="error"
             />);
         } else {
-            if (suggestions.length > 0) {
+            if (suggestions.filter(s => s.reprocessable).length > 0) {
                 actionsCards.push(<ActionCard
                     type="info"
                     title="Suggestions"
-                    description={<div>There {suggestions.length > 1 ? 'are' : 'is'} {suggestions.length} unprocessed
-                        suggestion{suggestions.length > 1 && 's'}</div>}
+                    description={<div>There {suggestions.filter(s => s.reprocessable).length > 1 ? 'are' : 'is'} {suggestions.filter(s => s.reprocessable).length} unprocessed
+                        suggestion{suggestions.filter(s => s.reprocessable).length > 1 && 's'}</div>}
                     linkText="Review"
                     linkHref={`/suggestions`}
                 />);
