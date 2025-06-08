@@ -1,0 +1,29 @@
+name: Create Alias For Vercel Preview Deployment
+
+on:
+  repository_dispatch:
+    types:
+      - 'vercel.deployment.success'
+jobs:
+  create-alias:
+    if: github.event.client_payload.environment == 'preview'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - uses: pnpm/action-setup@v2
+        name: Install pnpm
+        id: pnpm-install
+        with:
+          version: 7
+          run_install: false
+      - name: Install Vercel CLI
+        run: pnpm add --global vercel@latest
+      - name: Create Alias
+        env:
+          DEPLOYED_URL: ${{ github.event.client_payload.url }}
+        run: |
+          vercel alias rm lys-web-manager-preview.vercel.app --yes
+          vercel alias set $DEPLOYED_URL lys-web-manager-preview.vercel.app
