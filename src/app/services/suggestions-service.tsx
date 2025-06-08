@@ -20,7 +20,8 @@ export function getSuggestions(): Suggestion[] {
             ],
             'name': 'Uuden Musiikin Kilpailu',
             'processed': false,
-            'sourceLink': 'https://eurovoix.com/2025/05/16/finland-uuden-musiikin-kilpailu-2026-february-28/'
+            'sourceLink': 'https://eurovoix.com/2025/05/16/finland-uuden-musiikin-kilpailu-2026-february-28/',
+            'extractionDate': '2025-05-16'
         },
         {
             'id': 1256,
@@ -36,11 +37,12 @@ export function getSuggestions(): Suggestion[] {
             ],
             'name': 'Eurovision: You Decide',
             'processed': false,
-            'sourceLink': 'https://eurovoix.com/2025/05/15/united-kingdom-sophie-ellis-bextor-replaces-ncuti-gatwa-as-spokesperson-for-eurovision-2025/'
+            'sourceLink': 'https://eurovoix.com/2025/05/15/united-kingdom-sophie-ellis-bextor-replaces-ncuti-gatwa-as-spokesperson-for-eurovision-2025/',
+            'extractionDate': '2025-05-15'
         },
         {
             'id': 1255,
-            'reprocessable': true,
+            'reprocessable': false,
             'accepted': false,
             'country': 'Australia',
             'dateTimesCet': [
@@ -116,8 +118,9 @@ export function getSuggestions(): Suggestion[] {
                 }
             ],
             'name': 'Australia Decides',
-            'processed': false,
-            'sourceLink': 'https://eurovoix.com/2025/04/22/australia-go-jo-european-tour/'
+            'processed': true,
+            'sourceLink': 'https://eurovoix.com/2025/04/22/australia-go-jo-european-tour/',
+            'extractionDate': '2025-04-22'
         }
     ];
 }

@@ -125,9 +125,9 @@ export default function EventList({currentEventId}: { currentEventId?: number | 
                                                 {insertHeader(event, idx > 0 ? events[idx - 1] : undefined)}
                                                 <Link href={`/events/edit/${event.id}${queryString}#${event.id}`}>
                                                     {/*
-                        Stick the ID on a relative div, so that navigating to # "scrolls back up" a litle bit, to
-                        give a visual cue that there's more above in the list
-                        */}
+                                                    Stick the ID on a relative div, so that navigating to # "scrolls back up" a little bit, to
+                                                    give a visual cue that there's more above in the list
+                                                    */}
                                                     <div
                                                         id={event.id.toString()}
                                                         className="relative top-[-20px]"

@@ -12,7 +12,8 @@ export default function SuggestionCard({suggestion, active}: { suggestion: Sugge
                 'w-full h-auto p-3 flex rounded-md',
                 {
                     'text-white shadow-lg': active === true,
-                    'bg-background dark:bg-neutral-900 shadow-sm': active !== true
+                    'bg-background dark:bg-neutral-900 shadow-sm': active !== true && (!suggestion.processed || !suggestion.reprocessable),
+                    'bg-foreground/10 shadow-sm': active !== true && suggestion.processed && suggestion.reprocessable,
                 }
             )}
             style={!!active ? {
@@ -29,7 +30,7 @@ export default function SuggestionCard({suggestion, active}: { suggestion: Sugge
                 )}></div>
                 <div className={clsx('flex-col',
                     {
-                        'opacity-55 dark:opacity-30': suggestion.processed && !active,
+                        'opacity-55 dark:opacity-30': !suggestion.reprocessable && suggestion.processed && !active,
                         'line-through': suggestion.processed && !suggestion.accepted
                     })}
                 >
@@ -67,7 +68,7 @@ export default function SuggestionCard({suggestion, active}: { suggestion: Sugge
                 </div>
                 <div className="grow"></div>
                 {suggestion.processed && (
-                    <div className="flex flex-col justify-center items-center">
+                    <div className="flex flex-col justify-center items-center ">
                         {suggestion.accepted
                             ? <CheckCircleIcon className={clsx('w-5',
                                 {
