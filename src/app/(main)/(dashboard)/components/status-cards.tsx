@@ -134,15 +134,11 @@ export function StatusCard({cardName, processStatuses}: {
         </button>
         {unfolded && <div className="flex gap-2 items-center justify-center">
             {Object.entries(processStatuses).map(([process, status]) => (
-                <div key={`status-${cardName}-${process}`} className={clsx('flex flex-col items-center p-2',
-                    {
-                        'rounded-xl bg-red-400 dark:bg-red-300 text-background': !status.success && !!status.lastRun,
-                    }
-                )}>
+                <div key={`status-${cardName}-${process}`} className="flex flex-col items-center p-2">
                     <div className={clsx('w-fit p-3 rounded-4xl',
                         {
                             'bg-foreground/10': status.success && !status.isLate,
-                            'bg-amber-400 text-black': status.isLate,
+                            'bg-amber-400 text-black': status.success && status.isLate,
                             'bg-red-400 dark:bg-red-300 text-background': !status.success
                         })
                     }>
