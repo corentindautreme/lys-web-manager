@@ -1,9 +1,9 @@
 import { NextResponse } from 'next/server';
-import { fetchLysProcessStatuses } from '@/app/services/logs-service';
+import { fetchLysProcessStatuses, getLysProcessStatuses } from '@/app/services/logs-service';
 
 export async function GET() {
     try {
-        return NextResponse.json(await fetchLysProcessStatuses());
+        return process.env.DEBUG === "TRUE" ? NextResponse.json(getLysProcessStatuses()) : NextResponse.json(await fetchLysProcessStatuses());
     } catch (error) {
         if (error instanceof Error) {
             return NextResponse.json({error: error.name, message: error.message}, {status: 500});
