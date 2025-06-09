@@ -1,4 +1,5 @@
 import type { NextAuthConfig } from 'next-auth';
+import { GithubOrganization } from '@/app/types/auth';
 
 export const authConfig = {
     pages: {
@@ -6,9 +7,28 @@ export const authConfig = {
         error: '/login/error'
     },
     callbacks: {
-        signIn({user}) {
-            if (user.name) {
-                return user.name == 'corentindautreme';
+        async signIn({user}) {
+            // on debug mode, check that the user is a member of the LysEurovision organization
+            if (process.env.DEBUG === 'TRUE') {
+                if (user.name) {
+                    try {
+                        const response = await fetch(`https://api.github.com/users/${user.name}/orgs`);
+                        if (response.ok) {
+                            const orgs = await response.json() as GithubOrganization[];
+                            return orgs.some(org => org.login === "LysEurovision");
+                        }
+                        return false;
+                    } catch (e) {
+                        console.error(`Unable to check ${user.name}'s accesses on Github`);
+                        console.error(e);
+                        return false;
+                    }
+                }
+                return false;
+            }
+            // in prod, only check against this (very restrictive) whitelist
+            else if (user.name) {
+                return user.name === 'corentindautreme';
             }
             return false;
         },

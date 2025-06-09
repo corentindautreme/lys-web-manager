@@ -6,14 +6,29 @@ import { useSearchParams } from 'next/navigation';
 import { ArrowRightEndOnRectangleIcon, ExclamationCircleIcon, LockClosedIcon } from '@heroicons/react/24/outline';
 import { clsx } from 'clsx';
 import ThemeToggle from '@/app/components/theme-toggle';
+import { XCircleIcon } from '@heroicons/react/16/solid';
 
 export default function LoginForm() {
     const searchParams = useSearchParams();
-    const callbackUrl = searchParams.get('callbackUrl') || '/';
+    const error = searchParams.get('error');
+    const callbackUrl = error || !searchParams.get('callbackUrl') ? '/' : searchParams.get('callbackUrl')!;
     const [githubErrorMessage, githubFormAction, isGithubPending] = useActionState(authenticateWithGithub, undefined);
 
     return (
-        <main className="flex items-center justify-center h-screen bg-gray-100 dark:bg-neutral-900">
+        <main className="flex flex-col items-center justify-center h-screen bg-gray-100 dark:bg-neutral-900">
+            {error && <div className="w-72 flex items-center rounded-xl bg-red-500 p-3 mb-2 text-background">
+                { error == "AccessDenied" && <>
+                    <XCircleIcon className="shrink-0 h-5 w-5 me-2"/>
+                    You don&apos;t have the required permission to access this website
+                </>}
+                { error != "AccessDenied" && <div className="flex items-center break-all">
+                    <XCircleIcon className="shrink-0 h-5 w-5 me-2"/>
+                    <div>
+                        <div>Unable to sign you in</div>
+                        <div className="text-sm">(error message: {error})</div>
+                    </div>
+                </div>}
+            </div>}
             <div className="flex flex-col w-72 items-center rounded-xl py-12 px-6 bg-background">
                 <div className="w-fit bg-foreground/10 p-4 rounded-4xl">
                     <LockClosedIcon className="w-8"/>
