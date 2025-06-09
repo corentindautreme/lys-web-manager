@@ -4,6 +4,8 @@ import Link from 'next/link';
 import { Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 
+// idk, this page doesn't seem useful, I copied it from an old project, and I got a hard time getting next-auth to work
+// so at this point I'm too afraid to remove anything
 function Error() {
     const search = useSearchParams();
     const error = search.get('error')

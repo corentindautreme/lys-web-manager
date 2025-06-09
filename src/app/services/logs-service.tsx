@@ -27,6 +27,151 @@ const EXPECTED_DOWNTIME_IN_HOURS_BY_PROCESS: { [process: string]: number } = {
     'refresh': 24 * 31
 }
 
+export function getLysProcessStatuses(): ProcessStatuses {
+    return {
+        'daily|bluesky': {
+            success: true,
+            logs: [
+                {timestamp: "1970-01-01T00:00:00.014Z", message:"END RequestId:  00000001-ffff-ffff-ffff-abcdef012345"},
+                {timestamp: "1970-01-01T00:00:00.013Z", message:"REPORT RequestId:  00000001-ffff-ffff-ffff-abcdef012345 Duration: 4.00 ms Billed Duration: 4 ms Memory Size: 128 MB Max Memory Used: 89 MB"},
+                {timestamp: "1970-01-01T00:00:00.012Z", message:"Run date 1970-01-01T00:00:00 is without NF season range - exiting"},
+                {timestamp: "1970-01-01T00:00:00.011Z", message:"daily|bluesky"},
+                {timestamp: "1970-01-01T00:00:00.010Z", message:"START RequestId: 00000001-ffff-ffff-ffff-abcdef012345 Version: $LATEST"},
+                {timestamp: "1970-01-01T00:00:00.004Z", message:"END RequestId:  00000000-ffff-ffff-ffff-abcdef012345"},
+                {timestamp: "1970-01-01T00:00:00.003Z", message:"REPORT RequestId:  00000000-ffff-ffff-ffff-abcdef012345 Duration: 4.00 ms Billed Duration: 4 ms Memory Size: 128 MB Max Memory Used: 89 MB"},
+                {timestamp: "1970-01-01T00:00:00.002Z", message:"Run date 1970-01-01T00:00:00 is without NF season range - exiting"},
+                {timestamp: "1970-01-01T00:00:00.001Z", message:"daily|bluesky"},
+                {timestamp: "1970-01-01T00:00:00.000Z", message:"START RequestId: 00000000-ffff-ffff-ffff-abcdef012345 Version: $LATEST"}
+            ],
+            lastRun: '1970-01-01T00:00:00.014Z',
+            isLate: false
+        },
+        'daily|twitter': {
+            success: false,
+            logs: [
+                {timestamp: "1970-01-01T00:00:00.004Z", message:"END RequestId:  00000000-ffff-ffff-ffff-abcdef012345"},
+                {timestamp: "1970-01-01T00:00:00.003Z", message:"REPORT RequestId:  00000000-ffff-ffff-ffff-abcdef012345 Duration: 4.00 ms Billed Duration: 4 ms Memory Size: 128 MB Max Memory Used: 89 MB"},
+                {timestamp: "1970-01-01T00:00:00.002Z", message:"Oh no! Look! An Error log!"},
+                {timestamp: "1970-01-01T00:00:00.001Z", message:"daily|twitter"},
+                {timestamp: "1970-01-01T00:00:00.000Z", message:"START RequestId: 00000000-ffff-ffff-ffff-abcdef012345 Version: $LATEST"}
+            ],
+            lastRun: '1970-01-01T00:00:00.004Z',
+            isLate: false
+        },
+        'daily|threads': {
+            success: true,
+            logs: [
+                {timestamp: "1970-01-01T00:00:00.004Z", message:"END RequestId:  00000000-ffff-ffff-ffff-abcdef012345"},
+                {timestamp: "1970-01-01T00:00:00.003Z", message:"REPORT RequestId:  00000000-ffff-ffff-ffff-abcdef012345 Duration: 4.00 ms Billed Duration: 4 ms Memory Size: 128 MB Max Memory Used: 89 MB"},
+                {timestamp: "1970-01-01T00:00:00.002Z", message:"Run date 1970-01-01T00:00:00 is without NF season range - exiting"},
+                {timestamp: "1970-01-01T00:00:00.001Z", message:"daily|threads"},
+                {timestamp: "1970-01-01T00:00:00.000Z", message:"START RequestId: 00000000-ffff-ffff-ffff-abcdef012345 Version: $LATEST"}
+            ],
+            lastRun: '1970-01-01T00:00:00.004Z',
+            isLate: false
+        },
+        'weekly|bluesky': {
+            success: true,
+            logs: [
+                {timestamp: "1970-01-01T00:00:00.004Z", message:"END RequestId:  00000000-ffff-ffff-ffff-abcdef012345"},
+                {timestamp: "1970-01-01T00:00:00.003Z", message:"REPORT RequestId:  00000000-ffff-ffff-ffff-abcdef012345 Duration: 4.00 ms Billed Duration: 4 ms Memory Size: 128 MB Max Memory Used: 89 MB"},
+                {timestamp: "1970-01-01T00:00:00.002Z", message:"Run date 1970-01-01T00:00:00 is without NF season range - exiting"},
+                {timestamp: "1970-01-01T00:00:00.001Z", message:"weekly|bluesky"},
+                {timestamp: "1970-01-01T00:00:00.000Z", message:"START RequestId: 00000000-ffff-ffff-ffff-abcdef012345 Version: $LATEST"}
+            ],
+            lastRun: '1970-01-01T00:00:00.004Z',
+            isLate: false
+        },
+        'weekly|twitter': {
+            success: false,
+            logs: [],
+            isLate: true
+        },
+        'weekly|threads': {
+            success: true,
+            logs: [
+                {timestamp: "1970-01-01T00:00:00.004Z", message:"END RequestId:  00000000-ffff-ffff-ffff-abcdef012345"},
+                {timestamp: "1970-01-01T00:00:00.003Z", message:"REPORT RequestId:  00000000-ffff-ffff-ffff-abcdef012345 Duration: 4.00 ms Billed Duration: 4 ms Memory Size: 128 MB Max Memory Used: 89 MB"},
+                {timestamp: "1970-01-01T00:00:00.002Z", message:"Run date 1970-01-01T00:00:00 is without NF season range - exiting"},
+                {timestamp: "1970-01-01T00:00:00.001Z", message:"weekly|threads"},
+                {timestamp: "1970-01-01T00:00:00.000Z", message:"START RequestId: 00000000-ffff-ffff-ffff-abcdef012345 Version: $LATEST"}
+            ],
+            lastRun: '1970-01-01T00:00:00.004Z',
+            isLate: false
+        },
+        '5min|bluesky': {
+            success: true,
+            logs: [
+                {timestamp: "1970-01-01T00:00:00.004Z", message:"END RequestId:  00000000-ffff-ffff-ffff-abcdef012345"},
+                {timestamp: "1970-01-01T00:00:00.003Z", message:"REPORT RequestId:  00000000-ffff-ffff-ffff-abcdef012345 Duration: 4.00 ms Billed Duration: 4 ms Memory Size: 128 MB Max Memory Used: 89 MB"},
+                {timestamp: "1970-01-01T00:00:00.002Z", message:"Run date 1970-01-01T00:00:00 is without NF season range - exiting"},
+                {timestamp: "1970-01-01T00:00:00.001Z", message:"5min|bluesky"},
+                {timestamp: "1970-01-01T00:00:00.000Z", message:"START RequestId: 00000000-ffff-ffff-ffff-abcdef012345 Version: $LATEST"}
+            ],
+            lastRun: '1970-01-01T00:00:00.004Z',
+            isLate: false
+        },
+        '5min|twitter': {
+            success: true,
+            logs: [
+                {timestamp: "1970-01-01T00:00:00.004Z", message:"END RequestId:  00000000-ffff-ffff-ffff-abcdef012345"},
+                {timestamp: "1970-01-01T00:00:00.003Z", message:"REPORT RequestId:  00000000-ffff-ffff-ffff-abcdef012345 Duration: 4.00 ms Billed Duration: 4 ms Memory Size: 128 MB Max Memory Used: 89 MB"},
+                {timestamp: "1970-01-01T00:00:00.002Z", message:"Run date 1970-01-01T00:00:00 is without NF season range - exiting"},
+                {timestamp: "1970-01-01T00:00:00.001Z", message:"5min|twitter"},
+                {timestamp: "1970-01-01T00:00:00.000Z", message:"START RequestId: 00000000-ffff-ffff-ffff-abcdef012345 Version: $LATEST"}
+            ],
+            lastRun: '1970-01-01T00:00:00.004Z',
+            isLate: false
+        },
+        '5min|threads': {
+            success: true,
+            logs: [
+                {timestamp: "1970-01-01T00:00:00.004Z", message:"END RequestId:  00000000-ffff-ffff-ffff-abcdef012345"},
+                {timestamp: "1970-01-01T00:00:00.003Z", message:"REPORT RequestId:  00000000-ffff-ffff-ffff-abcdef012345 Duration: 4.00 ms Billed Duration: 4 ms Memory Size: 128 MB Max Memory Used: 89 MB"},
+                {timestamp: "1970-01-01T00:00:00.002Z", message:"Run date 1970-01-01T00:00:00 is without NF season range - exiting"},
+                {timestamp: "1970-01-01T00:00:00.001Z", message:"5min|threads"},
+                {timestamp: "1970-01-01T00:00:00.000Z", message:"START RequestId: 00000000-ffff-ffff-ffff-abcdef012345 Version: $LATEST"}
+            ],
+            lastRun: '1970-01-01T00:00:00.004Z',
+            isLate: false
+        },
+        'fetcher': {
+            success: true,
+            logs: [
+                {timestamp: "1970-01-01T00:00:00.004Z", message:"END RequestId: 00000000-ffff-ffff-ffff-abcdef012345"},
+                {timestamp: "1970-01-01T00:00:00.003Z", message:"REPORT RequestId: 00000000-ffff-ffff-ffff-abcdef012345 Duration: 4.00 ms Billed Duration: 4 ms Memory Size: 256 MB Max Memory Used: 101 MB Init Duration: 1096.83 ms"},
+                {timestamp: "1970-01-01T00:00:00.002Z", message:"Extracted suggestions:"},
+                {timestamp: "1970-01-01T00:00:00.001Z", message:"Saved suggestions:"},
+                {timestamp: "1970-01-01T00:00:00.000Z", message:"START RequestId: 00000000-ffff-ffff-ffff-abcdef012345 Version: $LATEST"}
+            ],
+            lastRun: '1970-01-01T00:00:00.004Z',
+            isLate: false
+        },
+        'refresh': {
+            success: true,
+            logs: [
+                {timestamp: "1970-01-01T00:00:00.003Z", message:"END RequestId: 00000000-ffff-ffff-ffff-abcdef012345"},
+                {timestamp: "1970-01-01T00:00:00.002Z", message:"REPORT RequestId: 00000000-ffff-ffff-ffff-abcdef012345 Duration: 3.00 ms Billed Duration: 3 ms Memory Size: 128 MB Max Memory Used: 81 MB Init Duration: 430.24 ms"},
+                {timestamp: "1970-01-01T00:00:00.001Z", message:"Refreshing token: ***XXXXXXXXXX"},
+                {timestamp: "1970-01-01T00:00:00.000Z", message:"START RequestId: 00000000-ffff-ffff-ffff-abcdef012345 Version: $LATEST"}
+            ],
+            lastRun: '1970-01-01T00:00:00.004Z',
+            isLate: false
+        },
+        'dump': {
+            success: true,
+            logs: [
+                {timestamp: "1970-01-01T00:00:00.003Z", message:"END RequestId: 68b58e08-8b90-4b2d-8da6-8a7edbfc2201"},
+                {timestamp: "1970-01-01T00:00:00.002Z", message:"REPORT RequestId: 68b58e08-8b90-4b2d-8da6-8a7edbfc2201 Duration: 3.00 ms Billed Duration: 3 ms Memory Size: 256 MB Max Memory Used: 82 MB Init Duration: 460.33 ms"},
+                {timestamp: "1970-01-01T00:00:00.001Z", message:"No diff between latest dump and current event list - nothing to do"},
+                {timestamp: "1970-01-01T00:00:00.000Z", message:"START RequestId: 68b58e08-8b90-4b2d-8da6-8a7edbfc2201 Version: $LATEST"}
+            ],
+            lastRun: '1970-01-01T00:00:00.004Z',
+            isLate: true
+        }
+    }
+}
+
 function isLate(process: string, lastRun: string) {
     const limitDate = new Date();
     limitDate.setTime(limitDate.getTime() - EXPECTED_DOWNTIME_IN_HOURS_BY_PROCESS[process] * 3_600_000);
