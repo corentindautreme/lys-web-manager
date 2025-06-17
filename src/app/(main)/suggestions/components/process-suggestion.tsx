@@ -5,10 +5,12 @@ import { useEffect, useState } from 'react';
 import { useCountries } from '@/app/(main)/referential/utils';
 import { Country } from '@/app/types/country';
 import { useSuggestions } from '@/app/(main)/suggestions/utils';
-import { redirect } from 'next/navigation';
+import { redirect, useSearchParams } from 'next/navigation';
 import SuggestionDetails from '@/app/(main)/suggestions/components/suggestion-details';
 
 export default function ProcessSuggestion({suggestionId}: { suggestionId: number }) {
+    const queryParams = useSearchParams();
+    const showProcessed = queryParams.get('showProcessed');
     const {suggestions, mutate, isLoading: isLoadingSuggestions} = useSuggestions();
     const {countryData, isLoading: isLoadingCountryData} = useCountries();
     const [suggestion, setSuggestion] = useState<Suggestion>();
@@ -36,7 +38,7 @@ export default function ProcessSuggestion({suggestionId}: { suggestionId: number
 
     const onSubmit = async (suggestion: Suggestion) => {
         await updateCache(suggestion);
-        redirect('/suggestions');
+        redirect(`/suggestions${showProcessed ? '?showProcessed=true' : ''}`);
     }
 
     const initSuggestion = (suggestion: Suggestion, countryData: Country): void => {
