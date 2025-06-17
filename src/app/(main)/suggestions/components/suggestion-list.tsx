@@ -131,19 +131,27 @@ export default function SuggestionList({currentSuggestionId}: { currentSuggestio
                     message={`${error.message} (status: ${error.cause.status})`}/>
             ) : (!isLoading && !!suggestions && !!processableSuggestions && !!unprocessableSuggestions ? (
                     <div className="h-full overflow-y-auto">
-                        <div className="mt-2 mx-auto w-fit flex items-center p-2 bg-foreground/10 rounded-3xl">
-                            <label className="flex items-center text-sm" htmlFor="hideProcessed">
-                                <DocumentCheckIcon className="w-5 me-1"/>
-                                Hide recently processed
-                            </label>
-                            <input
-                                type="checkbox"
-                                className="relative peer ms-2 appearance-none shrink-0 rounded w-4 h-4 bg-foreground/10 after:content-[''] after:hidden checked:after:inline-block after:w-2 after:h-3.5 after:ms-1 after:mb-1.5 after:rotate-[40deg] after:border-b-3 after:border-r-3 checked:bg-sky-500 after:border-white dark:after:border-black"
-                                id="hideProcessed"
-                                name="hideProcessed"
-                                checked={hideProcessed}
-                                onChange={(e) => toggleHideProcessedSuggestions(e.target.checked)}
-                            />
+                        <div className="flex flex-col gap-y-1">
+                            {modifiedCount > 0 &&
+                                <UnsavedSuggestionsBanner count={modifiedCount} suggestions={suggestions}
+                                                          events={events}
+                                                          callback={submittedSuggestionsCallback}
+                                />
+                            }
+                            <div className="mt-2 mx-auto w-fit flex items-center p-2 bg-foreground/10 rounded-3xl">
+                                <label className="flex items-center text-sm" htmlFor="hideProcessed">
+                                    <DocumentCheckIcon className="w-5 me-1"/>
+                                    Hide recently processed
+                                </label>
+                                <input
+                                    type="checkbox"
+                                    className="relative peer ms-2 appearance-none shrink-0 rounded w-4 h-4 bg-foreground/10 after:content-[''] after:hidden checked:after:inline-block after:w-2 after:h-3.5 after:ms-1 after:mb-1.5 after:rotate-[40deg] after:border-b-3 after:border-r-3 checked:bg-sky-500 after:border-white dark:after:border-black"
+                                    id="hideProcessed"
+                                    name="hideProcessed"
+                                    checked={hideProcessed}
+                                    onChange={(e) => toggleHideProcessedSuggestions(e.target.checked)}
+                                />
+                            </div>
                         </div>
                         {hideProcessed && processableSuggestions.length == 0 ? (
                             <div
@@ -155,77 +163,67 @@ export default function SuggestionList({currentSuggestionId}: { currentSuggestio
                                 </div>
                             </div>
                         ) : (
-                            <>
-                                <div className="flex flex-col gap-y-1">
-                                    {modifiedCount > 0 &&
-                                        <UnsavedSuggestionsBanner count={modifiedCount} suggestions={suggestions}
-                                                                  events={events}
-                                                                  callback={submittedSuggestionsCallback}
-                                        />
+                            <div className="flex flex-col gap-y-1">
+                                {/* Unprocessed suggestions */}
+                                {processableSuggestions.map((suggestion, index) => {
+                                        return (
+                                            <>
+                                                {(index == 0 || (!!suggestion.extractionDate && suggestion.extractionDate != suggestions.filter(s => s.reprocessable)[index - 1].extractionDate)) &&
+                                                    <div className="py-1 font-bold">
+                                                        {new Date(suggestion.extractionDate!).toLocaleString('en-US', {
+                                                            month: 'long',
+                                                            day: 'numeric'
+                                                        })}
+                                                    </div>
+                                                }
+                                                <div key={suggestion.id}>
+                                                    <Link
+                                                        href={`/suggestions/process/${suggestion.id}${!hideProcessed ? '?showProcessed=true' : ''}#${suggestion.id}`}>
+                                                        {/*
+                                                                Stick the ID on a relative div, so that navigating to # "scrolls back up" a little bit, to
+                                                                give a visual cue that there's more above in the list
+                                                                */}
+                                                        <div
+                                                            id={suggestion.id.toString()}
+                                                            className="relative top-[-20px]"
+                                                        />
+                                                        <SuggestionCard suggestion={suggestion}
+                                                                        active={currentSuggestionId == suggestion.id}/>
+                                                    </Link>
+                                                </div>
+                                            </>
+                                        )
                                     }
-                                    <div className="flex flex-col gap-y-1">
-                                        {/* Unprocessed suggestions */}
-                                        {processableSuggestions.map((suggestion, index) => {
-                                                return (
-                                                    <>
-                                                        {(index == 0 || (!!suggestion.extractionDate && suggestion.extractionDate != suggestions.filter(s => s.reprocessable)[index - 1].extractionDate)) &&
-                                                            <div className="py-1 font-bold">
-                                                                {new Date(suggestion.extractionDate!).toLocaleString('en-US', {
-                                                                    month: 'long',
-                                                                    day: 'numeric'
-                                                                })}
-                                                            </div>
-                                                        }
-                                                        <div key={suggestion.id}>
-                                                            <Link
-                                                                href={`/suggestions/process/${suggestion.id}${!hideProcessed ? '?showProcessed=true' : ''}#${suggestion.id}`}>
-                                                                {/*
+                                )}
+                                {/* Already processed suggestions (loaded from AWS) */}
+                                {!hideProcessed && unprocessableSuggestions.map((suggestion, index) => {
+                                        return (
+                                            <>
+                                                {(index == 0 || (!!suggestion.extractionDate && suggestion.extractionDate.substring(5, 7) != suggestions.filter(s => !s.reprocessable)[index - 1].extractionDate?.substring(5, 7))) &&
+                                                    <div className="py-1 font-bold">
+                                                        {new Date(suggestion.extractionDate!).toLocaleString('en-US', {month: 'long'})}
+                                                    </div>
+                                                }
+                                                <div key={suggestion.id}>
+                                                    <Link
+                                                        href={`/suggestions/process/${suggestion.id}${!hideProcessed ? '?showProcessed=true' : ''}#${suggestion.id}`}>
+                                                        {/*
                                                                 Stick the ID on a relative div, so that navigating to # "scrolls back up" a little bit, to
                                                                 give a visual cue that there's more above in the list
                                                                 */}
-                                                                <div
-                                                                    id={suggestion.id.toString()}
-                                                                    className="relative top-[-20px]"
-                                                                />
-                                                                <SuggestionCard suggestion={suggestion}
-                                                                                active={currentSuggestionId == suggestion.id}/>
-                                                            </Link>
-                                                        </div>
-                                                    </>
-                                                )
-                                            }
-                                        )}
-                                        {/* Already processed suggestions (loaded from AWS) */}
-                                        {!hideProcessed && unprocessableSuggestions.map((suggestion, index) => {
-                                                return (
-                                                    <>
-                                                        {(index == 0 || (!!suggestion.extractionDate && suggestion.extractionDate.substring(5, 7) != suggestions.filter(s => !s.reprocessable)[index - 1].extractionDate?.substring(5, 7))) &&
-                                                            <div className="py-1 font-bold">
-                                                                {new Date(suggestion.extractionDate!).toLocaleString('en-US', {month: 'long'})}
-                                                            </div>
-                                                        }
-                                                        <div key={suggestion.id}>
-                                                            <Link
-                                                                href={`/suggestions/process/${suggestion.id}${!hideProcessed ? '?showProcessed=true' : ''}#${suggestion.id}`}>
-                                                                {/*
-                                                                Stick the ID on a relative div, so that navigating to # "scrolls back up" a little bit, to
-                                                                give a visual cue that there's more above in the list
-                                                                */}
-                                                                <div
-                                                                    id={suggestion.id.toString()}
-                                                                    className="relative top-[-20px]"
-                                                                />
-                                                                <SuggestionCard suggestion={suggestion}
-                                                                                active={currentSuggestionId == suggestion.id}/>
-                                                            </Link>
-                                                        </div>
-                                                    </>
-                                                )
-                                            }
-                                        )}
-                                    </div>
-                                </div>
-                            </>
+                                                        <div
+                                                            id={suggestion.id.toString()}
+                                                            className="relative top-[-20px]"
+                                                        />
+                                                        <SuggestionCard suggestion={suggestion}
+                                                                        active={currentSuggestionId == suggestion.id}/>
+                                                    </Link>
+                                                </div>
+                                            </>
+                                        )
+                                    }
+                                )}
+                            </div>
                         )}
                     </div>) : <SuggestionListSkeleton/>
             )}
