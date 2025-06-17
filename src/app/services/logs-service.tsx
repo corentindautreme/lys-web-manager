@@ -310,14 +310,11 @@ async function fetchLysPublisherLogsForDateAndMode(date: Date, mode: 'daily' | '
                 // we actually target
                 .map(headerIndex => [headerIndex, logs.findIndex((e, idx) => idx > headerIndex && /(daily|weekly|5min)\\|(bluesky|threads|twitter)/.test(e.message))])
                 .flat();
-            // drop last header (and subsequent logs) if the logs after it don't describe a full run
-            const lastHeaderIndex = headerIndices[headerIndices.length - 1];
-            let consideredLogs: LogEvent[];
-            if (!logs.slice(lastHeaderIndex, logs.length).some(e => e.message.startsWith('REPORT'))) {
-                consideredLogs = logs.slice(0, lastHeaderIndex)
+            // drop the last header if we wouldn't be able to extract a full weekly run out of it; namely, if we
+            // extracted an uneven amount of run headers, it means we found the beginning of a weekly run, but not its
+            // end
+            if (headerIndices.length % 2 != 0) {
                 headerIndices.splice(headerIndices.length - 1);
-            } else {
-                consideredLogs = logs;
             }
             const logsByPublisher: LogsByProcess = {};
             headerIndices
@@ -328,19 +325,17 @@ async function fetchLysPublisherLogsForDateAndMode(date: Date, mode: 'daily' | '
                 // use as the start of the next window - hence the below filter
                 // eslint-disable-next-line @typescript-eslint/no-unused-vars
                 .filter((headerIndex, idx) => idx % 2 == 0)
-                .map((headerIndex, idx) => [headerIndex, idx < headerIndices.length - 1 ? headerIndices[idx + 1] : -1])
+                .map((headerIndex, idx) => [headerIndex, 2*idx < headerIndices.length - 1 ? headerIndices[2*idx + 1] : -1])
                 // for each sub-window, build a {publisher: LogEvent[]} object
                 .forEach(([from, to]) => {
                     // there's always a "START RequestId..." log before the header => to catch all logs of a run, we
                     // need to pick one log before the header, and drop one log before the next one
-                    const logs = consideredLogs.slice(from - 1, to == -1 ? consideredLogs.length : to - 1);
-                    const header = logs[1].message
-                    logsByPublisher[header] = header in logsByPublisher
-                        ? [...logsByPublisher[header], ...logs]
-                        : logs;
+                    const runLogs = logs.slice(from - 1, to == -1 ? logs.length : to - 1);
+                    const header = runLogs[1].message
+                    logsByPublisher[header] = runLogs;
                 });
             return logsByPublisher;
-        })
+        });
     } catch (error) {
         console.log(error);
         throw error;
