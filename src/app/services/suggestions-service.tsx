@@ -210,7 +210,7 @@ export async function fetchSuggestions(): Promise<Suggestion[]> {
                         : undefined;
                     return {
                         ...suggestion,
-                        reprocessable: false,
+                        reprocessable: !suggestion.processed,
                         extractionDate: extractionDate
                     }
                 })
