@@ -270,8 +270,11 @@ export async function fetchLysPublisherLogs(): Promise<LogsByProcess> {
             // sunday)
             if (Object.keys(logsByPublisher).filter(p => p.includes("weekly")).length < 3) {
                 const lastSunday = new Date();
-                if (lastSunday.getDay() != 0 || lastSunday.getHours() <= 17) {
+                lastSunday.setDate(lastSunday.getDate() + 1);
+                if (lastSunday.getDay() != 0) {
                     lastSunday.setDate(lastSunday.getDate() - lastSunday.getDay());
+                } else if (lastSunday.getHours() <= 17) {
+                    lastSunday.setDate(lastSunday.getDate() - 7);
                 }
                 return fetchLysPublisherLogsForDateAndMode(lastSunday, "weekly").then(weeklyPublisherLogs => {
                     return Object.assign(logsByPublisher, weeklyPublisherLogs);
