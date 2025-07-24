@@ -21,12 +21,15 @@ export default function LogScreen() {
     }, [loadedStatuses]);
 
     const publishers = [
+        'daily|trigger',
         'daily|bluesky',
         'daily|threads',
         'daily|twitter',
+        '5min|trigger',
         '5min|bluesky',
         '5min|threads',
         '5min|twitter',
+        'weekly|trigger',
         'weekly|bluesky',
         'weekly|threads',
         'weekly|twitter'

@@ -1,6 +1,7 @@
 'use client';
 
 import {
+    BoltIcon,
     CheckCircleIcon,
     CheckIcon,
     ChevronDownIcon,
@@ -9,7 +10,7 @@ import {
     XCircleIcon,
     XMarkIcon
 } from '@heroicons/react/24/outline';
-import { ProcessStatuses } from '@/app/types/status';
+import { ProcessStatus, ProcessStatuses } from '@/app/types/status';
 import { useEffect, useState } from 'react';
 import { useBreakpoint } from '@/app/utils/display-utils';
 import { useStatuses } from '@/app/(main)/logs/utils';
@@ -28,13 +29,13 @@ export function StatusCards() {
 
     if (error) return (<div className="flex items-center justify-center h-full font-sans">
         <div
-                className="w-full md:w-100 p-3 flex flex-col items-center justify-center text-center">
-                <ExclamationCircleIcon className="w-16"/>
-                <div className="py-1">
-                    <span className="font-bold">{error.name}</span> occurred while trying to fetch
-                    statuses and logs: {error.message}
-                </div>
+            className="w-full md:w-100 p-3 flex flex-col items-center justify-center text-center">
+            <ExclamationCircleIcon className="w-16"/>
+            <div className="py-1">
+                <span className="font-bold">{error.name}</span> occurred while trying to fetch
+                statuses and logs: {error.message}
             </div>
+        </div>
     </div>);
 
     return (
@@ -42,35 +43,43 @@ export function StatusCards() {
             ? <StatusCardsSkeleton/>
             : <div className="flex lg:flex flex-col xl:grid md:grid grid-cols-2 grid-flow-row gap-2 md:px-3">
                 <StatusCard
+                    cardName="Triggers"
+                    processStatuses={{
+                        'daily|trigger': {...statuses['daily|trigger'], name: "Daily" },
+                        '5min|trigger': {...statuses['5min|trigger'], name: "5 min" },
+                        'weekly|trigger': {...statuses['weekly|trigger'], name: "Weekly" }
+                    }}
+                />
+                <StatusCard
                     cardName="Daily"
                     processStatuses={{
-                        'daily|bluesky': statuses['daily|bluesky'],
-                        'daily|threads': statuses['daily|threads'],
-                        'daily|twitter': statuses['daily|twitter']
+                        'daily|bluesky': {...statuses['daily|bluesky'], name: "Bluesky" },
+                        'daily|threads': {...statuses['daily|threads'], name: "Threads" },
+                        'daily|twitter': {...statuses['daily|twitter'], name: "Twitter" }
                     }}
                 />
                 <StatusCard
                     cardName="5min"
                     processStatuses={{
-                        '5min|bluesky': statuses['5min|bluesky'],
-                        '5min|threads': statuses['5min|threads'],
-                        '5min|twitter': statuses['5min|twitter']
+                        '5min|bluesky': {...statuses['5min|bluesky'], name: "Bluesky" },
+                        '5min|threads': {...statuses['5min|threads'], name: "Threads" },
+                        '5min|twitter': {...statuses['5min|twitter'], name: "Twitter" }
                     }}
                 />
                 <StatusCard
                     cardName="Weekly"
                     processStatuses={{
-                        'weekly|bluesky': statuses['weekly|bluesky'],
-                        'weekly|threads': statuses['weekly|threads'],
-                        'weekly|twitter': statuses['weekly|twitter']
+                        'weekly|bluesky': {...statuses['weekly|bluesky'], name: "Bluesky" },
+                        'weekly|threads': {...statuses['weekly|threads'], name: "Threads" },
+                        'weekly|twitter': {...statuses['weekly|twitter'], name: "Twitter" }
                     }}
                 />
                 <StatusCard
                     cardName="Technical"
                     processStatuses={{
-                        'fetcher': statuses['fetcher'],
-                        'dump': statuses['dump'],
-                        'refresh': statuses['refresh']
+                        'fetcher': {...statuses['fetcher'], name: "Fetcher" },
+                        'dump': {...statuses['dump'], name: "Dump" },
+                        'refresh': {...statuses['refresh'], name: "Refresh" }
                     }}
                 />
             </div>
@@ -79,7 +88,7 @@ export function StatusCards() {
 
 export function StatusCard({cardName, processStatuses}: {
     cardName: string,
-    processStatuses: ProcessStatuses
+    processStatuses: { [p: string]: ProcessStatus & { name: string } }
 }) {
     const {isMd} = useBreakpoint('md');
     const [unfolded, setUnfolded] = useState(isMd);
@@ -134,30 +143,29 @@ export function StatusCard({cardName, processStatuses}: {
         </button>
         {unfolded && <div className="flex gap-2 items-center justify-center">
             {Object.entries(processStatuses).map(([process, status]) => (
-                <div key={`status-${cardName}-${process}`} className="flex flex-col items-center p-2">
-                    <div className={clsx('w-fit p-3 rounded-4xl',
-                        {
-                            'bg-foreground/10': status.success && !status.isLate,
-                            'bg-amber-400 text-black': status.success && status.isLate,
-                            'bg-red-400 dark:bg-red-300 text-background': !status.success
-                        })
-                    }>
-                        {status.success
-                            ? status.isLate ? <ExclamationTriangleIcon className="w-10"/> :
-                                <CheckIcon className="w-10"/>
-                            : <XMarkIcon className="w-10"/>
-                        }
-                    </div>
-                    <Link href={`/logs?lambda=${process}`}>
+                <Link key={`status-${cardName}-${process}`} href={`/logs?lambda=${process}`}>
+                    <div className="flex flex-col items-center p-2">
+                        <div className={clsx('w-fit p-3 rounded-4xl',
+                            {
+                                'bg-foreground/10': status.success && !status.isLate,
+                                'bg-amber-400 text-black': status.success && status.isLate,
+                                'bg-red-400 dark:bg-red-300 text-background': !status.success
+                            })
+                        }>
+                            {status.success && status.isLate && <ExclamationTriangleIcon className="w-10"/>}
+                            {status.success && !status.isLate && <CheckIcon className="w-10"/>}
+                            {!status.success && status.logs.length == 0 && <BoltIcon className="w-10"/>}
+                            {!status.success && status.logs.length > 0 && <XMarkIcon className="w-10"/>}
+                        </div>
                         <div className={clsx(
                             'my-1 text-center capitalize',
                             {'font-bold': !status.success || status.isLate}
                         )}>
-                            {process.split('|').reverse()[0]}
+                            {status.name}
                         </div>
                         <div className="text-sm text-center">Last run {getLastRunString(status.lastRun) || '-'}</div>
-                    </Link>
-                </div>
+                    </div>
+                </Link>
             ))}
         </div>}
     </div>);
