@@ -143,8 +143,8 @@ export function StatusCard({cardName, processStatuses}: {
         </button>
         {unfolded && <div className="flex gap-2 items-center justify-center">
             {Object.entries(processStatuses).map(([process, status]) => (
-                <Link href={`/logs?lambda=${process}`}>
-                    <div key={`status-${cardName}-${process}`} className="flex flex-col items-center p-2">
+                <Link key={`status-${cardName}-${process}`} href={`/logs?lambda=${process}`}>
+                    <div className="flex flex-col items-center p-2">
                         <div className={clsx('w-fit p-3 rounded-4xl',
                             {
                                 'bg-foreground/10': status.success && !status.isLate,
