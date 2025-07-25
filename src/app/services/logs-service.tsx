@@ -448,7 +448,7 @@ export async function fetchLysProcessStatuses(): Promise<ProcessStatuses> {
             const statuses: ProcessStatuses = {};
             Object.keys(logsByProcess).forEach(process => statuses[process] = {
                 success: logsByProcess[process].length > 0 && !logsByProcess[process].some(e => e.message.toLowerCase().includes('error')),
-                logs: logsByProcess[process].toSorted((e1, e2) => e2.timestamp.localeCompare(e1.timestamp)),
+                logs: logsByProcess[process].toReversed(),
                 lastRun: logsByProcess[process].length == 0 ? undefined : logsByProcess[process][logsByProcess[process].length - 1].timestamp,
                 isLate: isLate(process, logsByProcess[process])
             });
@@ -473,12 +473,14 @@ export async function fetchLogsForLambda(lambda: string, logStreamPrefix?: strin
         }));
         return Promise.all(res.logStreams!
             .reverse()
-            .map(s => fetchLambdaLogsInLogStream(s.logStreamName!, lambda))
+            .map(s => fetchLambdaLogsInLogStream(s.logStreamName!, s.firstEventTimestamp, lambda))
         ).then(fetchedLogs => fetchedLogs
-            .flat()
-            .filter(e => !e.message.startsWith('INIT_START'))
-            .map(e => ({...e, message: e.message.trim()} as LogEvent))
-            .sort((e1, e2) => e1.timestamp.localeCompare(e2.timestamp))
+                .flat()
+                .filter(e => !e.message.startsWith('INIT_START'))
+                .map(e => ({...e, message: e.message.trim()} as LogEvent))
+            // no need to sort further - the CloudWatch client returns event sorted by eventId by default, which turns
+            // out to be more accurate than timestamp-based sorting
+            // we can't even ensure this sorting ourselves as eventId isn't exposed in the OutputLogEvent interface
         );
     } catch (error) {
         console.error(error);
@@ -527,43 +529,7 @@ export async function fetchLysPublisherLogs(lambdaName: string, headerPattern: R
     try {
         return fetchLogsForLambda(lambdaName
         ).then(logs => splitLogsByProcessHeader(logs, headerPattern)
-            // ).then(logs => {
-            //     // find where the run headers (e.g. daily|bluesky, weekly|threads...) are located, to split the logs of the Lys
-            //     // lambda by Lys runs
-            //     const headerIndices = logs.reduce((arr: number[], e, i) => {
-            //         if (/(daily|weekly|5min)\\|(bluesky|threads|twitter)/.test(e.message)) {
-            //             arr.push(i);
-            //         }
-            //         return arr;
-            //     }, []);
-            //     // drop last header (and subsequent logs) if the logs after it don't describe a full run
-            //     const lastHeaderIndex = headerIndices[headerIndices.length - 1];
-            //     let consideredLogs: LogEvent[];
-            //     if (!logs.slice(lastHeaderIndex, logs.length).some(e => e.message.startsWith('REPORT'))) {
-            //         consideredLogs = logs.slice(0, lastHeaderIndex)
-            //         headerIndices.splice(headerIndices.length - 1);
-            //     } else {
-            //         consideredLogs = logs;
-            //     }
-            //     const logsByPublisher: LogsByProcess = {};
-            //     headerIndices
-            //         // create sub-windows of 2 indices
-            //         // (the last index of the last window is defaulted to -1 if we've reached the end of the indices array and
-            //         // can't close the last sub-window)
-            //         .map((headerIndex, idx) => [headerIndex, idx < headerIndices.length - 1 ? headerIndices[idx + 1] : -1])
-            //         // for each sub-window, build a {publisher: LogEvent[]} object
-            //         .forEach(([from, to]) => {
-            //             // there's always a "START RequestId..." log before the header => to catch all logs of a run, we
-            //             // need to pick one log before the header, and drop one log before the next one
-            //             const logs = consideredLogs.slice(from - 1, to == -1 ? consideredLogs.length : to - 1);
-            //             const header = logs[1].message
-            //             logsByPublisher[header] = header in logsByPublisher
-            //                 ? [...logsByPublisher[header], ...logs]
-            //                 : logs;
-            //         });
-            //     return logsByPublisher;
         ).then(logsByPublisher => {
-            // }).then(logsByPublisher => {
             // if the logs of at least one weekly publisher are missing, "manually" fetch them at the expected date (last
             // sunday)
             if (Object.keys(logsByPublisher).filter(p => p.includes('weekly')).length < 3) {
@@ -643,14 +609,15 @@ async function fetchLysPublisherLogsForDateAndMode(lambdaName: string, date: Dat
     }
 }
 
-async function fetchLambdaLogsInLogStream(logStream: string, lambda: string): Promise<LogEvent[]> {
+async function fetchLambdaLogsInLogStream(logStream: string, fromTimestamp: number | undefined, lambda: string): Promise<LogEvent[]> {
     const client = new CloudWatchLogsClient({
         region: 'eu-west-3'
     });
     const request = {
         logGroupName: `/aws/lambda/${lambda}`,
         logStreamName: logStream,
-        startFromHead: true
+        startFromHead: true,
+        startTime: fromTimestamp
     };
     const logs: LogEvent[] = [];
     let lastToken: string | undefined = '';
