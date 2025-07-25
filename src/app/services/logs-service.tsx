@@ -617,7 +617,8 @@ async function fetchLambdaLogsInLogStream(logStream: string, fromTimestamp: numb
         logGroupName: `/aws/lambda/${lambda}`,
         logStreamName: logStream,
         startFromHead: true,
-        startTime: fromTimestamp
+        startTime: fromTimestamp,
+        endTime: new Date().getTime()
     };
     const logs: LogEvent[] = [];
     let lastToken: string | undefined = '';
