@@ -448,7 +448,7 @@ export async function fetchLysProcessStatuses(): Promise<ProcessStatuses> {
             const statuses: ProcessStatuses = {};
             Object.keys(logsByProcess).forEach(process => statuses[process] = {
                 success: logsByProcess[process].length > 0 && !logsByProcess[process].some(e => e.message.toLowerCase().includes('error')),
-                logs: logsByProcess[process].toSorted((e1, e2) => e2.timestamp.localeCompare(e1.timestamp)),
+                logs: logsByProcess[process].toReversed(),
                 lastRun: logsByProcess[process].length == 0 ? undefined : logsByProcess[process][logsByProcess[process].length - 1].timestamp,
                 isLate: isLate(process, logsByProcess[process])
             });
@@ -475,10 +475,12 @@ export async function fetchLogsForLambda(lambda: string, logStreamPrefix?: strin
             .reverse()
             .map(s => fetchLambdaLogsInLogStream(s.logStreamName!, s.firstEventTimestamp, lambda))
         ).then(fetchedLogs => fetchedLogs
-            .flat()
-            .filter(e => !e.message.startsWith('INIT_START'))
-            .map(e => ({...e, message: e.message.trim()} as LogEvent))
-            .sort((e1, e2) => e1.timestamp.localeCompare(e2.timestamp))
+                .flat()
+                .filter(e => !e.message.startsWith('INIT_START'))
+                .map(e => ({...e, message: e.message.trim()} as LogEvent))
+            // no need to sort further - the CloudWatch client returns event sorted by eventId by default, which turns
+            // out to be more accurate than timestamp-based sorting
+            // we can't even ensure this sorting ourselves as eventId isn't exposed in the OutputLogEvent interface
         );
     } catch (error) {
         console.error(error);
