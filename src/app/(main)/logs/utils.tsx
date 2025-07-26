@@ -1,6 +1,6 @@
 'use client';
 
-import useSWR from 'swr';
+import useSWR, { KeyedMutator } from 'swr';
 import { fetcher } from '@/app/utils/fetching-utils';
 import { ProcessStatuses } from '@/app/types/status';
 
@@ -10,18 +10,20 @@ export function useStatuses(): {
     isValidating: boolean,
     error: Error & {
         cause: {response: string, status: number};
-    }
+    },
+    mutate: KeyedMutator<ProcessStatuses>
 } {
     const {
         data,
         isLoading,
         isValidating,
-        error
+        error,
+        mutate
     } = useSWR('/api/statuses', fetcher, {
         // the below ensures the data is never revalidated - in other words, that SWR's cache is never *automatically*
         // refreshed with updated data from the source
-        // that way, we can keep our updates (aka, mutations) local, until we decide to revalidate it later (which can
-        // be never, for the current client browser session anyway)
+        // that way, we can keep our data stale (and prevent requests to the backend), until we decide to revalidate it
+        // later
         // the below makes this use of useSWR here equivalent to useSWRImmutable - see https://swr.vercel.app/docs/revalidation#disable-automatic-revalidations
         revalidateIfStale: false,
         revalidateOnFocus: false,
@@ -31,6 +33,7 @@ export function useStatuses(): {
         statuses: data,
         isLoading,
         isValidating,
-        error
+        error,
+        mutate
     };
 }

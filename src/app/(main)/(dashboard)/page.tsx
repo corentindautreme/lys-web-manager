@@ -1,5 +1,4 @@
 import { Metadata } from 'next';
-import { BoltIcon } from '@heroicons/react/24/outline';
 import NextEventsByDay from '@/app/(main)/(dashboard)/components/next-events-by-day';
 import PastEventsByDay from '@/app/(main)/(dashboard)/components/past-events-by-day';
 import { StatusCards } from '@/app/(main)/(dashboard)/components/status-cards';
@@ -42,11 +41,6 @@ export default async function Page() {
 
                         <div className="w-full lg:w-[50%]">
                             <div className="w-full">
-                                <h2 className="flex items-center text-lg my-4">
-                                    <BoltIcon className="w-5 me-2"/>
-                                    <div className="">Status</div>
-                                </h2>
-
                                 <StatusCards/>
                             </div>
                         </div>
