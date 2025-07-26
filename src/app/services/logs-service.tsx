@@ -452,6 +452,15 @@ export async function fetchLysProcessStatuses(): Promise<ProcessStatuses> {
                 lastRun: logsByProcess[process].length == 0 ? undefined : logsByProcess[process][logsByProcess[process].length - 1].timestamp,
                 isLate: isLate(process, logsByProcess[process])
             });
+            // adjust isLate indicator for publishers
+            EXPECTED_PUBLISHERS.forEach(publisher => {
+                const hasTriggerSucceeded = statuses[`${publisher.split("|")[0]}|trigger`].success;
+                // if the trigger has succeeded but no publisher has run, it means the trigger didn't need to launch Lys
+                // (i.e. no event found) => isLate will have been sent to true for no reason
+                if (hasTriggerSucceeded && statuses[publisher].isLate) {
+                    statuses[publisher].isLate = false;
+                }
+            });
             return statuses;
         });
     } catch (error) {
