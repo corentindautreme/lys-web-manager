@@ -625,7 +625,7 @@ async function fetchLysPublisherLogsForDateAndMode(lambdaName: string, date: Dat
                 }, [])
                 // inject the index of the next header, regardless of the mode: that's the end of the logs of the mode
                 // we actually target
-                .map(headerIndex => [headerIndex, logs.findIndex((e, idx) => idx > headerIndex && /(daily|weekly|5min)\\|(bluesky|threads|twitter)/.test(e.message))])
+                .map(headerIndex => [headerIndex, logs.findIndex((e, idx) => idx > headerIndex && /(daily|weekly|5min)\\|(bluesky|threads|twitter|trigger)/.test(e.message))])
                 .flat();
             // drop the last header if we wouldn't be able to extract a full weekly run out of it; namely, if we
             // extracted an uneven amount of run headers, it means we found the beginning of a weekly run, but not its
