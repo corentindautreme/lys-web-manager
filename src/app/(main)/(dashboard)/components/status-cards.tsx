@@ -1,6 +1,7 @@
 'use client';
 
 import {
+    ArrowPathIcon,
     BoltIcon,
     CheckCircleIcon,
     CheckIcon,
@@ -11,23 +12,275 @@ import {
     XMarkIcon
 } from '@heroicons/react/24/outline';
 import { ProcessStatus, ProcessStatuses } from '@/app/types/status';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useBreakpoint } from '@/app/utils/display-utils';
 import { useStatuses } from '@/app/(main)/logs/utils';
 import { clsx } from 'clsx';
 import Link from 'next/link';
 
 export function StatusCards() {
-    const {statuses: loadedStatuses, error} = useStatuses();
+    const {statuses: loadedStatuses, error, isValidating, mutate} = useStatuses();
     const [statuses, setStatuses] = useState<ProcessStatuses>();
+    const statusesRef = useRef(statuses);
+
+    const [showReloadTriggers, setShowReloadTriggers] = useState(false);
+    const [reloadingTriggers, setReloadingTriggers] = useState(false);
+    const [showReloadPublishers, setShowReloadPublishers] = useState(false);
+    const [reloadingPublishers, setReloadingPublishers] = useState(false);
+    const [showReloadFetcher, setShowReloadFetcher] = useState(false);
+    const [reloadingFetcher, setReloadingFetcher] = useState(false);
+    const [showReloadRefresh, setShowReloadRefresh] = useState(false);
+    const [reloadingRefresh, setReloadingRefresh] = useState(false);
+    const [showReloadDump, setShowReloadDump] = useState(false);
+    const [reloadingDump, setReloadingDump] = useState(false);
 
     useEffect(() => {
         if (!!loadedStatuses) {
             setStatuses(loadedStatuses);
+            statusesRef.current = loadedStatuses;
         }
-    }, [loadedStatuses])
+    }, [loadedStatuses]);
 
-    if (error) return (<div className="flex items-center justify-center h-full font-sans">
+    const updateStatusesCache = (statuses: ProcessStatuses) => {
+        mutate(statuses);
+    }
+
+    useEffect(() => {
+        async function updateTriggersStatuses() {
+            const triggerStatuses = await fetch('/api/statuses/reload?processes=trigger').then(res => res.json()) as ProcessStatuses;
+            const newStatuses = {...statusesRef.current, ...triggerStatuses};
+            updateStatusesCache(newStatuses);
+            statusesRef.current = newStatuses;
+        }
+
+        if (reloadingTriggers) {
+            updateTriggersStatuses().then(() => setReloadingTriggers(false));
+        }
+    }, [reloadingTriggers]);
+
+    useEffect(() => {
+        async function updatePublishersStatuses() {
+            const publisherStatuses = await fetch('/api/statuses/reload?processes=publisher').then(res => res.json()) as ProcessStatuses;
+            const newStatuses = {...statusesRef.current, ...publisherStatuses};
+            updateStatusesCache(newStatuses);
+            statusesRef.current = newStatuses;
+        }
+
+        if (reloadingPublishers) {
+            updatePublishersStatuses().then(() => setReloadingPublishers(false));
+        }
+    }, [reloadingPublishers]);
+
+    useEffect(() => {
+        async function updateFetcherStatuses() {
+            const fetcherStatus = await fetch('/api/statuses/reload?processes=fetcher').then(res => res.json()) as ProcessStatuses;
+            const newStatuses = {...statusesRef.current, ...fetcherStatus};
+            updateStatusesCache(newStatuses);
+            statusesRef.current = newStatuses;
+        }
+
+        if (reloadingFetcher) {
+            updateFetcherStatuses().then(() => setReloadingFetcher(false));
+        }
+    }, [reloadingFetcher]);
+
+    useEffect(() => {
+        async function updateDumpStatuses() {
+            const dumpStatus = await fetch('/api/statuses/reload?processes=dump').then(res => res.json()) as ProcessStatuses;
+            const newStatuses = {...statusesRef.current, ...dumpStatus};
+            updateStatusesCache(newStatuses);
+            statusesRef.current = newStatuses;
+        }
+
+        if (reloadingDump) {
+            updateDumpStatuses().then(() => setReloadingDump(false));
+        }
+    }, [reloadingDump]);
+
+    useEffect(() => {
+        async function updateRefreshStatus() {
+            const refreshStatus = await fetch('/api/statuses/reload?processes=refresh').then(res => res.json()) as ProcessStatuses;
+            const newStatuses = {...statusesRef.current, ...refreshStatus};
+            updateStatusesCache(newStatuses);
+            statusesRef.current = newStatuses;
+        }
+
+        if (reloadingRefresh) {
+            updateRefreshStatus().then(() => setReloadingRefresh(false));
+        }
+    }, [reloadingRefresh]);
+
+    const reloadTriggerStatuses = () => {
+        if (!showReloadTriggers) {
+            setShowReloadTriggers(true);
+        } else {
+            setReloadingTriggers(true);
+            setShowReloadTriggers(false);
+        }
+    }
+
+    const reloadPublisherStatuses = () => {
+        if (!showReloadPublishers) {
+            setShowReloadPublishers(true);
+        } else {
+            setReloadingPublishers(true);
+            setShowReloadPublishers(false);
+        }
+    }
+
+    const reloadFetcherStatus = () => {
+        if (!showReloadFetcher) {
+            setShowReloadFetcher(true);
+        } else {
+            setReloadingFetcher(true);
+            setShowReloadFetcher(false);
+        }
+    }
+
+    const reloadDumpStatus = () => {
+        if (!showReloadDump) {
+            setShowReloadDump(true);
+        } else {
+            setReloadingDump(true);
+            setShowReloadDump(false);
+        }
+    }
+
+    const reloadRefreshStatus = () => {
+        if (!showReloadRefresh) {
+            setShowReloadRefresh(true);
+        } else {
+            setReloadingRefresh(true);
+            setShowReloadRefresh(false);
+        }
+    }
+
+    const reloadStatuses = (process: string) => {
+        if (process === 'trigger') {
+            reloadTriggerStatuses();
+        } else if (process === 'publisher') {
+            reloadPublisherStatuses();
+        } else if (process === 'fetcher') {
+            reloadFetcherStatus();
+        } else if (process === 'dump') {
+            reloadDumpStatus();
+        } else if (process === 'refresh') {
+            reloadRefreshStatus();
+        }
+    }
+
+    const showReloadTechnical = (process: string) => {
+        if (process === 'fetcher') {
+            return showReloadFetcher;
+        } else if (process === 'dump') {
+            return showReloadDump;
+        } else if (process === 'refresh') {
+            return showReloadRefresh;
+        } else {
+            return false;
+        }
+    }
+
+    const isReloadingTechnical = (process: string) => {
+        if (process === 'fetcher') {
+            return reloadingFetcher;
+        } else if (process === 'dump') {
+            return reloadingDump;
+        } else if (process === 'refresh') {
+            return reloadingRefresh;
+        } else {
+            return false;
+        }
+    }
+
+    return (
+        <>
+            <h2 className="flex justify-between my-4">
+                <div className="flex items-center gap-2 text-lg">
+                    <BoltIcon className="w-5"/>
+                    <div className="">Status</div>
+                </div>
+                <button onClick={() => mutate()} disabled={isValidating}>
+                    <div className={clsx('flex items-center gap-1 rounded py-1 px-2',
+                        {
+                            'text-foreground/50 cursor-not-allowed': isValidating,
+                            'bg-foreground/10 cursor-pointer': !isValidating
+                        }
+                    )}>
+                        <ArrowPathIcon
+                            className={clsx('w-4', {'animate-spin': isValidating})}/> {isValidating ? 'Loading...' : 'Reload'}
+                    </div>
+                </button>
+            </h2>
+            {error ? <Error error={error}/> : !statuses
+                ? <StatusCardsSkeleton/>
+                : <div className={clsx('flex lg:flex flex-col xl:grid md:grid grid-cols-2 grid-flow-row gap-2 md:px-3',
+                    {
+                        'opacity-50': isValidating
+                    }
+                )}>
+                    <StatusCard
+                        cardName="Triggers"
+                        processStatuses={{
+                            'daily|trigger': {...statuses['daily|trigger'], name: 'Daily', process: 'trigger'},
+                            '5min|trigger': {...statuses['5min|trigger'], name: '5 min', process: 'trigger'},
+                            'weekly|trigger': {...statuses['weekly|trigger'], name: 'Weekly', process: 'trigger'}
+                        }}
+                        reloadStatuses={reloadStatuses}
+                        showReloadBtn={() => showReloadTriggers}
+                        isReloading={() => reloadingTriggers}
+                    />
+                    <StatusCard
+                        cardName="Daily"
+                        processStatuses={{
+                            'daily|bluesky': {...statuses['daily|bluesky'], name: 'Bluesky', process: 'publisher'},
+                            'daily|threads': {...statuses['daily|threads'], name: 'Threads', process: 'publisher'},
+                            'daily|twitter': {...statuses['daily|twitter'], name: 'Twitter', process: 'publisher'}
+                        }}
+                        reloadStatuses={reloadStatuses}
+                        showReloadBtn={() => showReloadPublishers}
+                        isReloading={() => reloadingPublishers}
+                    />
+                    <StatusCard
+                        cardName="5min"
+                        processStatuses={{
+                            '5min|bluesky': {...statuses['5min|bluesky'], name: 'Bluesky', process: 'publisher'},
+                            '5min|threads': {...statuses['5min|threads'], name: 'Threads', process: 'publisher'},
+                            '5min|twitter': {...statuses['5min|twitter'], name: 'Twitter', process: 'publisher'}
+                        }}
+                        reloadStatuses={reloadStatuses}
+                        showReloadBtn={() => showReloadPublishers}
+                        isReloading={() => reloadingPublishers}
+                    />
+                    <StatusCard
+                        cardName="Weekly"
+                        processStatuses={{
+                            'weekly|bluesky': {...statuses['weekly|bluesky'], name: 'Bluesky', process: 'publisher'},
+                            'weekly|threads': {...statuses['weekly|threads'], name: 'Threads', process: 'publisher'},
+                            'weekly|twitter': {...statuses['weekly|twitter'], name: 'Twitter', process: 'publisher'}
+                        }}
+                        reloadStatuses={reloadStatuses}
+                        showReloadBtn={() => showReloadPublishers}
+                        isReloading={() => reloadingPublishers}
+                    />
+                    <StatusCard
+                        cardName="Technical"
+                        processStatuses={{
+                            'fetcher': {...statuses['fetcher'], name: 'Fetcher', process: 'fetcher'},
+                            'dump': {...statuses['dump'], name: 'Dump', process: 'dump'},
+                            'refresh': {...statuses['refresh'], name: 'Refresh', process: 'refresh'}
+                        }}
+                        reloadStatuses={reloadStatuses}
+                        showReloadBtn={(process: string) => showReloadTechnical(process)}
+                        isReloading={(process: string) => isReloadingTechnical(process)}
+                    />
+                </div>}
+        </>
+    )
+}
+
+function Error({error}: { error: Error & { cause: { response: string; status: number; } } }) {
+    return (<div className="flex items-center justify-center h-full font-sans">
         <div
             className="w-full md:w-100 p-3 flex flex-col items-center justify-center text-center">
             <ExclamationCircleIcon className="w-16"/>
@@ -37,62 +290,17 @@ export function StatusCards() {
             </div>
         </div>
     </div>);
-
-    return (
-        !statuses
-            ? <StatusCardsSkeleton/>
-            : <div className="flex lg:flex flex-col xl:grid md:grid grid-cols-2 grid-flow-row gap-2 md:px-3">
-                <StatusCard
-                    cardName="Triggers"
-                    processStatuses={{
-                        'daily|trigger': {...statuses['daily|trigger'], name: "Daily" },
-                        '5min|trigger': {...statuses['5min|trigger'], name: "5 min" },
-                        'weekly|trigger': {...statuses['weekly|trigger'], name: "Weekly" }
-                    }}
-                />
-                <StatusCard
-                    cardName="Daily"
-                    processStatuses={{
-                        'daily|bluesky': {...statuses['daily|bluesky'], name: "Bluesky" },
-                        'daily|threads': {...statuses['daily|threads'], name: "Threads" },
-                        'daily|twitter': {...statuses['daily|twitter'], name: "Twitter" }
-                    }}
-                />
-                <StatusCard
-                    cardName="5min"
-                    processStatuses={{
-                        '5min|bluesky': {...statuses['5min|bluesky'], name: "Bluesky" },
-                        '5min|threads': {...statuses['5min|threads'], name: "Threads" },
-                        '5min|twitter': {...statuses['5min|twitter'], name: "Twitter" }
-                    }}
-                />
-                <StatusCard
-                    cardName="Weekly"
-                    processStatuses={{
-                        'weekly|bluesky': {...statuses['weekly|bluesky'], name: "Bluesky" },
-                        'weekly|threads': {...statuses['weekly|threads'], name: "Threads" },
-                        'weekly|twitter': {...statuses['weekly|twitter'], name: "Twitter" }
-                    }}
-                />
-                <StatusCard
-                    cardName="Technical"
-                    processStatuses={{
-                        'fetcher': {...statuses['fetcher'], name: "Fetcher" },
-                        'dump': {...statuses['dump'], name: "Dump" },
-                        'refresh': {...statuses['refresh'], name: "Refresh" }
-                    }}
-                />
-            </div>
-    )
 }
 
-export function StatusCard({cardName, processStatuses}: {
+export function StatusCard({cardName, processStatuses, reloadStatuses, showReloadBtn, isReloading}: {
     cardName: string,
-    processStatuses: { [p: string]: ProcessStatus & { name: string } }
+    processStatuses: { [p: string]: ProcessStatus & { name: string, process: string } },
+    reloadStatuses: (process: string) => void,
+    showReloadBtn: (process: string) => boolean,
+    isReloading: (process: string) => boolean
 }) {
     const {isMd} = useBreakpoint('md');
     const [unfolded, setUnfolded] = useState(isMd);
-
     const unfold = () => setUnfolded(!unfolded);
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -136,27 +344,44 @@ export function StatusCard({cardName, processStatuses}: {
                 </div>
                 {unfolded ? <ChevronUpIcon className="ms-2 w-4"/> : <ChevronDownIcon className="ms-2 w-4"/>}
                 <div className="grow"></div>
-                {globalStatus == 'success' && <CheckCircleIcon className="w-6"/>}
-                {globalStatus == 'warn' && <ExclamationTriangleIcon className="w-6"/>}
-                {globalStatus == 'error' && <XCircleIcon className="w-6"/>}
+                {!Object.values(processStatuses).map(s => s.process).some(p => isReloading(p)) && globalStatus == 'success' &&
+                    <CheckCircleIcon className="w-6"/>}
+                {!Object.values(processStatuses).map(s => s.process).some(p => isReloading(p)) && globalStatus == 'warn' &&
+                    <ExclamationTriangleIcon className="w-6"/>}
+                {!Object.values(processStatuses).map(s => s.process).some(p => isReloading(p)) && globalStatus == 'error' &&
+                    <XCircleIcon className="w-6"/>}
+                {Object.values(processStatuses).map(s => s.process).some(p => isReloading(p)) &&
+                    <ArrowPathIcon className="w-6 animate-spin"/>}
             </div>
         </button>
         {unfolded && <div className="flex gap-2 items-center justify-center">
             {Object.entries(processStatuses).map(([process, status]) => (
-                <Link key={`status-${cardName}-${process}`} href={`/logs?lambda=${process}`}>
-                    <div className="flex flex-col items-center p-2">
+                <div key={`status-${cardName}-${process}`} className="flex flex-col items-center p-2">
+                    <button
+                        onClick={() => reloadStatuses(status.process)}
+                        disabled={isReloading(status.process)}
+                    >
                         <div className={clsx('w-fit p-3 rounded-4xl',
                             {
                                 'bg-foreground/10': status.success && !status.isLate,
                                 'bg-amber-400 text-black': status.success && status.isLate,
-                                'bg-red-400 dark:bg-red-300 text-background': !status.success
+                                'bg-red-400 dark:bg-red-300 text-background': !status.success,
+                                'opacity-50 animate-spin': isReloading(status.process)
                             })
                         }>
-                            {status.success && status.isLate && <ExclamationTriangleIcon className="w-10"/>}
-                            {status.success && !status.isLate && <CheckIcon className="w-10"/>}
-                            {!status.success && status.logs.length == 0 && <BoltIcon className="w-10"/>}
-                            {!status.success && status.logs.length > 0 && <XMarkIcon className="w-10"/>}
+                            {!showReloadBtn(status.process) && !isReloading(status.process) && status.success && status.isLate &&
+                                <ExclamationTriangleIcon className="w-10"/>}
+                            {!showReloadBtn(status.process) && !isReloading(status.process) && status.success && !status.isLate &&
+                                <CheckIcon className="w-10"/>}
+                            {!showReloadBtn(status.process) && !isReloading(status.process) && !status.success && status.logs.length == 0 &&
+                                <BoltIcon className="w-10"/>}
+                            {!showReloadBtn(status.process) && !isReloading(status.process) && !status.success && status.logs.length > 0 &&
+                                <XMarkIcon className="w-10"/>}
+                            {(showReloadBtn(status.process) || isReloading(status.process)) &&
+                                <ArrowPathIcon className="w-10"/>}
                         </div>
+                    </button>
+                    <Link href={`/logs?lambda=${process}`} className={clsx({'opacity-50': isReloading(status.process)})}>
                         <div className={clsx(
                             'my-1 text-center capitalize',
                             {'font-bold': !status.success || status.isLate}
@@ -164,8 +389,8 @@ export function StatusCard({cardName, processStatuses}: {
                             {status.name}
                         </div>
                         <div className="text-sm text-center">Last run {getLastRunString(status.lastRun) || '-'}</div>
-                    </div>
-                </Link>
+                    </Link>
+                </div>
             ))}
         </div>}
     </div>);

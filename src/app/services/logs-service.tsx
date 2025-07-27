@@ -408,6 +408,22 @@ export function getLysProcessStatuses(): ProcessStatuses {
     }
 }
 
+export function reloadLysProcessesStatuses(processes: string[]) {
+    const keys: string[] = processes.map(p => {
+        if (p === 'publisher') {
+            return EXPECTED_PUBLISHERS;
+        } else if (p === 'trigger') {
+            return EXPECTED_TRIGGERS;
+        } else if (p === 'fetcher' || p === 'refresh' || p === 'dump') {
+            return p;
+        } else {
+            return null;
+        }
+    }).flat().filter(key => key != null);
+    const statuses = getLysProcessStatuses();
+    return Object.assign({}, keys.map(process => statuses[process]));
+}
+
 function isBotProcess(process: string) {
     const splitProcess = process.split('|');
     return splitProcess.length == 2 && splitProcess[1] != 'trigger';
@@ -427,36 +443,71 @@ function isLate(process: string, logs: LogEvent[]) {
     return lastRun < limitDate.toISOString();
 }
 
-export async function fetchLysProcessStatuses(): Promise<ProcessStatuses> {
+export async function fetchLysProcessStatuses(processes?: string[]): Promise<ProcessStatuses> {
     try {
-        return Promise.all([
-            fetchLysPublisherLogs(
-                LYS_PUBLISHER_LAMBDA_NAME,
-                /(daily|weekly|5min)\\|(bluesky|threads|twitter)/,
-                EXPECTED_PUBLISHERS
-            ),
-            fetchLysPublisherLogs(
-                LYS_TRIGGER_LAMBDA_NAME,
-                /(daily|weekly|5min)\|trigger/,
-                EXPECTED_TRIGGERS
-            ),
-            fetchLogsForLambda('LysEventFetcher').then(logs => ({'fetcher': logs} as LogsByProcess)),
-            fetchLogsForLambda('LysRefresh').then(logs => ({'refresh': logs} as LogsByProcess)),
-            fetchLogsForLambda('LysDump').then(logs => ({'dump': logs} as LogsByProcess))
-        ]).then(allLogsByProcess => {
-            const logsByProcess: LogsByProcess = Object.assign({}, ...allLogsByProcess);
-            const statuses: ProcessStatuses = {};
-            Object.keys(logsByProcess).forEach(process => statuses[process] = {
-                success: logsByProcess[process].length > 0 && !logsByProcess[process].some(e => e.message.toLowerCase().includes('error')),
-                logs: logsByProcess[process].toReversed(),
-                lastRun: logsByProcess[process].length == 0 ? undefined : logsByProcess[process][logsByProcess[process].length - 1].timestamp,
-                isLate: isLate(process, logsByProcess[process])
+        return Promise
+            .all(fetchLogsForProcesses(processes))
+            .then(allLogsByProcess => {
+                const logsByProcess: LogsByProcess = Object.assign({}, ...allLogsByProcess);
+                const statuses: ProcessStatuses = {};
+                Object.keys(logsByProcess).forEach(process => statuses[process] = {
+                    success: !logsByProcess[process].some(e => e.message.toLowerCase().includes('error')),
+                    logs: logsByProcess[process].toReversed(),
+                    lastRun: logsByProcess[process].length == 0 ? undefined : logsByProcess[process][logsByProcess[process].length - 1].timestamp,
+                    isLate: isLate(process, logsByProcess[process])
+                });
+                // adjust isLate indicator for publishers
+                EXPECTED_PUBLISHERS.forEach(publisher => {
+                    const matchingTrigger = `${publisher.split('|')[0]}|trigger`;
+                    if (publisher in statuses && matchingTrigger in statuses) {
+                        const hasTriggerSucceeded = statuses[matchingTrigger].success;
+                        // if the trigger has succeeded but no publisher has run, it means the trigger didn't need to launch Lys
+                        // (i.e. no event found) => isLate will have been sent to true for no reason
+                        if (hasTriggerSucceeded && statuses[publisher].isLate) {
+                            statuses[publisher].isLate = false;
+                        }
+                    }
+                });
+                return statuses;
             });
-            return statuses;
-        });
     } catch (error) {
         throw error;
     }
+}
+
+function fetchLogsForProcesses(processes?: string[]): Promise<LogsByProcess>[] {
+    const processLogsPromises: Promise<LogsByProcess>[] = [];
+    if (!processes) {
+        processes = ['publisher', 'trigger', 'fetcher', 'refresh', 'dump'];
+    }
+    processes.forEach(p => {
+        if (p === 'publisher') {
+            processLogsPromises.push(fetchLysPublisherLogs(
+                LYS_PUBLISHER_LAMBDA_NAME,
+                /(daily|weekly|5min)\\|(bluesky|threads|twitter)/,
+                EXPECTED_PUBLISHERS
+            ));
+        } else if (p === 'trigger') {
+            processLogsPromises.push(fetchLysPublisherLogs(
+                LYS_TRIGGER_LAMBDA_NAME,
+                /(daily|weekly|5min)\|trigger/,
+                EXPECTED_TRIGGERS
+            ));
+        } else if (p === 'fetcher') {
+            processLogsPromises.push(fetchLogsForLambda('LysEventFetcher')
+                .then(logs => ({'fetcher': logs} as LogsByProcess))
+            );
+        } else if (p === 'refresh') {
+            processLogsPromises.push(fetchLogsForLambda('LysRefresh')
+                .then(logs => ({'refresh': logs} as LogsByProcess))
+            );
+        } else if (p === 'dump') {
+            processLogsPromises.push(fetchLogsForLambda('LysDump')
+                .then(logs => ({'dump': logs} as LogsByProcess))
+            );
+        }
+    });
+    return processLogsPromises;
 }
 
 export async function fetchLogsForLambda(lambda: string, logStreamPrefix?: string): Promise<LogEvent[]> {
@@ -534,7 +585,6 @@ export async function fetchLysPublisherLogs(lambdaName: string, headerPattern: R
             // sunday)
             if (Object.keys(logsByPublisher).filter(p => p.includes('weekly')).length < 3) {
                 const lastSunday = new Date();
-                lastSunday.setDate(lastSunday.getDate() + 1);
                 if (lastSunday.getDay() != 0) {
                     lastSunday.setDate(lastSunday.getDate() - lastSunday.getDay());
                 } else if (lastSunday.getHours() <= 17) {
@@ -575,7 +625,7 @@ async function fetchLysPublisherLogsForDateAndMode(lambdaName: string, date: Dat
                 }, [])
                 // inject the index of the next header, regardless of the mode: that's the end of the logs of the mode
                 // we actually target
-                .map(headerIndex => [headerIndex, logs.findIndex((e, idx) => idx > headerIndex && /(daily|weekly|5min)\\|(bluesky|threads|twitter)/.test(e.message))])
+                .map(headerIndex => [headerIndex, logs.findIndex((e, idx) => idx > headerIndex && /(daily|weekly|5min)\\|(bluesky|threads|twitter|trigger)/.test(e.message))])
                 .flat();
             // drop the last header if we wouldn't be able to extract a full weekly run out of it; namely, if we
             // extracted an uneven amount of run headers, it means we found the beginning of a weekly run, but not its
