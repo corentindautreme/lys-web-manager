@@ -451,7 +451,7 @@ export async function fetchLysProcessStatuses(processes?: string[]): Promise<Pro
                 const logsByProcess: LogsByProcess = Object.assign({}, ...allLogsByProcess);
                 const statuses: ProcessStatuses = {};
                 Object.keys(logsByProcess).forEach(process => statuses[process] = {
-                    success: logsByProcess[process].length > 0 && !logsByProcess[process].some(e => e.message.toLowerCase().includes('error')),
+                    success: !logsByProcess[process].some(e => e.message.toLowerCase().includes('error')),
                     logs: logsByProcess[process].toReversed(),
                     lastRun: logsByProcess[process].length == 0 ? undefined : logsByProcess[process][logsByProcess[process].length - 1].timestamp,
                     isLate: isLate(process, logsByProcess[process])
