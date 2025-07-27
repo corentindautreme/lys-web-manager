@@ -2,10 +2,12 @@
 
 import { clsx } from 'clsx';
 import {
+    AdjustmentsHorizontalIcon,
     BellIcon,
-    ExclamationCircleIcon,
+    BoltIcon,
     ExclamationTriangleIcon,
-    InformationCircleIcon
+    PlayIcon,
+    XMarkIcon
 } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { useStatuses } from '@/app/(main)/logs/utils';
@@ -26,6 +28,8 @@ export default function ActionCards() {
         if (statusesError) {
             actionsCards.push(<ActionCard
                 key={`actions-status-fetch-error`}
+                title="Error"
+                category="Dashboard"
                 description={<>
                     <span className="font-bold">{statusesError.name}</span> occurred while trying to fetch statuses and
                     logs: {statusesError.message}
@@ -38,21 +42,18 @@ export default function ActionCards() {
                 .filter(([process, status]) => !status.success || status.isLate)
                 .map(([process, status], index) => <ActionCard
                     key={`action-${index}`}
-                    title={!status.success ? 'Error' : 'Warning'}
+                    title={!status.success ? (!!status.lastRun ? 'Error' : 'Down') : 'Warning'}
+                    category="Lambda"
+                    process={process.includes('|') ? (process.includes('trigger') ? 'Trigger' : 'Lys') : process}
+                    options={process.includes('|') ? process : undefined}
                     type={!status.success ? 'error' : 'warn'}
                     description={
                         <div>
                             Lambda
-                            <span className={clsx('font-bold mx-1', {
-                                'capitalize': !process.includes('|')
-                            })}>
-                                {process.includes('|') ? `Lys (${process})` : `Lambda ${process}`}
-                            </span>
-                            {!status.success && (!!status.lastRun ? 'threw an error' : 'has not run in a while')}
-                            {status.success && status.isLate && 'has skipped its last run'}
+                            {!status.success && (!!status.lastRun ? ' threw an error' : ' has not run in a while')}
+                            {status.success && status.isLate && ' has skipped its last run'}
                         </div>
                     }
-                    linkText="View logs"
                     linkHref={`/logs?lambda=${process}`}
                 />)
             );
@@ -61,6 +62,8 @@ export default function ActionCards() {
         if (eventsError) {
             actionsCards.push(<ActionCard
                 key={`actions-events-fetch-error`}
+                title="Error"
+                category="Dashboard"
                 description={<>
                     <span className="font-bold">{eventsError.name}</span> occurred while trying to fetch
                     events: {eventsError.message}
@@ -74,9 +77,9 @@ export default function ActionCards() {
                 actionsCards.push(<ActionCard
                     type="warn"
                     title="Warning"
+                    category="Events"
                     description={<div>{upcomingEventsWithoutTimeOrLink} upcoming event(s) without time or watch
                         link</div>}
-                    linkText="Go to events"
                     linkHref={`/events`}
                 />);
             }
@@ -84,8 +87,8 @@ export default function ActionCards() {
                 actionsCards.push(<ActionCard
                     type="warn"
                     title="Warning"
+                    category="Events"
                     description={<div>{recentEventsWithoutLink} recent event(s) without replay watch link</div>}
-                    linkText="Go to events"
                     linkHref={`/events`}
                 />);
             }
@@ -94,6 +97,8 @@ export default function ActionCards() {
         if (suggestionsError) {
             actionsCards.push(<ActionCard
                 key={`actions-suggestions-fetch-error`}
+                title="Error"
+                category="Dashboard"
                 description={<>
                     <span className="font-bold">{suggestionsError.name}</span> occurred while trying to fetch
                     suggestions: {suggestionsError.message}
@@ -105,9 +110,9 @@ export default function ActionCards() {
                 actionsCards.push(<ActionCard
                     type="info"
                     title="Suggestions"
-                    description={<div>There {suggestions.filter(s => s.reprocessable).length > 1 ? 'are' : 'is'} {suggestions.filter(s => s.reprocessable).length} unprocessed
-                        suggestion{suggestions.filter(s => s.reprocessable).length > 1 && 's'}</div>}
-                    linkText="Review"
+                    description={
+                        <div>There {suggestions.filter(s => s.reprocessable).length > 1 ? 'are' : 'is'} {suggestions.filter(s => s.reprocessable).length} unprocessed
+                            suggestion{suggestions.filter(s => s.reprocessable).length > 1 && 's'}</div>}
                     linkHref={`/suggestions`}
                 />);
             }
@@ -134,40 +139,49 @@ export default function ActionCards() {
         </>);
 }
 
-function ActionCard({title, description, type, linkText, linkHref}: {
+function ActionCard({title, category, process, options, description, type, linkHref}: {
     title?: string;
+    category?: string;
+    process?: string;
+    options?: string;
     description: JSX.Element;
     type: 'error' | 'warn' | 'info',
-    linkText?: string;
     linkHref?: string;
 }) {
-    return (<div
-        className={clsx('shrink-0 w-65 md:w-75 text-sm p-3 rounded-xl bg-foreground/10 flex items-center')}>
-        <div className="flex items-center gap-x-2 w-full">
-            <div className={clsx('w-fit p-2 md:p-3 rounded-4xl mb-1 md:mb-0',
-                {
-                    'bg-red-400 dark:bg-red-300 text-background': type == 'error',
-                    'bg-amber-400 text-black': type == 'warn',
-                    'bg-foreground/10': type == 'info'
-                }
-            )}>
-                {type == 'error' && <ExclamationCircleIcon className="w-8 md:w-10"/>}
-                {type == 'warn' && <ExclamationTriangleIcon className="w-8 md:w-10"/>}
-                {type == 'info' && <InformationCircleIcon className="w-8 md:w-10"/>}
-            </div>
-            <div className="flex flex-col w-full">
-                <div className="flex flex-col">
-                    {title && <div className="font-bold">{title}</div>}
-                    <div className="py-1">{description}</div>
-                </div>
-                {linkHref &&
-                    <div className="flex justify-end">
-                        <Link href={linkHref} className="text-right">{linkText}</Link>
+    return (
+        <div className={clsx('shrink-0 w-65 md:w-75 text-sm rounded-xl bg-foreground/10 flex items-center')}>
+            <Link href={linkHref || '#'} className="w-full">
+                <div className="flex flex-col w-full p-3">
+                    <div className="flex flex-col">
+                        <div className="flex items-center gap-1">
+                            {title && <div
+                                className={clsx('flex items-center gap-0.5 w-fit rounded font-bold px-1 py-0.5', {
+                                    'bg-red-400 dark:bg-red-300 text-background': type == 'error',
+                                    'bg-amber-400 text-black': type == 'warn',
+                                    'bg-foreground/10': type == 'info'
+                                })}>
+                                {title === 'Down' && <BoltIcon className="w-4"/>}
+                                {title === 'Error' && <XMarkIcon className="w-4"/>}
+                                {title === 'Warning' && <ExclamationTriangleIcon className="w-4"/>}
+                                {title}
+                            </div>}
+                            {category && <div className="w-fit rounded px-1 py-0.5 bg-foreground/10">
+                                {category}
+                            </div>}
+                        </div>
+                        {process && <div className="flex items-center gap-0.5 py-1 text-foreground/50 text-xs">
+                            <PlayIcon className="w-4"/>
+                            <div>{process}</div>
+                            {options && <>
+                                <AdjustmentsHorizontalIcon className="w-4"/>
+                                <div>{options}</div>
+                            </>}
+                        </div>}
+                        <div className="text-sm py-1">{description}</div>
                     </div>
-                }
-            </div>
-        </div>
-    </div>);
+                </div>
+            </Link>
+        </div>);
 }
 
 export function ActionCardsSkeleton() {
