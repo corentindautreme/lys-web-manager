@@ -511,7 +511,7 @@ function fetchLogsForProcesses(processes?: string[]): Promise<LogsByProcess>[] {
     return processLogsPromises;
 }
 
-export async function fetchLogsForLambda(lambda: string, logStreamPrefix?: string): Promise<LogEvent[]> {
+export async function fetchLogsForLambda(lambda: string, limit?: number, logStreamPrefix?: string): Promise<LogEvent[]> {
     try {
         const client = new CloudWatchLogsClient({
             region: 'eu-west-3',
@@ -521,7 +521,7 @@ export async function fetchLogsForLambda(lambda: string, logStreamPrefix?: strin
             descending: true,
             orderBy: !logStreamPrefix ? 'LastEventTime' : undefined,
             logStreamNamePrefix: logStreamPrefix,
-            limit: 10
+            limit: limit || 10
         }));
         return Promise.all(res.logStreams!
             .reverse()
@@ -579,7 +579,7 @@ export function splitLogsByProcessHeader(logs: LogEvent[], headerPattern: RegExp
 
 export async function fetchLysPublisherLogs(lambdaName: string, headerPattern: RegExp, expectedPublishers: string[]): Promise<LogsByProcess> {
     try {
-        return fetchLogsForLambda(lambdaName
+        return fetchLogsForLambda(lambdaName, 20
         ).then(logs => splitLogsByProcessHeader(logs, headerPattern)
         ).then(logsByPublisher => {
             // if the logs of at least one weekly publisher are missing, "manually" fetch them at the expected date (last
@@ -615,7 +615,7 @@ export async function fetchLysPublisherLogs(lambdaName: string, headerPattern: R
 async function fetchLysPublisherLogsForDateAndMode(lambdaName: string, date: Date, mode: 'daily' | '5min' | 'weekly'): Promise<LogsByProcess> {
     try {
         const logStreamPrefixForDate = date.toLocaleString('eu', {year: 'numeric', month: '2-digit', day: '2-digit'});
-        return fetchLogsForLambda(lambdaName, logStreamPrefixForDate).then(logs => {
+        return fetchLogsForLambda(lambdaName, 20, logStreamPrefixForDate).then(logs => {
             // find where the run headers of the target mode (i.e. {mode}|{target}) are located
             const headerIndices = logs
                 .reduce((arr: number[], e, i) => {
