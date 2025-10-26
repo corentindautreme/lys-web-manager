@@ -3,7 +3,8 @@ import {
     DescribeLogStreamsCommand,
     DescribeLogStreamsCommandOutput,
     GetLogEventsCommand,
-    GetLogEventsCommandOutput
+    GetLogEventsCommandOutput,
+    ThrottlingException
 } from '@aws-sdk/client-cloudwatch-logs';
 import { LogEvent, LogsByProcess } from '@/app/types/logs';
 import { ProcessStatuses } from '@/app/types/status';
@@ -660,6 +661,8 @@ async function fetchLysPublisherLogsForDateAndMode(lambdaName: string, date: Dat
 }
 
 async function fetchLambdaLogsInLogStream(logStream: string, fromTimestamp: number | undefined, lambda: string): Promise<LogEvent[]> {
+    const maxRetries = 3;
+    let retries = 0;
     const client = new CloudWatchLogsClient({
         region: 'eu-west-3'
     });
@@ -675,21 +678,33 @@ async function fetchLambdaLogsInLogStream(logStream: string, fromTimestamp: numb
     let nextToken = undefined;
     while (nextToken != lastToken) {
         lastToken = nextToken;
-        const res: GetLogEventsCommandOutput = await client.send(new GetLogEventsCommand({
-            ...request,
-            nextToken: nextToken
-        }));
-        // if we get the same token, we've already loaded these logs
-        // we'll break at the next iteration
-        if (res.nextBackwardToken != lastToken && !!res.events) {
-            logs.push(...res.events.map(e => {
-                return {
-                    timestamp: new Date(e.timestamp || 0).toISOString() || '',
-                    message: e.message || ''
-                } as LogEvent;
-            }));
+        while (retries < maxRetries) {
+            try {
+                const res: GetLogEventsCommandOutput = await client.send(new GetLogEventsCommand({
+                    ...request,
+                    nextToken: nextToken
+                }));
+                // if we get the same token, we've already loaded these logs
+                // we'll break at the next iteration
+                if (res.nextBackwardToken != lastToken && !!res.events) {
+                    logs.push(...res.events.map(e => {
+                        return {
+                            timestamp: new Date(e.timestamp || 0).toISOString() || '',
+                            message: e.message || ''
+                        } as LogEvent;
+                    }));
+                }
+                nextToken = res.nextBackwardToken;
+                break;
+            } catch (error) {
+                if (error instanceof ThrottlingException) {
+                    retries++;
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                } else {
+                    throw error;
+                }
+            }
         }
-        nextToken = res.nextBackwardToken;
     }
     return logs;
 }
