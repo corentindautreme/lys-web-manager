@@ -4,6 +4,7 @@ import PastEventsByDay from '@/app/(main)/(dashboard)/components/past-events-by-
 import { StatusCards } from '@/app/(main)/(dashboard)/components/status-cards';
 import ActionCards from '@/app/(main)/(dashboard)/components/action-cards';
 import Breadcrumbs from '@/app/components/breadcrumbs';
+import Metrics from '@/app/(main)/(dashboard)/components/metrics';
 
 export const metadata: Metadata = {
     title: 'Dashboard'
@@ -40,6 +41,9 @@ export default async function Page() {
                         </div>
 
                         <div className="w-full lg:w-[50%]">
+                            <div className="w-full">
+                                <Metrics/>
+                            </div>
                             <div className="w-full">
                                 <StatusCards/>
                             </div>
