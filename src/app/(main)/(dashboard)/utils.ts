@@ -1,7 +1,7 @@
 import { Event } from '@/app/types/events/event';
 import useSWR from 'swr';
 import { fetcher } from '@/app/utils/fetching-utils';
-import { ProcessMetrics, UsageMetrics } from '@/app/types/metrics';
+import { UsageMetrics } from '@/app/types/metrics';
 
 export function getNext7DaysEvents(events: Event[]) {
     const now = new Date().toISOString().split('.')[0];
@@ -31,8 +31,7 @@ export function useMetrics(): {
         data,
         isLoading,
         isValidating,
-        error,
-        mutate
+        error
     } = useSWR('/api/metrics', fetcher, {
         // the below ensures the data is never revalidated - in other words, that SWR's cache is never *automatically*
         // refreshed with updated data from the source

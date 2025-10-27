@@ -44,6 +44,7 @@ export default function Metrics() {
                             }
                         ]}
                         xAxis={[{scaleType: 'point', data: [...Array(31).keys().map(i => i + 1)]}]}
+
                         sx={{
                             [`.${lineElementClasses.root}, .${markElementClasses.root}`]: {
                                 strokeWidth: 1,
@@ -77,8 +78,6 @@ export default function Metrics() {
                             //     stroke: 'none',
                             // },
                         }}
-                        // yAxis={[{ width: 50 }]}
-                        // margin={margin}
                     />
                 </Box>
             </div>
