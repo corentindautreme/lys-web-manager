@@ -8,7 +8,10 @@ export function getUsageMetrics(): UsageMetrics {
 export async function fetchUsageMetrics(): Promise<UsageMetrics> {
     return Promise
         .all([fetchDynamoDBMonthlyReadUsageMetrics()])
-        .then(allMetrics => Object.assign({}, ...allMetrics));
+        .then(allMetrics => Object.assign({}, ...allMetrics))
+        .catch(err => {
+            throw err;
+        });
 }
 
 async function fetchDynamoDBMonthlyReadUsageMetrics(): Promise<UsageMetrics> {
@@ -16,21 +19,28 @@ async function fetchDynamoDBMonthlyReadUsageMetrics(): Promise<UsageMetrics> {
         region: 'eu-west-3',
     });
 
-    const now = new Date();
+    const now = new Date("2025-10-25");
     const lastMonthStart = new Date();
+    // start from the 2nd of the month, since the daily metric is given as of 00:00 UTC and gives the consumption over
+    // the last 24 hours
+    // TODO review that above comment lol
     lastMonthStart.setUTCFullYear(now.getUTCFullYear(), now.getUTCMonth(), 1);
     lastMonthStart.setMonth(lastMonthStart.getMonth() - 1);
     lastMonthStart.setUTCHours(0, 0, 0, 0);
-    const monthEnd = new Date(now.getUTCFullYear(), now.getUTCMonth(), 1, 0, 0, 0);
+    // request data until the 2nd of the next month (end boundary is exclusive), for the same reason as mentioned above
+    const monthEnd = new Date(now.getUTCFullYear(), now.getUTCMonth(), 2, 0, 0, 0);
     monthEnd.setMonth(monthEnd.getMonth() + 1);
-    monthEnd.setDate(0);
+    console.log(monthEnd);
     return Promise
         .all([
             client.send(getRCUCommandForTable('lys_events', lastMonthStart, monthEnd)),
             client.send(getRCUCommandForTable('lys_suggested_events', lastMonthStart, monthEnd)),
             client.send(getRCUCommandForTable('lys_ref_country', lastMonthStart, monthEnd)),
             client.send(getRCUCommandForTable('lys_settings', lastMonthStart, monthEnd))
-        ]).then(allResults => allResults
+        ]).then(allResults => {
+            console.log(JSON.stringify(allResults[0], null, 2));
+            return allResults;
+        }).then(allResults => allResults
             .map(o => o.Datapoints || [])
             .flat()
             .sort((dp1, dp2) => dp1.Timestamp! < dp2.Timestamp! ? -1 : 1)
@@ -65,7 +75,7 @@ async function fetchDynamoDBMonthlyReadUsageMetrics(): Promise<UsageMetrics> {
             } as ProcessMetrics,
             'current_month_rcu': {
                 measurements: Object
-                    .entries(dateToValues[1])
+                    .entries(dateToValues[1] || [])
                     .map(([key, value]) => ({label: key, value: value}))
                     .reduce((out, m, index) => {
                         if (index === 0) {
@@ -78,6 +88,7 @@ async function fetchDynamoDBMonthlyReadUsageMetrics(): Promise<UsageMetrics> {
             }
         }))
         .catch(err => {
+            console.log(err);
             throw err;
         });
 }
