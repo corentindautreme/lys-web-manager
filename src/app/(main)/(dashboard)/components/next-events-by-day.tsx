@@ -13,7 +13,7 @@ export default function NextEventsByDay() {
     const [displayedEvents, setDisplayedEvents] = useState<Event[]>();
     const {events} = useEvents();
 
-    const isNextEventInError = (e: Event): boolean => e.dateTimeCet.substring(11, 16) === '00:00' && !e.watchLinks.some(l => l.live == 1);
+    const isNextEventInError = (e: Event): boolean => e.dateTimeCet.substring(11, 16) === '00:00' || !e.watchLinks.some(l => l.live == 1);
 
     useEffect(() => {
         if (!!events) {
