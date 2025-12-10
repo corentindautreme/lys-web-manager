@@ -50,7 +50,7 @@ export default function EventsByDay({eventsParam, showErrorOnly, errorPredicate,
             Object.keys(eventsByDate).length == 0 ? <EmptyEventsByDay showErrorOnly={showErrorOnly}/> : (
                 <div className="relative flex gap-x-2 overflow-x-scroll">
                     {Object.entries(eventsByDate).map(([date, events], index) => (
-                        <div className="relative grow min-w-65 pt-5" key={date}>
+                        <div className="relative grow min-w-65 max-h-85 pt-5" key={date}>
                             <div
                                 className="absolute top-1 left-[50%] rounded-xl transform-[translateX(-50%)] w-fit px-3 py-1 text-white"
                                 style={{
@@ -62,8 +62,8 @@ export default function EventsByDay({eventsParam, showErrorOnly, errorPredicate,
                             >
                                 {date}
                             </div>
-                            <div className=" p-3 pt-8 rounded-xl bg-white dark:bg-foreground/10">
-                                <div className="flex flex-col gap-y-1.5 h-80 overflow-y-scroll">
+                            <div className="p-3 pt-8 h-full rounded-xl bg-white dark:bg-foreground/10">
+                                <div className="flex flex-col gap-y-1.5 h-full overflow-y-scroll">
                                     {events.map(e =>
                                         <div key={e.id} className={clsx('rounded',
                                             {
