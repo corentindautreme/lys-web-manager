@@ -485,7 +485,7 @@ function fetchLogsForProcesses(processes?: string[]): Promise<LogsByProcess>[] {
         if (p === 'publisher') {
             processLogsPromises.push(fetchLysPublisherLogs(
                 LYS_PUBLISHER_LAMBDA_NAME,
-                /(daily|weekly|5min)\\|(bluesky|threads|twitter)/,
+                /(daily|weekly|5min)\|(bluesky|threads|twitter)/,
                 EXPECTED_PUBLISHERS
             ));
         } else if (p === 'trigger') {
