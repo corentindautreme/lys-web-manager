@@ -36,6 +36,7 @@
     --foreground: #171717;
     --background-dark: #0a0a0a;
     --foreground-dark: #ededed;
+    --font-family: ui-sans-serif,system-ui,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Noto Color Emoji;
 }
 
 :root.dark {
@@ -46,7 +47,7 @@
 body {
     color: var(--foreground);
     background: var(--background);
-    font-family: ui-sans-serif,system-ui,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Noto Color Emoji;
+    font-family: var(--font-family), ui-sans-serif;
 }
 
 .dark body {
