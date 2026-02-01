@@ -1,5 +1,5 @@
 import { ProcessMetrics, UsageMetrics } from '@/app/types/metrics';
-import { CloudWatchClient, GetMetricStatisticsCommand } from '@aws-sdk/client-cloudwatch';
+import { CloudWatchClient, Datapoint, GetMetricStatisticsCommand } from '@aws-sdk/client-cloudwatch';
 
 export function getUsageMetrics(): UsageMetrics {
     return {
@@ -204,7 +204,16 @@ async function fetchDynamoDBMonthlyReadUsageMetrics(): Promise<UsageMetrics> {
             client.send(getRCUCommandForTable('lys_ref_country', lastMonthStart, monthEnd)),
             client.send(getRCUCommandForTable('lys_settings', lastMonthStart, monthEnd))
         ]).then(allResults => allResults
-            .map(o => o.Datapoints || [])
+            .map((o, index) => {
+                if (!o.Datapoints) return [];
+                return o.Datapoints.map(dp => {
+                    const provisioned = (index === 3 || index === 5) ? 24 : 120; // settings & events_archive have a 1/1 provisioned R/WCU
+                    return {
+                        Timestamp: dp.Timestamp,
+                        Sum: dp.Sum! < provisioned ? provisioned : (dp.Sum! - provisioned)
+                    } as Datapoint;
+                });
+            })
             .flat()
             .sort((dp1, dp2) => dp1.Timestamp! < dp2.Timestamp! ? -1 : 1)
         ).then(dataPoints => dataPoints.reduce(
