@@ -1,21 +1,30 @@
 'use client';
 
 import { Event, ValidEvent } from '@/app/types/events/event';
-import { EventCardLite } from '@/app/components/events/event/event-cards';
-import { useEffect, useState } from 'react';
+import { EventCard } from '@/app/components/events/event/event-cards';
+import { useEffect, useRef, useState } from 'react';
 import { CheckIcon, CubeTransparentIcon } from '@heroicons/react/24/outline';
-import { EventCardLiteSkeleton } from '@/app/components/events/event/event-card-skeletons';
+import { EventCardSkeleton } from '@/app/components/events/event/event-card-skeletons';
 import { clsx } from 'clsx';
 import Link from 'next/link';
 
-export default function EventsByDay({eventsParam, showErrorOnly, errorPredicate, showLinks}: {
+export default function EventsByDay({eventsParam, showErrorOnly, errorPredicate, dateMarker}: {
     eventsParam: Event[],
     showErrorOnly: boolean,
     errorPredicate: (e: Event) => boolean,
-    showLinks: 'live' | 'vod' | 'both'
+    dateMarker: 'today' | 'yday',
 }) {
+    const today = new Date();
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const markedDate = dateMarker === 'today'
+        ? today.toLocaleString('en-GB', {weekday: 'short', day: 'numeric'})
+        : yesterday.toLocaleString('en-GB', {weekday: 'short', day: 'numeric'});
+
     const [eventsByDate, setEventsByDate] = useState<{ [date: string]: ValidEvent[] }>();
-    const dateBackgroundShift = ['0 0', '0 -100%', '-100% 0', '-100% -100%', '-200% 0', '-200% -100%']
+    const [currentDate, setCurrentDate] = useState<string | null>(null);
+
+    const eventsContainerRef = useRef<HTMLDivElement>(null);
 
     const computeEventsByDate = (events: ValidEvent[]): { [date: string]: ValidEvent[] } => {
         const eventsByDate = events.reduce((out, e) => {
@@ -42,46 +51,94 @@ export default function EventsByDay({eventsParam, showErrorOnly, errorPredicate,
         if (showErrorOnly) {
             events = events.filter(e => e.error);
         }
+        const eventsByDate = computeEventsByDate(events);
         setEventsByDate(computeEventsByDate(events));
+        setCurrentDate(Object.keys(eventsByDate)[0]);
     }, [showErrorOnly]);
 
-    return !!eventsByDate ? <>
+    useEffect(() => {
+        const observer = new IntersectionObserver(
+            (entries) => {
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting) {
+                        const newDate = entry.target.attributes.getNamedItem('data-date')?.value || '';
+                        setCurrentDate(newDate);
+                        const dateElement = document.getElementById("date-" + dateToId(newDate));
+                        dateElement?.scrollIntoView({ block: 'nearest' });
+                    }
+                });
+            },
+            {
+                root: eventsContainerRef.current,
+                rootMargin: '0px -50% 0px -50%',
+                threshold: 0.5
+            }
+        );
+
+        const sections = document.querySelectorAll('.event-container');
+        sections.forEach((section) => observer.observe(section));
+
+        return () => observer.disconnect();
+    }, [eventsByDate]);
+
+    const displayEvents = (date: string) => {
+        const eventElement = document.getElementById(dateToId(date));
+        eventElement?.scrollIntoView({ block: 'nearest' });
+        setCurrentDate(date);
+    }
+
+    const dateToId = (date: string) => date.toLowerCase().replace(' ', '');
+
+    return !!eventsByDate && currentDate !== null ? <>
         {
             Object.keys(eventsByDate).length == 0 ? <EmptyEventsByDay showErrorOnly={showErrorOnly}/> : (
-                <div className="relative flex gap-x-2 overflow-x-scroll">
-                    {Object.entries(eventsByDate).map(([date, events], index) => (
-                        <div className="relative grow min-w-65 max-h-85 pt-5" key={date}>
+                <div className="flex flex-col">
+                    <div className="flex items-end mb-3 justify-between overflow-x-scroll no-scrollbar">
+                        {Object.keys(eventsByDate).map(date => (
                             <div
-                                className="absolute top-1 left-[50%] rounded-xl transform-[translateX(-50%)] w-fit px-3 py-1 text-white"
-                                style={{
-                                    background: 'linear-gradient(red, transparent), linear-gradient(to top left, lime, transparent), linear-gradient(to top right, blue, transparent)',
-                                    backgroundBlendMode: 'screen',
-                                    backgroundSize: '200% 200%',
-                                    backgroundPosition: `${dateBackgroundShift[index % dateBackgroundShift.length]}`
-                                }}
+                                key={date}
+                                id={`date-${dateToId(date)}`}
+                                className="flex flex-col items-center shrink-0 w-1/4 text-center cursor-pointer"
                             >
-                                {date}
-                            </div>
-                            <div className="p-3 pt-8 h-full rounded-xl bg-white dark:bg-foreground/10">
-                                <div className="flex flex-col gap-y-1.5 h-full overflow-y-scroll">
-                                    {events.map(e =>
-                                        <div key={e.id} className={clsx('rounded',
-                                            {
-                                                'border-1 border-foreground/10 dark:border-0': !e.error
-                                            }
-                                        )}>
-                                            <Link href={`/events/edit/${e.id}#${e.id}`}>
-                                                <EventCardLite
-                                                    event={e}
-                                                    showLinks={showLinks}
-                                                />
-                                            </Link>
-                                        </div>
-                                    )}
+                                {date === markedDate &&
+                                    <div className="text-[10px] px-1 rounded bg-amber-300 dark:bg-amber-700">
+                                        {dateMarker.toUpperCase()}
+                                    </div>
+                                }
+                                <div
+                                    onClick={() => displayEvents(date)}
+                                    className={clsx({
+                                        'font-bold underline decoration-8 underline-offset-4': date === currentDate,
+                                        'text-foreground/50': date !== currentDate
+                                    })}>
+                                    {date}
                                 </div>
                             </div>
-                        </div>
-                    ))}
+                        ))}
+                    </div>
+                    <div ref={eventsContainerRef} className="w-full flex gap-x-2 overflow-x-scroll overflow-y-hidden snap-x snap-mandatory motion-reduce:scroll-auto scroll-smooth">
+                        { Object.entries(eventsByDate).map(([date, events]) => (
+                            <div
+                                key={dateToId(date)}
+                                id={dateToId(date)}
+                                data-date={date}
+                                className={clsx('event-container snap-start w-full shrink-0 flex flex-wrap items-stretch gap-2', {
+                                    'h-0' : date !== currentDate,
+                                    'h-fit': date === currentDate
+                                })}
+                            >
+                                { events.map(event => (
+                                    <div
+                                        className="flex flex-col items-stretch w-full md:w-auto lg:w-full basis-auto md:basis-[calc(50%-0.25rem)] lg:basis-auto xl:basis-[calc(50%-0.25rem)]"
+                                        key={event.id}>
+                                        <Link className="w-full flex h-full" href={`/events/edit/${event.id}#${event.id}`}>
+                                            <EventCard event={event} active={false}/>
+                                        </Link>
+                                    </div>
+                                )) }
+                            </div>
+                        )) }
+                    </div>
                 </div>
             )
         }
@@ -95,28 +152,33 @@ const shimmer =
     'before:bg-gradient-to-r before:from-transparent before:via-white/60 dark:before:via-gray-700/60 before:to-transparent';
 
 export function EventsByDaySkeleton() {
-    return (<div className={`${shimmer} relative overflow-hidden rounded-xl border-1 border-foreground/30`}>
-        <div className="flex flex-col gap-y-2 py-2 pl-3">
-            <div className="flex items-center gap-x-2">
-                <div
-                    className="shrink-0 w-6 md:w-12 flex items-center justify-center">
-                    <div className="h-5 w-14 rounded bg-gray-300 dark:bg-gray-400/20"></div>
+    return (<div className={`overflow-hidden`}>
+        <div className="flex flex-col">
+            <div className="flex flex-1 items-end mb-3 justify-between overflow-x-scroll no-scrollbar">
+                <div className={`flex flex-col pt-4 items-center shrink-0 w-1/4 text-center cursor-pointer`}>
+                    <div className={`${shimmer} relative overflow-hidden rounded bg-foreground/10 w-12 h-5`}></div>
                 </div>
-                <div className="flex gap-x-2">
-                    <EventCardLiteSkeleton/>
-                    <EventCardLiteSkeleton/>
-                    <EventCardLiteSkeleton/>
+                <div className="flex flex-col pt-4 items-center shrink-0 w-1/4 text-center cursor-pointer">
+                    <div className={`${shimmer} relative overflow-hidden rounded bg-foreground/10 w-12 h-5`}></div>
+                </div>
+                <div className="flex flex-col pt-4 items-center shrink-0 w-1/4 text-center cursor-pointer">
+                    <div className={`${shimmer} relative overflow-hidden rounded bg-foreground/10 w-12 h-5`}></div>
+                </div>
+                <div className="flex flex-col pt-4 items-center shrink-0 w-1/4 text-center cursor-pointer">
+                    <div className={`${shimmer} relative overflow-hidden rounded bg-foreground/10 w-12 h-5`}></div>
                 </div>
             </div>
+            <EventCardSkeleton/>
         </div>
     </div>);
 }
 
 function EmptyEventsByDay({showErrorOnly}: { showErrorOnly: boolean }) {
-    return (<div className="flex flex-col items-center py-10 text-foreground/50 rounded-xl border-1 border-foreground/30">
-        {showErrorOnly ? <CheckIcon className="w-12 mb-1"/> :
-            <CubeTransparentIcon className="w-12 mb-1"></CubeTransparentIcon>}
-        <div className="text-center">No event {showErrorOnly && 'in error '} to display</div>
-        {showErrorOnly && <div className="text-center text-sm">Try removing the error filter to show more</div>}
-    </div>);
+    return (
+        <div className="flex flex-col items-center pt-5 pb-8 text-foreground/50">
+            {showErrorOnly ? <CheckIcon className="w-12 mb-1"/> :
+                <CubeTransparentIcon className="w-12 mb-1"></CubeTransparentIcon>}
+            <div className="text-center">No event {showErrorOnly && 'in error '} to display</div>
+            {showErrorOnly && <div className="text-center text-sm">Try removing the error filter to show more</div>}
+        </div>);
 }
