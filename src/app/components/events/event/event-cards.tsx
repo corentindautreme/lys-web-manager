@@ -10,10 +10,10 @@ export function EventCard({event, active, shorten}: { event: Event, active: bool
     return (
         <div
             className={clsx(
-                'w-full h-auto p-3 flex rounded-xl border-1 border-foreground/10',
+                'w-full h-auto p-3 flex rounded-xl',
                 {
                     'text-white': active === true,
-                    'bg-background dark:bg-neutral-900': active !== true
+                    'bg-background dark:bg-neutral-900 border-1 border-foreground/10': active !== true
                 }
             )}
             style={!!active ? {

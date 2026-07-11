@@ -11,9 +11,9 @@ export default function SuggestionCard({suggestion, active}: { suggestion: Sugge
             className={clsx(
                 'w-full h-auto p-3 flex rounded-md',
                 {
-                    'text-white shadow-lg': active === true,
-                    'bg-background dark:bg-neutral-900 shadow-sm': active !== true && (!suggestion.processed || !suggestion.reprocessable),
-                    'bg-foreground/10 shadow-sm': active !== true && suggestion.processed && suggestion.reprocessable,
+                    'text-white': active === true,
+                    'bg-background dark:bg-neutral-900 border-1 border-foreground/10': active !== true && (!suggestion.processed || !suggestion.reprocessable),
+                    'bg-foreground/10 border-1 border-foreground/10': active !== true && suggestion.processed && suggestion.reprocessable,
                 }
             )}
             style={!!active ? {
