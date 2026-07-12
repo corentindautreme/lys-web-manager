@@ -36,9 +36,15 @@ export default function StatusTiles() {
 
     useEffect(() => {
         setEventStatuses();
+    }, [events]);
+
+    useEffect(() => {
         computeAndSetSuggestionStatus();
+    }, [suggestions]);
+
+    useEffect(() => {
         computeAndSetLambdaIssues();
-    }, [statuses, statusesError, events, eventsError, suggestions, suggestionsError]);
+    }, [statuses, statusesError]);
 
     const setEventStatuses = () => {
         if (!!events) {
@@ -70,6 +76,7 @@ export default function StatusTiles() {
             }
         }
         else if (!!statuses) {
+            console.log(statuses);
             const lambdaErrors = Object.entries(statuses)
                 // eslint-disable-next-line @typescript-eslint/no-unused-vars
                 .filter(([_, status]) => !status.success || status.isLate)
@@ -206,14 +213,14 @@ export default function StatusTiles() {
                 </div>
 
                 <div className="flex size-full md:items-stretch justify-center">
-                    <div className="flex flex-col gap-0.5 md:gap-2 flex-1 md:flex-initial pe-1 md:px-3 py-1 items-center md:justify-center text-2xl md:text-3xl">
-                        <div className={clsx('px-1 rounded-lg', {
+                    <div className="flex flex-col gap-0.5 md:gap-2 flex-1 md:flex-initial pe-1 md:px-5 py-1 items-center md:justify-center text-2xl md:text-3xl">
+                        <div className={clsx('rounded-lg', {
                             'bg-amber-300 dark:bg-amber-700': false
                         })}>{!events ? "  " : events.length}</div>
                         <ServerIcon className="w-5 md:w-6"/>
                     </div>
 
-                    <div className="flex flex-col gap-0.5 md:gap-2 flex-1 md:flex-initial h-fit md:h-auto ps-1 md:px-3 py-1 items-center md:justify-center border-l-1 border-foreground/25 text-2xl md:text-3xl">
+                    <div className="flex flex-col gap-0.5 md:gap-2 flex-1 md:flex-initial h-fit md:h-auto ps-1 md:px-5 py-1 items-center md:justify-center border-l-1 border-foreground/25 text-2xl md:text-3xl">
                         -
                         <GlobeAltIcon className="w-5 md:w-6"/>
                     </div>
