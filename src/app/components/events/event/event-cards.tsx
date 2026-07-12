@@ -10,10 +10,10 @@ export function EventCard({event, active, shorten}: { event: Event, active: bool
     return (
         <div
             className={clsx(
-                'w-full h-auto p-3 flex rounded-md',
+                'w-full h-auto p-3 flex rounded-xl',
                 {
-                    'text-white shadow-lg': active === true,
-                    'bg-background dark:bg-neutral-900 shadow-sm': active !== true
+                    'text-white': active === true,
+                    'bg-background dark:bg-neutral-900 border-1 border-foreground/10': active !== true
                 }
             )}
             style={!!active ? {
@@ -44,7 +44,7 @@ export function EventCard({event, active, shorten}: { event: Event, active: bool
                         'border-sky-500': !event.deleted && !active
                     }
                 )}></div>
-                <div className="flex-col">
+                <div className="flex flex-col justify-center">
                     <div className={clsx('text-xs/3', {
                         'text-foreground/70': !active,
                         'text-white': !!active

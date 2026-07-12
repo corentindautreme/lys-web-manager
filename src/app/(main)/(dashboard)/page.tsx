@@ -2,9 +2,9 @@ import { Metadata } from 'next';
 import NextEventsByDay from '@/app/(main)/(dashboard)/components/next-events-by-day';
 import PastEventsByDay from '@/app/(main)/(dashboard)/components/past-events-by-day';
 import { StatusCards } from '@/app/(main)/(dashboard)/components/status-cards';
-import ActionCards from '@/app/(main)/(dashboard)/components/action-cards';
 import Breadcrumbs from '@/app/components/breadcrumbs';
 import Metrics from '@/app/(main)/(dashboard)/components/metrics';
+import StatusTiles from '@/app/(main)/(dashboard)/components/status-tiles';
 
 export const metadata: Metadata = {
     title: 'Dashboard'
@@ -25,7 +25,7 @@ export default async function Page() {
 
             <div className="px-3 md:pb-3 md:px-6">
                 <div className="flex flex-col">
-                    <ActionCards/>
+                    <StatusTiles/>
 
                     <div className="lg:flex md:gap-x-5">
 

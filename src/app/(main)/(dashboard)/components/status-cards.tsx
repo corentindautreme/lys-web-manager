@@ -6,7 +6,8 @@ import {
     CheckCircleIcon,
     CheckIcon,
     ChevronDownIcon,
-    ChevronUpIcon, ExclamationCircleIcon,
+    ChevronUpIcon,
+    ExclamationCircleIcon,
     ExclamationTriangleIcon,
     XCircleIcon,
     XMarkIcon
@@ -195,16 +196,14 @@ export function StatusCards() {
 
     return (
         <>
-            <h2 className="flex justify-between my-4">
-                <div className="flex items-center gap-2 text-lg">
-                    <BoltIcon className="w-5"/>
-                    <div className="">Status</div>
-                </div>
+            <h2 className="flex items-center gap-2 my-4">
+                <div className="font-bold text-sm">Status</div>
+                <div className="grow h-px bg-foreground/25"></div>
                 <button onClick={() => mutate()} disabled={isValidating}>
-                    <div className={clsx('flex items-center gap-1 rounded py-1 px-2',
+                    <div className={clsx('flex items-center gap-1 rounded-lg py-1 px-2',
                         {
                             'text-foreground/50 cursor-not-allowed': isValidating,
-                            'bg-foreground/10 cursor-pointer': !isValidating
+                            'bg-background dark:bg-foreground/10 border-1 border-gray-300 dark:border-foreground/10 cursor-pointer': !isValidating
                         }
                     )}>
                         <ArrowPathIcon
@@ -327,7 +326,7 @@ export function StatusCard({cardName, processStatuses, reloadStatuses, showReloa
             : `on ${date.toLocaleString('en-US', {month: 'short', day: 'numeric'})}`;
     }
 
-    return (<div className="w-full h-fit p-3 rounded-xl bg-foreground/10">
+    return (<div className="w-full p-3 rounded-xl bg-background dark:bg-foreground/10 border-1 border-gray-300 dark:border-foreground/10">
         <button
             className={clsx('w-full', {'mb-2': unfolded})}
             onClick={unfold}
@@ -411,7 +410,7 @@ export function StatusCardsSkeleton() {
 
 function StatusCardSkeleton() {
     return (
-        <div className="relative overflow-hidden w-full h-fit p-3 rounded-xl bg-foreground/10">
+        <div className="relative overflow-hidden w-full h-fit p-3 rounded-xl bg-background dark:bg-foreground/10 border-1 border-gray-300 dark:border-foreground/10">
             <div className={shimmer}>
                 <div className="h-7 w-16 md:mb-2 rounded bg-foreground/10 dark:bg-gray-400/20"/>
                 <div className="hidden md:flex gap-2 items-center justify-center">

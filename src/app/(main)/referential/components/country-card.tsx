@@ -8,10 +8,10 @@ export default function CountryCard({countryData, active}: { countryData: Countr
     return (
         <div
             className={clsx(
-                'w-full h-auto p-3 flex rounded-md',
+                'w-full h-auto p-3 flex rounded-xl',
                 {
-                    'text-white shadow-lg': active === true,
-                    'bg-background dark:bg-neutral-900 shadow-sm': active !== true
+                    'text-white': active === true,
+                    'bg-background dark:bg-neutral-900 border-1 border-foreground/10': active !== true
                 }
             )}
             style={!!active ? {

@@ -1,9 +1,8 @@
 'use client';
 
 import { useMetrics } from '@/app/(main)/(dashboard)/utils';
-import { ChartBarIcon } from '@heroicons/react/24/outline';
 import { Box } from '@mui/material';
-import { LineChart, lineElementClasses, markElementClasses, chartsTooltipClasses } from '@mui/x-charts';
+import { chartsTooltipClasses, LineChart, lineElementClasses, markElementClasses } from '@mui/x-charts';
 import { ProcessMetrics } from '@/app/types/metrics';
 
 function getCurrentMonthAreaColor(metrics: ProcessMetrics) {
@@ -22,14 +21,12 @@ export default function Metrics() {
 
     return (
         <>
-            <h2 className="flex justify-between my-4">
-                <div className="flex items-center gap-2 text-lg">
-                    <ChartBarIcon className="w-5"/>
-                    <div className="">Metrics</div>
-                </div>
+            <h2 className="flex items-center gap-2 my-4">
+                <div className="font-bold text-sm">Metrics</div>
+                <div className="grow h-px bg-foreground/25"></div>
             </h2>
             <div className="md:px-3">
-                <div className="rounded-xl bg-foreground/10 pt-2 h-[200px] md:h-[300px] w-full">
+                <div className="rounded-xl pt-2 w-full h-[200px] md:h-[300px] bg-background dark:bg-foreground/10 border-1 border-gray-300 dark:border-foreground/10">
                     <div className="flex justify-center mt-2">RCU consumption</div>
                     <Box sx={{width: '100%', height: '90%'}} className="!w-[102%] md:!w-[100%] -ms-[3%] md:-ms-3">
                         {isLoading || error
