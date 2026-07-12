@@ -16,7 +16,7 @@ import { useStatuses } from '@/app/(main)/logs/utils';
 import { useEvents } from '@/app/(main)/events/utils';
 import { useSuggestions } from '@/app/(main)/suggestions/utils';
 import { useEffect, useState } from 'react';
-import { getLast7DaysEvents, getNext7DaysEvents } from '@/app/(main)/(dashboard)/utils';
+import { getLast7DaysEvents, getNext7DaysEvents, useMetrics } from '@/app/(main)/(dashboard)/utils';
 import { ProcessStatus } from '@/app/types/status';
 
 type StatusType = 'ok' | 'info' | 'warn' | 'error' | null;
@@ -26,9 +26,11 @@ export default function StatusTiles() {
     const {statuses, error: statusesError} = useStatuses();
     const {events, error: eventsError} = useEvents();
     const {suggestions, error: suggestionsError} = useSuggestions();
+    const {metrics, error: metricsError} = useMetrics();
 
     const [globalStatus, setGlobalStatus] = useState<StatusType>(null);
     const [lambdaIssues, setLambdaIssues] = useState<{ status: StatusType, issue: string }[]>([]);
+    const [otherIssues, setOtherIssues] = useState<{ status: StatusType, issue: string }[]>([]);
 
     const [upcomingStatus, setUpcomingStatus] = useState<StatusType>(null);
     const [recentStatus, setRecentStatus] = useState<StatusType>(null);
@@ -45,6 +47,10 @@ export default function StatusTiles() {
     useEffect(() => {
         computeAndSetLambdaIssues();
     }, [statuses, statusesError]);
+
+    useEffect(() => {
+        computeAndSetMetricIssues();
+    }, [metrics, metricsError]);
 
     const setEventStatuses = () => {
         if (!!events) {
@@ -132,6 +138,32 @@ export default function StatusTiles() {
         }
     };
 
+    const computeAndSetMetricIssues = () => {
+        if (!!metricsError) {
+            return;
+        } if (!!metrics) {
+            const measurements = metrics['current_month_rcu'].measurements;
+            const lastMeasurement = measurements[measurements.length - 1].value;
+            if (lastMeasurement > 12_500) {
+                setOtherIssues([...otherIssues, {
+                    status: 'warn',
+                    issue: 'RCU usage > 12_500'
+                }]);
+                if (globalStatus === null || globalStatus === 'ok' || globalStatus === 'info') {
+                    setGlobalStatus('warn');
+                }
+            } else if (lastMeasurement > 18_600) {
+                setOtherIssues([...otherIssues, {
+                    status: 'warn',
+                    issue: `RCU over quota (${new Intl.NumberFormat('en-US').format(lastMeasurement)})`
+                }]);
+                if (globalStatus === null || globalStatus === 'ok' || globalStatus === 'info') {
+                    setGlobalStatus('warn');
+                }
+            }
+        }
+    }
+
     const computeEventStatus: () => StatusType = () => {
         if (!events && !eventsError && !suggestions && !suggestionsError) {
             return null;
@@ -157,6 +189,13 @@ export default function StatusTiles() {
                 { globalStatus === 'ok' && <div className="flex items-center gap-1"><CheckCircleIcon className="w-4"/>All good!</div> }
                 { globalStatus !== 'ok' && <div className="flex flex-col">
                     { lambdaIssues.map((issue, index) => (
+                        <div key={`issue-${index}`} className="flex items-center gap-1">
+                            { issue.status === 'error' && <XCircleIcon className="w-4"/> }
+                            { issue.status === 'warn' && <ExclamationTriangleIcon className="w-4"/> }
+                            { issue.issue }
+                        </div>
+                    )) }
+                    { otherIssues.map((issue, index) => (
                         <div key={`issue-${index}`} className="flex items-center gap-1">
                             { issue.status === 'error' && <XCircleIcon className="w-4"/> }
                             { issue.status === 'warn' && <ExclamationTriangleIcon className="w-4"/> }
