@@ -13,7 +13,7 @@ export default function SuggestionCard({suggestion, active}: { suggestion: Sugge
                 {
                     'text-white': active === true,
                     'bg-background dark:bg-neutral-900 border-1 border-foreground/10': active !== true && (!suggestion.processed || !suggestion.reprocessable),
-                    'bg-foreground/10 border-1 border-foreground/10': active !== true && suggestion.processed && suggestion.reprocessable,
+                    'text-foreground/50 bg-foreground/5 border-1 border-foreground/10': active !== true && suggestion.processed && suggestion.reprocessable,
                 }
             )}
             style={!!active ? {

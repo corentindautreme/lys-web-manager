@@ -297,12 +297,12 @@ export default function SuggestionDetails({suggestionParam, countryData, onSubmi
                 </h2>
 
                 {events.length == 0 ? (
-                    <div className="flex flex-col w-full xl:w-[300px] items-center text-foreground/50 py-18">
+                    <div className="flex flex-col w-full xl:w-[300px] items-center text-foreground/50 pt-8 pb-12 md:py-18">
                         <CubeTransparentIcon className="w-18"/>
                         <span>No date selected</span>
                     </div>
                 ) : (
-                    <div className="flex flex-col gap-y-1 grow w-full xl:w-[300px] xl:overflow-y-auto">
+                    <div className="flex flex-col gap-y-1 grow w-full xl:w-[300px] xl:overflow-y-auto pb-4 md:pb-0">
                         {events.map((event, index) => (
                             <>
                                 {insertHeader(event, index > 0 ? events[index - 1] : undefined)}
