@@ -8,7 +8,7 @@ import { JSX, useEffect, useState } from 'react';
 import ErrorScreen from '@/app/components/error-screen';
 import { DataSubmissionResponse } from '@/app/types/data-submission-response';
 import { useSuggestions } from '@/app/(main)/suggestions/utils';
-import SuggestionCard from '@/app/(main)/suggestions/components/suggestion-card';
+import { SuggestionCard } from '@/app/(main)/suggestions/components/suggestion-card';
 import { Suggestion } from '@/app/types/suggestion';
 import { Event } from '@/app/types/events/event';
 import { submitSuggestions } from '@/app/(main)/suggestions/actions';
@@ -158,13 +158,13 @@ export default function SuggestionList({currentSuggestionId}: { currentSuggestio
                                 </div>
                             </div>
                         ) : (
-                            <div className="flex flex-col gap-y-1">
+                            <div className="flex flex-col gap-y-1 pb-3 md:pb-0">
                                 {/* Unprocessed suggestions */}
                                 {processableSuggestions.map((suggestion, index) => {
                                         return (
                                             <>
                                                 {(index == 0 || (!!suggestion.extractionDate && suggestion.extractionDate != suggestions.filter(s => s.reprocessable)[index - 1].extractionDate)) &&
-                                                    <div className="py-1 font-bold">
+                                                    <div key={`date-${index}`} className="py-1 font-bold">
                                                         {new Date(suggestion.extractionDate!).toLocaleString('en-US', {
                                                             month: 'long',
                                                             day: 'numeric'

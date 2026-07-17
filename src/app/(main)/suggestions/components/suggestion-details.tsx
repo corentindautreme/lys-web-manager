@@ -306,7 +306,7 @@ export default function SuggestionDetails({suggestionParam, countryData, onSubmi
                         {events.map((event, index) => (
                             <>
                                 {insertHeader(event, index > 0 ? events[index - 1] : undefined)}
-                                <EventCard event={event} active={false} shorten={true}/>
+                                <EventCard event={event} active={false}/>
                             </>
                         ))}
                     </div>
