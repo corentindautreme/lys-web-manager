@@ -3,17 +3,12 @@
 import Link from 'next/link';
 import { clsx } from 'clsx';
 import { redirect, useSearchParams } from 'next/navigation';
-import {
-    CheckIcon,
-    DocumentCheckIcon,
-    ExclamationCircleIcon,
-    ExclamationTriangleIcon
-} from '@heroicons/react/24/outline';
+import { CheckIcon, ExclamationCircleIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 import { JSX, useEffect, useState } from 'react';
 import ErrorScreen from '@/app/components/error-screen';
 import { DataSubmissionResponse } from '@/app/types/data-submission-response';
 import { useSuggestions } from '@/app/(main)/suggestions/utils';
-import SuggestionCard from '@/app/(main)/suggestions/components/suggestion-card';
+import { SuggestionCard } from '@/app/(main)/suggestions/components/suggestion-card';
 import { Suggestion } from '@/app/types/suggestion';
 import { Event } from '@/app/types/events/event';
 import { submitSuggestions } from '@/app/(main)/suggestions/actions';
@@ -57,9 +52,9 @@ function UnsavedSuggestionsBanner({count, suggestions, events, callback}: {
     const nextEventId = events.toSorted((e1, e2) => e2.id - e1.id)[0].id + 1;
     const submit = submitProcessedSuggestions.bind(null, suggestions, nextEventId, callback, onError);
     return (
-        <div className={clsx('flex flex-col rounded-lg p-3 text-background', {
-            'bg-sky-500 ': !error,
-            'bg-red-400 dark:bg-red-600': !!error,
+        <div className={clsx('flex flex-col rounded-lg p-3 border-1', {
+            'bg-sky-500/75 border-sky-500 dark:border-sky-400': !error,
+            'bg-red-400 dark:bg-red-600/25 border-red-500/10': !!error,
         })}>
             <div className="flex items-center justify-between">
                 <div className="flex flex-row items-center">
@@ -67,7 +62,7 @@ function UnsavedSuggestionsBanner({count, suggestions, events, callback}: {
                     <span className="block text-sm md:text-base">{count} processed pending</span>
                 </div>
                 <form action={submit}>
-                    <button className="border-1 border-background px-2">Submit</button>
+                    <button className="border-1 border-foreground/75 rounded px-2 py-0.5">Submit</button>
                 </form>
             </div>
             {!!error && <div className="flex flex-col mt-2 pt-2 border-t-1 border-background">
@@ -138,14 +133,14 @@ export default function SuggestionList({currentSuggestionId}: { currentSuggestio
                                                           callback={submittedSuggestionsCallback}
                                 />
                             }
-                            <div className="mt-2 mx-auto w-fit flex items-center p-2 bg-foreground/10 rounded-3xl">
+                            <div className="flex items-center gap-2 py-2">
+                                <div className="grow h-px bg-foreground/25"></div>
                                 <label className="flex items-center text-sm" htmlFor="hideProcessed">
-                                    <DocumentCheckIcon className="w-5 me-1"/>
                                     Hide recently processed
                                 </label>
                                 <input
                                     type="checkbox"
-                                    className="relative peer ms-2 appearance-none shrink-0 rounded w-4 h-4 bg-foreground/10 after:content-[''] after:hidden checked:after:inline-block after:w-2 after:h-3.5 after:ms-1 after:mb-1.5 after:rotate-[40deg] after:border-b-3 after:border-r-3 checked:bg-sky-500 after:border-white dark:after:border-black"
+                                    className="relative peer appearance-none shrink-0 rounded w-4 h-4 bg-foreground/10 after:content-[''] after:hidden checked:after:inline-block after:w-2 after:h-3.5 after:ms-1 after:mb-3 after:rotate-[40deg] after:border-b-4 after:border-r-4 checked:bg-sky-500 after:border-white dark:after:border-black"
                                     id="hideProcessed"
                                     name="hideProcessed"
                                     checked={hideProcessed}
@@ -163,13 +158,13 @@ export default function SuggestionList({currentSuggestionId}: { currentSuggestio
                                 </div>
                             </div>
                         ) : (
-                            <div className="flex flex-col gap-y-1">
+                            <div className="flex flex-col gap-y-1 pb-3 md:pb-0">
                                 {/* Unprocessed suggestions */}
                                 {processableSuggestions.map((suggestion, index) => {
                                         return (
                                             <>
                                                 {(index == 0 || (!!suggestion.extractionDate && suggestion.extractionDate != suggestions.filter(s => s.reprocessable)[index - 1].extractionDate)) &&
-                                                    <div className="py-1 font-bold">
+                                                    <div key={`date-${index}`} className="py-1 font-bold">
                                                         {new Date(suggestion.extractionDate!).toLocaleString('en-US', {
                                                             month: 'long',
                                                             day: 'numeric'

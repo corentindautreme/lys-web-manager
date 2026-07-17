@@ -2,18 +2,18 @@ import { clsx } from 'clsx';
 import { Suggestion } from '@/app/types/suggestion';
 import { CheckCircleIcon, XCircleIcon } from '@heroicons/react/16/solid';
 
-export default function SuggestionCard({suggestion, active}: { suggestion: Suggestion, active: boolean | undefined }) {
+export function SuggestionCard({suggestion, active}: { suggestion: Suggestion, active: boolean | undefined }) {
     const displayedDates = suggestion.processed && suggestion.accepted
         ? suggestion.dateTimesCet.filter(d => d.selected)
         : suggestion.dateTimesCet;
     return (
         <div
             className={clsx(
-                'w-full h-auto p-3 flex rounded-md',
+                'w-full h-auto p-3 flex rounded-xl',
                 {
                     'text-white': active === true,
                     'bg-background dark:bg-neutral-900 border-1 border-foreground/10': active !== true && (!suggestion.processed || !suggestion.reprocessable),
-                    'bg-foreground/10 border-1 border-foreground/10': active !== true && suggestion.processed && suggestion.reprocessable,
+                    'text-foreground/50 bg-foreground/5 border-1 border-foreground/10': active !== true && suggestion.processed && suggestion.reprocessable,
                 }
             )}
             style={!!active ? {
@@ -96,9 +96,9 @@ function Label({content, style, active, discarded}: {
 }) {
     return (
         <div className={clsx(
-            'flex items-center w-fit me-1 px-1.5 py-0.5 rounded-lg text-xs',
+            'flex items-center w-fit me-1 px-1.5 py-0.5 rounded-full text-xs',
             {
-                'bg-gray-400/30 dark:bg-gray-700/50': !active && style == 'normal',
+                'bg-foreground/10': !active && style == 'normal',
                 'bg-sky-500 text-background': !active && style == 'accent' && !discarded,
                 'bg-gray-400/80 dark:bg-gray-300/50': !active && style == 'accent' && discarded,
                 'border-1 border-white': active && style == 'normal',

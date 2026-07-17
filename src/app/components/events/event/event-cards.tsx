@@ -184,11 +184,11 @@ function Label({icon, content, style, active}: {
     }
     return (
         <div className={clsx(
-            'flex items-center w-fit me-1 px-1.5 py-0.5 rounded-xs text-xs',
+            'flex items-center w-fit me-1 px-1.5 py-0.5 rounded text-xs',
             {
                 'bg-red-300 dark:bg-red-900': style === 'error' && !active,
                 'bg-green-300 dark:bg-green-900 border-1 border-green-300 dark:border-green-900': style === 'valid' && !active,
-                'bg-gray-400/30 dark:bg-gray-700/50': style === 'normal' && !active,
+                'bg-foreground/10': style === 'normal' && !active,
                 'border-1 border-white': active
             }
         )}>

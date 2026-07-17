@@ -13,7 +13,6 @@ import {
     ChevronUpIcon,
     ClockIcon,
     CubeTransparentIcon,
-    EyeIcon,
     ListBulletIcon,
     NewspaperIcon,
     SparklesIcon,
@@ -167,7 +166,7 @@ export default function SuggestionDetails({suggestionParam, countryData, onSubmi
     }
 
     return (
-        <>
+        <div className="h-full flex flex-col xl:flex-row xl:items-stretch xl:gap-3">
             <div className="block md:hidden">
                 <SuggestionActionButtons
                     suggestion={suggestion}
@@ -176,7 +175,7 @@ export default function SuggestionDetails({suggestionParam, countryData, onSubmi
                     reprocess={reprocessSuggestion}
                 />
             </div>
-            <div className="bg-background px-1 py-3 md:p-3 rounded-xl dark:bg-neutral-900 md:overflow-y-auto">
+            <div className="grow px-1 py-3 md:p-3 rounded-xl bg-background dark:bg-neutral-900 border-1 border-foreground/10 xl:overflow-y-auto">
                 <div className="flex items-center justify-between px-1 space-x-2">
                     <Link
                         href={`/suggestions${showProcessed ? '?showProcessed=true' : ''}`}
@@ -221,7 +220,7 @@ export default function SuggestionDetails({suggestionParam, countryData, onSubmi
                 </div>
 
                 <div className="block lg:flex lg:mt-4">
-                    <div className={clsx('w-full lg:w-[50%] xl:grow p-2',
+                    <div className={clsx('w-full p-2',
                         {
                             'text-foreground/50': suggestion.processed
                         }
@@ -288,42 +287,34 @@ export default function SuggestionDetails({suggestionParam, countryData, onSubmi
                         </div>
 
                     </div>
-
-                    <div className={clsx('w-full lg:w-[50%] xl:w-fit p-2',
-                        {
-                            'text-foreground/50': suggestion.processed
-                        }
-                    )}>
-                        <h2 className="text-lg flex items-center mb-2">
-                            <EyeIcon className="w-6 me-1"/>Preview
-                        </h2>
-
-                        {events.length == 0 ? (
-                            <div className="flex flex-col w-full xl:w-[340px] items-center text-foreground/50 py-18">
-                                <CubeTransparentIcon className="w-18"/>
-                                <span>No date selected</span>
-                            </div>
-                        ) : (
-                            <div className="mt-4">
-                                <div className="bg-gray-100 dark:bg-background p-5 m-auto rounded-2xl">
-                                    <div className="flex flex-col gap-y-1 w-full xl:w-[300px]">
-                                        {events.map((event, index) => (
-                                            <>
-                                                {insertHeader(event, index > 0 ? events[index - 1] : undefined)}
-                                                <EventCard event={event} active={false} shorten={true}/>
-                                            </>
-                                        ))}
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-                    </div>
                 </div>
 
             </div>
+            <div className="flex flex-col shrink-0">
+                <h2 className="flex items-center gap-2 my-4">
+                    <div className="font-bold">Preview</div>
+                    <div className="grow h-px bg-foreground/25"></div>
+                </h2>
+
+                {events.length == 0 ? (
+                    <div className="flex flex-col w-full xl:w-[300px] items-center text-foreground/50 pt-8 pb-12 md:py-18">
+                        <CubeTransparentIcon className="w-18"/>
+                        <span>No date selected</span>
+                    </div>
+                ) : (
+                    <div className="flex flex-col gap-y-1 grow w-full xl:w-[300px] xl:overflow-y-auto pb-4 md:pb-0">
+                        {events.map((event, index) => (
+                            <>
+                                {insertHeader(event, index > 0 ? events[index - 1] : undefined)}
+                                <EventCard event={event} active={false}/>
+                            </>
+                        ))}
+                    </div>
+                )}
+            </div>
 
             <div className="md:hidden h-12"></div>
-        </>
+        </div>
     );
 }
 
