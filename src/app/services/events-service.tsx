@@ -33,15 +33,6 @@ export function getEvents(): Event[] {
                     "comment": "Recommended link",
                     "geoblocked": 0,
                     "live": 1
-                },
-                {
-                    "accountRequired": 0,
-                    "replayable": 1,
-                    "castable": 0,
-                    "channel": "La 1",
-                    "link": "https://www.rtve.es/play/videos/benidorm-fest/2025-primera-semifinal/16426488/",
-                    "geoblocked": 0,
-                    "live": 0
                 }
             ],
             "id": 351,
@@ -236,31 +227,6 @@ export function getEvents(): Event[] {
         }, {
             'stage': 'Final',
             'watchLinks': [{
-                'accountRequired': 0,
-                'replayable': 1,
-                'castable': 1,
-                'channel': 'VRT1',
-                'link': 'https://www.youtube.com/live/QuoWc3Jy4jo',
-                'comment': 'Recommended link',
-                'geoblocked': 0,
-                'live': 1
-            }, {
-                'accountRequired': 0,
-                'replayable': 0,
-                'castable': 0,
-                'channel': 'VRT1',
-                'link': 'https://www.vrt.be/vrtnu/livestream/video/een/https://www.vrt.be/vrtmax/livestream/video/vrt1/',
-                'geoblocked': 1,
-                'live': 1
-            }, {
-                'accountRequired': 0,
-                'replayable': 0,
-                'castable': 0,
-                'channel': 'VRT1',
-                'link': 'https://live.esc-plus.com/',
-                'geoblocked': 0,
-                'live': 1
-            }, {
                 'accountRequired': 1,
                 'replayable': 1,
                 'castable': 1,
