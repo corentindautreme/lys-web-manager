@@ -195,7 +195,7 @@ export default function SuggestionList({currentSuggestionId}: { currentSuggestio
                                         return (
                                             <>
                                                 {(index == 0 || (!!suggestion.extractionDate && suggestion.extractionDate.substring(5, 7) != suggestions.filter(s => !s.reprocessable)[index - 1].extractionDate?.substring(5, 7))) &&
-                                                    <div className="py-1 font-bold">
+                                                    <div key={`past-date-${index}`} className="py-1 font-bold">
                                                         {new Date(suggestion.extractionDate!).toLocaleString('en-US', {month: 'long'})}
                                                     </div>
                                                 }

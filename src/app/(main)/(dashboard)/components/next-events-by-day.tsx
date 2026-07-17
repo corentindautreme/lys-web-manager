@@ -44,7 +44,12 @@ export default function NextEventsByDay() {
             </h2>
 
             {!!displayedEvents
-                ? (<EventsByDay eventsParam={displayedEvents} showErrorOnly={showErrorOnly} errorPredicate={isNextEventInError} dateMarker={'today'}/>)
+                ? (<EventsByDay
+                    eventsParam={displayedEvents} showErrorOnly={showErrorOnly} errorPredicate={isNextEventInError} dateMarker={'today'}
+                    highlightErrors={{
+                        time: {isError: (e: Event) => e.dateTimeCet.substring(11, 16) === '00:00'},
+                        liveLinks: {isError: (e: Event) => !e.watchLinks.some(l => l.live == 1)},
+                    }}/>)
                 : (<EventsByDaySkeleton/>)
             }
         </>

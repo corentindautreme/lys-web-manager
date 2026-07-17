@@ -44,7 +44,11 @@ export default function PastEventsByDay() {
             </h2>
 
             {!!displayedEvents
-                ? (<EventsByDay eventsParam={displayedEvents} showErrorOnly={showErrorOnly} errorPredicate={isPastEventInError} dateMarker={'yday'}/>)
+                ? (<EventsByDay
+                    eventsParam={displayedEvents} showErrorOnly={showErrorOnly} errorPredicate={isPastEventInError} dateMarker={'yday'}
+                    highlightErrors={{
+                        vodLinks: {isError: (e: Event) => !e.watchLinks.some(l => l.replayable == 1)},
+                    }}/>)
                 : (<EventsByDaySkeleton/>)
             }
         </>

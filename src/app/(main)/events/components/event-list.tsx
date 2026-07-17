@@ -132,7 +132,11 @@ export default function EventList({currentEventId}: { currentEventId?: number | 
                                                         id={event.id.toString()}
                                                         className="relative top-[-20px]"
                                                     />
-                                                    <EventCard event={event} active={currentEventId == event.id}/>
+                                                    <EventCard event={event} active={currentEventId == event.id}
+                                                               highlightError={{
+                                                                   liveLinks: !event.watchLinks.some(l => l.live == 1),
+                                                                   vodLinks: !event.watchLinks.some(l => l.replayable == 1)
+                                                               }}/>
                                                 </Link>
                                             </div>
                                         )

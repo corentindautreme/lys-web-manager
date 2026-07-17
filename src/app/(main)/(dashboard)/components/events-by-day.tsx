@@ -8,11 +8,16 @@ import { EventCardSkeleton } from '@/app/components/events/event/event-card-skel
 import { clsx } from 'clsx';
 import Link from 'next/link';
 
-export default function EventsByDay({eventsParam, showErrorOnly, errorPredicate, dateMarker}: {
+export default function EventsByDay({eventsParam, showErrorOnly, errorPredicate, dateMarker, highlightErrors}: {
     eventsParam: Event[],
     showErrorOnly: boolean,
     errorPredicate: (e: Event) => boolean,
     dateMarker: 'today' | 'yday',
+    highlightErrors: {
+        time?: { isError: (e: Event) => boolean },
+        liveLinks?: { isError: (e: Event) => boolean },
+        vodLinks?: { isError: (e: Event) => boolean },
+    }
 }) {
     const today = new Date();
     const yesterday = new Date();
@@ -132,7 +137,14 @@ export default function EventsByDay({eventsParam, showErrorOnly, errorPredicate,
                                         className="flex flex-col items-stretch w-full md:w-auto lg:w-full basis-auto md:basis-[calc(50%-0.25rem)] lg:basis-auto xl:basis-[calc(50%-0.25rem)]"
                                         key={event.id}>
                                         <Link className="w-full flex h-full" href={`/events/edit/${event.id}#${event.id}`}>
-                                            <EventCard event={event} active={false}/>
+                                            <EventCard
+                                                event={event} active={false}
+                                                highlightError={{
+                                                    time: highlightErrors?.time?.isError(event),
+                                                    liveLinks: highlightErrors?.liveLinks?.isError(event),
+                                                    vodLinks: highlightErrors?.vodLinks?.isError(event),
+                                                }}
+                                            />
                                         </Link>
                                     </div>
                                 )) }

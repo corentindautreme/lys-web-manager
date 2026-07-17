@@ -3,7 +3,12 @@ import { clsx } from 'clsx';
 import { BackwardIcon, CheckIcon, ExclamationTriangleIcon, LinkIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { JSX } from 'react';
 
-export function EventCard({event, active, shorten}: { event: Event, active: boolean | undefined, shorten?: boolean }) {
+export function EventCard({event, active, shorten, highlightError}: {
+    event: Event,
+    active: boolean | undefined,
+    shorten?: boolean,
+    highlightError?: { time?: boolean, liveLinks?: boolean, vodLinks?: boolean },
+}) {
     const date = new Date(event.dateTimeCet);
     const liveLinkCount = event.watchLinks.filter(l => l.live == 1).length;
     const replayableLinkCount = event.watchLinks.filter(l => l.replayable == 1).length;
@@ -30,9 +35,11 @@ export function EventCard({event, active, shorten}: { event: Event, active: bool
                     <div
                         className="text-3xl font-bold">{date.toLocaleString('default', {day: '2-digit'})}</div>
                     <div className="text-base/3">{date.toLocaleString('en-GB', {month: 'short'})}</div>
-                    <div className={clsx('text-xs mt-2 ', {
-                        'text-foreground/70': !active,
-                        'text-white': active
+                    <div className={clsx('text-xs', {
+                        'text-foreground/70': !active && !highlightError?.time,
+                        'text-white': active && !highlightError?.time,
+                        'mt-2': !highlightError?.time,
+                        'mt-1.5 py-0.5 px-1 dark:bg-red-300 dark:text-black bg-red-600 text-white rounded-lg': highlightError?.time,
                     })}>{date.toLocaleString('en-GB', {
                         hour: '2-digit',
                         minute: '2-digit'
@@ -56,9 +63,9 @@ export function EventCard({event, active, shorten}: { event: Event, active: bool
                     })}>{event.stage}</div>
                     {event.watchLinks && (
                         <div className="mt-2 flex">
-                            <Label icon="link" style={liveLinkCount == 0 ? 'error' : 'normal'} active={!!active}
+                            <Label icon="link" style={highlightError?.liveLinks ? 'error' : 'normal'} active={!!active}
                                    content={`${liveLinkCount} ${!shorten ? 'link(s)' : ''}`}/>
-                            <Label icon="vod" style={replayableLinkCount == 0 ? 'error' : 'normal'}
+                            <Label icon="vod" style={highlightError?.vodLinks ? 'error' : 'normal'}
                                    active={!!active} content={`${replayableLinkCount} ${!shorten ? 'VOD' : ''}`}/>
                         </div>
                     )}
@@ -186,7 +193,7 @@ function Label({icon, content, style, active}: {
         <div className={clsx(
             'flex items-center w-fit me-1 px-1.5 py-0.5 rounded text-xs',
             {
-                'bg-red-300 dark:bg-red-900': style === 'error' && !active,
+                'dark:bg-red-300 dark:text-black bg-red-600 text-white': style === 'error' && !active,
                 'bg-green-300 dark:bg-green-900 border-1 border-green-300 dark:border-green-900': style === 'valid' && !active,
                 'bg-foreground/10': style === 'normal' && !active,
                 'border-1 border-white': active
