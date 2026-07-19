@@ -195,7 +195,7 @@ export default function EventDetails({eventParam, onSave, onDelete}: {
     }
 
     return (
-        <div className="bg-background dark:bg-neutral-900 px-1 py-3 md:p-3 rounded-xl md:overflow-y-auto">
+        <div className="bg-background dark:bg-neutral-900 px-1 py-3 md:p-3 rounded-xl border-1 border-foreground/10 md:overflow-y-auto">
             <div className="flex px-1 flex-row justify-between space-x-2">
                 <button
                     onClick={() => router.back()}

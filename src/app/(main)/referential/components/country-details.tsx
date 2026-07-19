@@ -229,7 +229,7 @@ export default function CountryDetails({countryDataParam, onSave, onDelete}: {
     }
 
     return (
-        <div className="bg-background px-1 py-3 md:p-3 rounded-xl dark:bg-neutral-900 md:overflow-y-auto">
+        <div className="bg-background px-1 py-3 md:p-3 rounded-xl dark:bg-neutral-900 border-1 border-foreground/10 md:overflow-y-auto">
             <div className="flex px-1 flex-row justify-between space-x-2">
                 <Link
                     href={`/referential`}
@@ -413,22 +413,6 @@ export default function CountryDetails({countryDataParam, onSave, onDelete}: {
                         'line-through text-foreground/50': countryData.deleted
                     }
                 )}>
-                    {/*<h2 className="text-lg flex items-center mb-2">*/}
-                    {/*    <TrophyIcon className="w-6 me-1"/>Stages*/}
-                    {/*</h2>*/}
-
-                    {/*<div className="py-3 md:px-3 flex flex-col">*/}
-                    {/*    <div className="flex items-center">*/}
-                    {/*        <TrophyIcon className="w-5 me-2"/>*/}
-                    {/*        <CountryTextInput*/}
-                    {/*            name="stages"*/}
-                    {/*            placeholder="Stages (e.g. Heat...,Final)"*/}
-                    {/*            value={countryData.stages.join(',')}*/}
-                    {/*            callback={onCountryDataChange}*/}
-                    {/*            disabled={!!countryData.deleted}*/}
-                    {/*        />*/}
-                    {/*    </div>*/}
-                    {/*</div>*/}
 
                     <h2 className="text-lg flex items-center mb-2">
                         <TrophyIcon className="w-6 me-1"/>Stages
@@ -523,12 +507,12 @@ export default function CountryDetails({countryDataParam, onSave, onDelete}: {
                                     </button>
                                 </div>
                                 <div>
-                                    <div className="h-5 ml-10 border-l-1 w-0 border-foreground/50"></div>
+                                    <div className="h-5 ml-9.5 border-l-1 w-0 border-foreground/50"></div>
                                 </div>
                             </>
                         )}
                         <button
-                            className={clsx('ml-7 mt-1 w-fit',
+                            className={clsx('ml-6.5 mt-1 w-fit',
                                 {
                                     'text-foreground/50 cursor-not-allowed': countryData.deleted,
                                     'cursor-pointer': !countryData.deleted

@@ -44,12 +44,12 @@ export default function EditEvent({eventId}: { eventId: number }) {
     };
 
     return (
-        <>
+        <div className="pb-3 md:pb-0">
             {!isLoading && !!event ? (
                 <EventDetails eventParam={event} onSave={saveEvent} onDelete={toggleDelete}/>
             ) : (
                 <>Loading...</>
             )}
-        </>
+        </div>
     );
 }
