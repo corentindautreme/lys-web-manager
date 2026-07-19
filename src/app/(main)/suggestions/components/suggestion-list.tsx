@@ -162,7 +162,7 @@ export default function SuggestionList({currentSuggestionId}: { currentSuggestio
                                 {/* Unprocessed suggestions */}
                                 {processableSuggestions.map((suggestion, index) => {
                                         return (
-                                            <div>
+                                            <div key={suggestion.id}>
                                                 {(index == 0 || (!!suggestion.extractionDate && suggestion.extractionDate != suggestions.filter(s => s.reprocessable)[index - 1].extractionDate)) &&
                                                     <div className="py-1 font-bold">
                                                         {new Date(suggestion.extractionDate!).toLocaleString('en-US', {
