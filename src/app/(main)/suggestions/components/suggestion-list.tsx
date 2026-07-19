@@ -162,16 +162,16 @@ export default function SuggestionList({currentSuggestionId}: { currentSuggestio
                                 {/* Unprocessed suggestions */}
                                 {processableSuggestions.map((suggestion, index) => {
                                         return (
-                                            <>
+                                            <div>
                                                 {(index == 0 || (!!suggestion.extractionDate && suggestion.extractionDate != suggestions.filter(s => s.reprocessable)[index - 1].extractionDate)) &&
-                                                    <div key={`date-${index}`} className="py-1 font-bold">
+                                                    <div className="py-1 font-bold">
                                                         {new Date(suggestion.extractionDate!).toLocaleString('en-US', {
                                                             month: 'long',
                                                             day: 'numeric'
                                                         })}
                                                     </div>
                                                 }
-                                                <div key={suggestion.id}>
+                                                <div>
                                                     <Link
                                                         href={`/suggestions/process/${suggestion.id}${!hideProcessed ? '?showProcessed=true' : ''}#${suggestion.id}`}>
                                                         {/*
@@ -186,7 +186,7 @@ export default function SuggestionList({currentSuggestionId}: { currentSuggestio
                                                                         active={currentSuggestionId == suggestion.id}/>
                                                     </Link>
                                                 </div>
-                                            </>
+                                            </div>
                                         )
                                     }
                                 )}

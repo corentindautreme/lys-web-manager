@@ -180,6 +180,8 @@ export default function StatusTiles() {
     return (
         <div className="flex items-stretch overflow-x-scroll gap-x-2 mt-2">
 
+            <div className="w-1 shrink-0"></div>
+
             <Tile status={globalStatus}>
                 <div className="absolute bottom-1 right-1 text-foreground/25">
                     <PowerIcon className="w-8"/>
@@ -265,6 +267,8 @@ export default function StatusTiles() {
                     </div>
                 </div>
             </Tile>
+
+            <div className="w-1 shrink-0"></div>
         </div>
     )
 }
@@ -277,8 +281,8 @@ function Tile({status, children}: { status: StatusType, children: React.ReactNod
                 'w-[100px] md:w-[200px]': !status || status === 'ok',
                 'w-[200px]': !!status && status !== 'ok',
                 'bg-background dark:bg-foreground/10 border-gray-300 dark:border-foreground/10': !status || status === 'ok',
-                'bg-amber-300 dark:bg-amber-700/50 border-amber-500/10': status === 'warn',
-                'bg-red-300 dark:bg-red-700/25 border-red-500/10': status === 'error',
+                'bg-amber-300 dark:bg-amber-700/50 border-amber-500/25': status === 'warn',
+                'bg-red-300 dark:bg-red-700/50 border-red-500/25': status === 'error',
             }
         )}>
             {children}
