@@ -23,32 +23,37 @@ export default async function Page() {
                 ]}/>
             </div>
 
-            <div className="px-3 md:pb-3 md:px-6">
+            <div className="pb-3">
                 <div className="flex flex-col">
                     <StatusTiles/>
 
-                    <div className="lg:flex md:gap-x-5">
+                    <div className="px-3 md:px-6">
 
-                        <div className="w-full lg:w-[50%]">
-                            <div className="w-full">
-                                <NextEventsByDay/>
+                        <div className="lg:flex md:gap-x-5">
+
+                            <div className="w-full lg:w-[50%]">
+                                <div className="w-full">
+                                    <NextEventsByDay/>
+                                </div>
+
+                                <div className="w-full">
+                                    <PastEventsByDay/>
+                                </div>
+
                             </div>
 
-                            <div className="w-full">
-                                <PastEventsByDay/>
+                            <div className="w-full lg:w-[50%]">
+                                <div className="w-full">
+                                    <Metrics/>
+                                </div>
+                                <div className="w-full">
+                                    <StatusCards/>
+                                </div>
                             </div>
-
                         </div>
 
-                        <div className="w-full lg:w-[50%]">
-                            <div className="w-full">
-                                <Metrics/>
-                            </div>
-                            <div className="w-full">
-                                <StatusCards/>
-                            </div>
-                        </div>
                     </div>
+
                 </div>
             </div>
         </div>

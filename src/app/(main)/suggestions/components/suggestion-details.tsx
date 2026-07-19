@@ -302,7 +302,7 @@ export default function SuggestionDetails({suggestionParam, countryData, onSubmi
                         <span>No date selected</span>
                     </div>
                 ) : (
-                    <div className="flex flex-col gap-y-1 grow w-full xl:w-[300px] xl:overflow-y-auto pb-4 md:pb-0">
+                    <div className="flex flex-col gap-y-1 grow w-full xl:w-[300px] xl:overflow-y-auto pb-3 md:pb-0">
                         {events.map((event, index) => (
                             <>
                                 {insertHeader(event, index > 0 ? events[index - 1] : undefined)}

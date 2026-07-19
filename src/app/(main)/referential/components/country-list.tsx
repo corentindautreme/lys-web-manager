@@ -90,7 +90,7 @@ export default function CountryList({currentCountryId}: { currentCountryId?: num
                                                       callback={mutate}/>
                         }
 
-                        <div className="flex flex-col gap-y-1 overflow-y-auto">
+                        <div className="flex flex-col gap-y-1 overflow-y-auto pb-3 md:pb-0">
                             {countryData?.map(countryData => {
                                     return (
                                         <div key={countryData.id}>

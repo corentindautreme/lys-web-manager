@@ -43,12 +43,12 @@ export default function EditCountry({countryId}: { countryId: number }) {
     };
 
     return (
-        <>
+        <div className="pb-3 md:pb-0">
             {!isLoading && !!countryData ? (
                 <CountryDetails countryDataParam={countryData} onSave={saveCountryData} onDelete={toggleDelete}/>
             ) : (
                 <>Loading...</>
             )}
-        </>
+        </div>
     );
 }
