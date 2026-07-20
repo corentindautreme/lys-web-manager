@@ -134,6 +134,7 @@ export default function EventList({currentEventId}: { currentEventId?: number | 
                                                     />
                                                     <EventCard event={event} active={currentEventId == event.id}
                                                                highlightError={{
+                                                                   time: event.dateTimeCet.substring(11, 16) === '00:00',
                                                                    liveLinks: !event.watchLinks.some(l => l.live == 1),
                                                                    vodLinks: !event.watchLinks.some(l => l.replayable == 1)
                                                                }}/>

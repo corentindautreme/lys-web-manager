@@ -1036,8 +1036,8 @@ export function getEvents(): Event[] {
             'id': 415,
             'name': 'Depi Evratesil',
             'country': 'Armenia',
-            'endDateTimeCet': '2025-02-16T19:00:00',
-            'dateTimeCet': '2025-02-16T17:00:00'
+            'endDateTimeCet': '2025-02-16T02:00:00',
+            'dateTimeCet': '2025-02-16T00:00:00'
         }
     ];
 }
