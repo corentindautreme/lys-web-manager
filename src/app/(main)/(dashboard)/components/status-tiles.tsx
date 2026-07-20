@@ -67,7 +67,7 @@ export default function StatusTiles() {
 
     const computeAndSetSuggestionStatus = () => {
         if (!!suggestions) {
-            setSuggestionStatus(suggestions.length === 0 ? 'ok' : 'info');
+            setSuggestionStatus(suggestions.some(s => !s.processed) ? 'info' : 'ok');
         }
     };
 
