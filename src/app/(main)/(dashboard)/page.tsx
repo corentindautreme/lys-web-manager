@@ -13,6 +13,7 @@ export const metadata: Metadata = {
 export default async function Page() {
     return (
         <div className="flex flex-col">
+
             <div className="w-full md:mt-3 py-3 px-3 md:px-6">
                 <Breadcrumbs breadcrumbs={[
                     {
@@ -28,34 +29,22 @@ export default async function Page() {
                     <StatusTiles/>
 
                     <div className="px-3 md:px-6">
-
                         <div className="lg:flex md:gap-x-5">
-
                             <div className="w-full lg:w-[50%]">
-                                <div className="w-full">
-                                    <NextEventsByDay/>
-                                </div>
-
-                                <div className="w-full">
-                                    <PastEventsByDay/>
-                                </div>
-
+                                <div className="w-full"><NextEventsByDay/></div>
+                                <div className="w-full"><PastEventsByDay/></div>
                             </div>
 
                             <div className="w-full lg:w-[50%]">
-                                <div className="w-full">
-                                    <Metrics/>
-                                </div>
-                                <div className="w-full">
-                                    <StatusCards/>
-                                </div>
+                                <div className="w-full"><Metrics/></div>
+                                <div className="w-full"><StatusCards/></div>
                             </div>
                         </div>
-
                     </div>
 
                 </div>
             </div>
+
         </div>
     );
 }
