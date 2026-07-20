@@ -43,9 +43,9 @@ function UnsavedCountryDataBanner({count, countryData, callback}: {
     }
     const submit = submitModifiedCountryData.bind(null, countryData, callback, onError);
     return (
-        <div className={clsx('flex flex-col rounded-lg p-3 text-background', {
-            'bg-sky-500 ': !error,
-            'bg-red-400 dark:bg-red-600': !!error,
+        <div className={clsx('flex flex-col rounded-lg p-3 border-1', {
+            'bg-sky-500/75 border-sky-500 dark:border-sky-400': !error,
+            'bg-red-400 dark:bg-red-600/25 border-red-500/10': !!error,
         })}>
             <div className="flex">
                 <span className="flex flex-row content-center">
@@ -54,7 +54,7 @@ function UnsavedCountryDataBanner({count, countryData, callback}: {
                 </span>
                 <div className="grow"></div>
                 <form action={submit}>
-                    <button className="border-1 border-background px-2">Save</button>
+                    <button className="border-1 border-foreground/75 rounded px-2 py-0.5">Save</button>
                 </form>
             </div>
             {!!error && <div className="flex flex-col mt-2 pt-2 border-t-1 border-background">
