@@ -82,7 +82,6 @@ export default function StatusTiles() {
             }
         }
         else if (!!statuses) {
-            console.log(statuses);
             const lambdaErrors = Object.entries(statuses)
                 // eslint-disable-next-line @typescript-eslint/no-unused-vars
                 .filter(([_, status]) => !status.success || status.isLate)
@@ -187,7 +186,7 @@ export default function StatusTiles() {
                     <PowerIcon className="w-8"/>
                 </div>
 
-                { !globalStatus && 'Loading...' }
+                { !globalStatus && <TileTextSkeleton/> }
                 { globalStatus === 'ok' && <div className="flex items-center gap-1"><CheckCircleIcon className="w-4"/>All good!</div> }
                 { globalStatus !== 'ok' && <div className="flex flex-col">
                     { lambdaIssues.map((issue, index) => (
@@ -213,7 +212,11 @@ export default function StatusTiles() {
                 </div>
 
                 <div className="flex flex-col">
-                    { !events && !suggestions && 'Loading...' }
+                    { !events && !suggestions && <div className="flex flex-col gap-1">
+                        <TileTextSkeleton/>
+                        <TileTextSkeleton/>
+                        <TileTextSkeleton/>
+                    </div> }
                     { !!eventsError && <div className="flex items-center gap-1">
                         <ExclamationTriangleIcon className="w-4"/>
                         Error loading events
@@ -257,7 +260,7 @@ export default function StatusTiles() {
                     <div className="flex flex-col gap-0.5 md:gap-2 flex-1 md:flex-initial pe-1 md:px-5 py-1 items-center md:justify-center text-2xl md:text-3xl">
                         <div className={clsx('rounded-lg', {
                             'bg-amber-300 dark:bg-amber-700': false
-                        })}>{!events ? "  " : events.length}</div>
+                        })}>{!events ? <ComparisonTextSkeleton/> : events.length}</div>
                         <ServerIcon className="w-5 md:w-6"/>
                     </div>
 
@@ -288,4 +291,16 @@ function Tile({status, children}: { status: StatusType, children: React.ReactNod
             {children}
         </div>
     );
+}
+
+const shimmer =
+    'before:absolute before:inset-0 before:-translate-x-full before:animate-[shimmer_2s_infinite] ' +
+    'before:bg-gradient-to-r before:from-transparent before:via-white/60 dark:before:via-gray-700/60 before:to-transparent';
+
+function TileTextSkeleton() {
+    return <div className={`${shimmer} relative overflow-hidden rounded bg-foreground/10 w-20 h-3`}></div>;
+}
+
+function ComparisonTextSkeleton() {
+    return <div className={`${shimmer} relative overflow-hidden rounded bg-foreground/10 size-7 mb-1.5 mx-0.5`}></div>;
 }
