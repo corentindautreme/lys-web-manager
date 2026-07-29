@@ -45,12 +45,9 @@ export default function StatusTiles() {
     }, [suggestions]);
 
     useEffect(() => {
-        computeAndSetLambdaIssues();
-    }, [statuses, statusesError]);
-
-    useEffect(() => {
-        computeAndSetMetricIssues();
-    }, [metrics, metricsError]);
+        const newGlobalStatus = computeAndSetLambdaIssues();
+        computeAndSetMetricIssues(newGlobalStatus);
+    }, [statuses, statusesError, metrics, metricsError]);
 
     const setEventStatuses = () => {
         if (!!events) {
@@ -71,7 +68,7 @@ export default function StatusTiles() {
         }
     };
 
-    const computeAndSetLambdaIssues = () => {
+    const computeAndSetLambdaIssues: () => StatusType = () => {
         if (statusesError) {
             setLambdaIssues([{
                 status: 'warn',
@@ -79,7 +76,9 @@ export default function StatusTiles() {
             }]);
             if (globalStatus === null || globalStatus === 'ok' || globalStatus === 'info') {
                 setGlobalStatus('warn');
+                return 'warn';
             }
+            return globalStatus;
         }
         else if (!!statuses) {
             const lambdaErrors = Object.entries(statuses)
@@ -131,13 +130,16 @@ export default function StatusTiles() {
                 setLambdaIssues([...lambdaIssues]);
                 const overallLambdaStatus = lambdaIssues.some(li => li.status === 'error') ? 'error' : 'warn';
                 if (globalStatus === null || globalStatus === 'ok' || globalStatus === 'info' || globalStatus === 'warn') {
+                    console.log(`[Lambda] Global status=${globalStatus} - changing to '${overallLambdaStatus}'`);
                     setGlobalStatus(overallLambdaStatus);
+                    return overallLambdaStatus;
                 }
             }
         }
+        return globalStatus;
     };
 
-    const computeAndSetMetricIssues = () => {
+    const computeAndSetMetricIssues = (globalStatus: StatusType) => {
         if (!!metricsError) {
             return;
         } if (!!metrics) {
@@ -149,6 +151,7 @@ export default function StatusTiles() {
                     issue: 'RCU usage > 12_500'
                 }]);
                 if (globalStatus === null || globalStatus === 'ok' || globalStatus === 'info') {
+                    console.log(`[Metrics] Global status=${globalStatus} - changing to 'warn'`);
                     setGlobalStatus('warn');
                 }
             } else if (lastMeasurement > 18_600) {
@@ -244,7 +247,7 @@ export default function StatusTiles() {
                     { !!suggestions && (
                         <div className="flex items-center gap-1">
                             { suggestionStatus === 'ok' && <CheckIcon className="w-4 shrink-0"/> }
-                            { suggestionStatus === 'info' && <div className="w-4 shrink-0"><div className="rounded-full size-1.5 mx-auto bg-sky-500"></div></div> }
+                            { suggestionStatus === 'info' && <div className="w-3 shrink-0 rounded mx-0.5 text-xs/3.5 text-center text-background bg-sky-500">{ suggestions.filter(s => !s.processed).length }</div> }
                             Suggestions
                         </div>
                     )}
@@ -284,7 +287,7 @@ function Tile({status, children}: { status: StatusType, children: React.ReactNod
                 'w-[100px] md:w-[200px]': !status || status === 'ok',
                 'w-[200px]': !!status && status !== 'ok',
                 'bg-background dark:bg-foreground/10 border-gray-300 dark:border-foreground/10': !status || status === 'ok',
-                'bg-amber-300 dark:bg-amber-700/50 border-amber-500/25': status === 'warn',
+                'bg-amber-300 dark:bg-amber-500/50 border-amber-500/25': status === 'warn',
                 'bg-red-300 dark:bg-red-700/50 border-red-500/25': status === 'error',
             }
         )}>
