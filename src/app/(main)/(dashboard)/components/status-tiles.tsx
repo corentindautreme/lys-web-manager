@@ -287,7 +287,7 @@ function Tile({status, children}: { status: StatusType, children: React.ReactNod
                 'w-[100px] md:w-[200px]': !status || status === 'ok',
                 'w-[200px]': !!status && status !== 'ok',
                 'bg-background dark:bg-foreground/10 border-gray-300 dark:border-foreground/10': !status || status === 'ok',
-                'bg-amber-300 dark:bg-amber-700/50 border-amber-500/25': status === 'warn',
+                'bg-amber-300 dark:bg-amber-500/50 border-amber-500/25': status === 'warn',
                 'bg-red-300 dark:bg-red-700/50 border-red-500/25': status === 'error',
             }
         )}>
