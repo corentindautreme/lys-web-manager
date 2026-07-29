@@ -47,12 +47,11 @@ function UnsavedCountryDataBanner({count, countryData, callback}: {
             'bg-sky-500/75 border-sky-500 dark:border-sky-400': !error,
             'bg-red-400 dark:bg-red-600/25 border-red-500/10': !!error,
         })}>
-            <div className="flex">
-                <span className="flex flex-row content-center">
+            <div className="flex items-center justify-between">
+                <span className="flex items-center">
                     <ExclamationCircleIcon className="w-5 me-1"/>
-                    {count} unsaved country data
+                    <span className="text-sm md:text-base">{count} unsaved country data</span>
                 </span>
-                <div className="grow"></div>
                 <form action={submit}>
                     <button className="border-1 border-foreground/75 rounded px-2 py-0.5">Save</button>
                 </form>
