@@ -247,7 +247,10 @@ export default function StatusTiles() {
                     { !!suggestions && (
                         <div className="flex items-center gap-1">
                             { suggestionStatus === 'ok' && <CheckIcon className="w-4 shrink-0"/> }
-                            { suggestionStatus === 'info' && <div className="w-3 shrink-0 rounded mx-0.5 text-xs/3.5 text-center text-background bg-sky-500">{ suggestions.filter(s => !s.processed).length }</div> }
+                            { suggestionStatus === 'info' && <div className="w-3.5 shrink-0 rounded mx-0.25 text-xs/3.5 tracking-[-0.1em] text-center text-background bg-sky-500">{(() => {
+                                const count = suggestions.filter(s => !s.processed).length;
+                                return <>{ count >= 9 ? '9+' : count }</>;
+                            })()}</div> }
                             Suggestions
                         </div>
                     )}
