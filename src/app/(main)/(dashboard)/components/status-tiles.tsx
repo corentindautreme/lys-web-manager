@@ -30,7 +30,7 @@ export default function StatusTiles() {
 
     const [globalStatus, setGlobalStatus] = useState<StatusType>(null);
     const [lambdaIssues, setLambdaIssues] = useState<{ status: StatusType, issue: string }[]>([]);
-    const [otherIssues, setOtherIssues] = useState<{ status: StatusType, issue: string }[]>([]);
+    const [dbQuotaIssues, setDbQuotaIssues] = useState<{ status: StatusType, issue: string }[]>([]);
 
     const [upcomingStatus, setUpcomingStatus] = useState<StatusType>(null);
     const [recentStatus, setRecentStatus] = useState<StatusType>(null);
@@ -130,7 +130,6 @@ export default function StatusTiles() {
                 setLambdaIssues([...lambdaIssues]);
                 const overallLambdaStatus = lambdaIssues.some(li => li.status === 'error') ? 'error' : 'warn';
                 if (globalStatus === null || globalStatus === 'ok' || globalStatus === 'info' || globalStatus === 'warn') {
-                    console.log(`[Lambda] Global status=${globalStatus} - changing to '${overallLambdaStatus}'`);
                     setGlobalStatus(overallLambdaStatus);
                     return overallLambdaStatus;
                 }
@@ -143,26 +142,27 @@ export default function StatusTiles() {
         if (!!metricsError) {
             return;
         } if (!!metrics) {
+            const issues: { status: StatusType, issue: string }[] = [];
             const measurements = metrics['current_month_rcu'].measurements;
             const lastMeasurement = measurements[measurements.length - 1].value;
             if (lastMeasurement > 12_500) {
-                setOtherIssues([...otherIssues, {
+                issues.push({
                     status: 'warn',
                     issue: 'RCU usage > 12_500'
-                }]);
+                });
                 if (globalStatus === null || globalStatus === 'ok' || globalStatus === 'info') {
-                    console.log(`[Metrics] Global status=${globalStatus} - changing to 'warn'`);
                     setGlobalStatus('warn');
                 }
             } else if (lastMeasurement > 18_600) {
-                setOtherIssues([...otherIssues, {
+                issues.push({
                     status: 'warn',
                     issue: `RCU over quota (${new Intl.NumberFormat('en-US').format(lastMeasurement)})`
-                }]);
+                });
                 if (globalStatus === null || globalStatus === 'ok' || globalStatus === 'info') {
                     setGlobalStatus('warn');
                 }
             }
+            setDbQuotaIssues(issues);
         }
     }
 
@@ -199,7 +199,7 @@ export default function StatusTiles() {
                             { issue.issue }
                         </div>
                     )) }
-                    { otherIssues.map((issue, index) => (
+                    { dbQuotaIssues.map((issue, index) => (
                         <div key={`issue-${index}`} className="flex items-center gap-1">
                             { issue.status === 'error' && <XCircleIcon className="w-4"/> }
                             { issue.status === 'warn' && <ExclamationTriangleIcon className="w-4"/> }
@@ -247,7 +247,10 @@ export default function StatusTiles() {
                     { !!suggestions && (
                         <div className="flex items-center gap-1">
                             { suggestionStatus === 'ok' && <CheckIcon className="w-4 shrink-0"/> }
-                            { suggestionStatus === 'info' && <div className="w-3 shrink-0 rounded mx-0.5 text-xs/3.5 text-center text-background bg-sky-500">{ suggestions.filter(s => !s.processed).length }</div> }
+                            { suggestionStatus === 'info' && <div className="w-3.5 shrink-0 rounded mx-0.25 text-xs/3.5 tracking-[-0.1em] text-center text-background bg-sky-500">{(() => {
+                                const count = suggestions.filter(s => !s.processed).length;
+                                return <>{ count >= 9 ? '9+' : count }</>;
+                            })()}</div> }
                             Suggestions
                         </div>
                     )}
